@@ -559,7 +559,7 @@ binds {
   Mod+B hotkey-overlay-title="Browser" {spawn "google-chrome-stable" "--new-window";}
   Mod+A hotkey-overlay-title="ChatGPT" {spawn "google-chrome-stable" "--app=https://chatgpt.com";}
   Mod+Alt+P hotkey-overlay-title="Perplexity" {spawn "google-chrome-stable" "--app=https://perplexity.ai/";}
-  Mod+Shift+E hotkey-overlay-title="Email" {spawn "google-chrome-stable" "--app=https://mail.google.com/mail/u/0/?pli=1#inbox";}
+  Mod+Shift+E hotkey-overlay-title="Email" {spawn "google-chrome-stable" "--app=https://mail.google.com/mail/u/nganaremba@gmail.com/?pli=1#inbox";}
   Mod+Y hotkey-overlay-title="YouTube" {spawn "google-chrome-stable" "--app=https://youtube.com";}
   Mod+Shift+G hotkey-overlay-title="WhatsApp" {spawn "google-chrome-stable" "--app=https://web.whatsapp.com";}
   Mod+Alt+N hotkey-overlay-title="Netflix" {spawn "google-chrome-stable" "--app=https://netflix.com";}
