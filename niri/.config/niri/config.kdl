@@ -568,16 +568,19 @@ binds {
   Mod+Ctrl+N hotkey-overlay-title="Night light" {spawn "~/bin/arch/toggle-gammastep";}
   Mod+Delete hotkey-overlay-title="Power Menu" {spawn "wlogout";}
   // Mod+Space hotkey-overlay-title="Launcher" {spawn "fuzzel";}
-  Mod+Space hotkey-overlay-title="Noctalia launcher" {spawn-sh "qs -c noctalia-shell ipc call launcher toggle";}
+  // Mod+Space hotkey-overlay-title="Noctalia launcher" {spawn-sh "qs -c noctalia-shell ipc call launcher toggle";}
+  Mod+Space hotkey-overlay-title="Rofi launcher" {spawn-sh "rofi -show drun";}
   Mod+Alt+Space hotkey-overlay-title="Omarchy Menu" {spawn "~/.local/share/omarchy/bin/omarchy-menu";}
   Ctrl+Mod+Alt+L hotkey-overlay-title="Suspend" {spawn "systemctl" "suspend";}
   Mod+Shift+T hotkey-overlay-title="Btop" {spawn "~/.local/bin/kitty" "-e" "bash" "-c" "'btop'";}
   Mod+Ctrl+Alt+V hotkey-overlay-title="Sound" {spawn "~/.local/bin/kitty" "-e" "bash" "-c" "wiremix";}
   Mod+V hotkey-overlay-title="Clipboard History" {spawn-sh "cliphist list | fuzzel --dmenu | cliphist decode | wl-copy";}
   // Mod+Ctrl+E hotkey-overlay-title="Emoji picker" {spawn "~/.local/bin/emoji-picker";}
-  Mod+Ctrl+E hotkey-overlay-title="Emoji picker" {spawn-sh "qs -c noctalia-shell ipc call launcher emoji";}
+  // Mod+Ctrl+E hotkey-overlay-title="Emoji picker" {spawn-sh "qs -c noctalia-shell ipc call launcher emoji";}
+  Mod+Ctrl+E hotkey-overlay-title="Emoji picker" {spawn-sh "rofi -show emoji";}
   // Mod+Ctrl+Alt+B hotkey-overlay-title="Wallpaper picker" {spawn "~/.local/bin/wallpaper-picker.sh";}
-  Mod+Ctrl+Alt+B hotkey-overlay-title="Wallpaper picker" {spawn-sh "qs -c noctalia-shell ipc call wallpaper toggle";}
+  // Mod+Ctrl+Alt+B hotkey-overlay-title="Wallpaper picker" {spawn-sh "qs -c noctalia-shell ipc call wallpaper toggle";}
+  Mod+Ctrl+Alt+B hotkey-overlay-title="Wallpaper picker" {spawn-sh "~/.config/rofi/wallpaper.sh";}
   Mod+Ctrl+Alt+N hotkey-overlay-title="Notification Center" {spawn "swaync-client" "-t" "-sw";}
   Mod+Apostrophe hotkey-overlay-title="Launch Kitty" {spawn "~/.local/bin/kitty";}
   Mod+Slash hotkey-overlay-title="Launch Ghostty" {spawn "ghostty";}
@@ -586,8 +589,8 @@ binds {
   // Mod+Ctrl+X hotkey-overlay-title="Voxtype Record Toggle" {spawn "voxtype-record-toggle";}
   Mod+Ctrl+Apostrophe hotkey-overlay-title="Toggle between Floating and Tiling" { switch-focus-between-floating-and-tiling; }
   Mod+Alt+C hotkey-overlay-title="Claude AI" {spawn "google-chrome-stable" "--app=https://claude.ai/chat";}
-  Mod+Alt+Ctrl+C hotkey-overlay-title="Control Center" {spawn-sh "qs -c noctalia-shell ipc call controlCenter toggle";}
-  Mod+Alt+Ctrl+I hotkey-overlay-title="Settings" {spawn-sh "qs -c noctalia-shell ipc call settings toggle";}
+  // Mod+Alt+Ctrl+C hotkey-overlay-title="Control Center" {spawn-sh "qs -c noctalia-shell ipc call controlCenter toggle";}
+  // Mod+Alt+Ctrl+I hotkey-overlay-title="Settings" {spawn-sh "qs -c noctalia-shell ipc call settings toggle";}
 
 
   
