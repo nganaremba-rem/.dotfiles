@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# Updates the global shell PWD tracker
+
+echo "$PWD" >/tmp/niri-shell-pwd-$USER
