@@ -577,7 +577,7 @@ binds {
   Mod+V hotkey-overlay-title="Clipboard History" {spawn-sh "cliphist list | fuzzel --dmenu | cliphist decode | wl-copy";}
   // Mod+Ctrl+E hotkey-overlay-title="Emoji picker" {spawn "~/.local/bin/emoji-picker";}
   // Mod+Ctrl+E hotkey-overlay-title="Emoji picker" {spawn-sh "qs -c noctalia-shell ipc call launcher emoji";}
-  Mod+Ctrl+E hotkey-overlay-title="Emoji picker" {spawn-sh "rofi -show emoji";}
+  Mod+Ctrl+E hotkey-overlay-title="Emoji picker" {spawn-sh "rofi -show emoji -theme ~/.config/rofi/launchers/type-2/style-2.rasi";}
   // Mod+Ctrl+Alt+B hotkey-overlay-title="Wallpaper picker" {spawn "~/.local/bin/wallpaper-picker.sh";}
   // Mod+Ctrl+Alt+B hotkey-overlay-title="Wallpaper picker" {spawn-sh "qs -c noctalia-shell ipc call wallpaper toggle";}
   Mod+Ctrl+Alt+B hotkey-overlay-title="Wallpaper picker" {spawn-sh "~/.config/wallpaper/set-wallpaper.sh";}
