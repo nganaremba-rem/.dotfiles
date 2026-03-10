@@ -569,7 +569,7 @@ binds {
   Mod+Delete hotkey-overlay-title="Power Menu" {spawn "wlogout";}
   // Mod+Space hotkey-overlay-title="Launcher" {spawn "fuzzel";}
   // Mod+Space hotkey-overlay-title="Noctalia launcher" {spawn-sh "qs -c noctalia-shell ipc call launcher toggle";}
-  Mod+Space hotkey-overlay-title="Rofi launcher" {spawn-sh "rofi -show drun";}
+  Mod+Space hotkey-overlay-title="Rofi launcher" {spawn-sh "rofi -show drun -theme ~/.config/rofi/launchers/type-2/style-2.rasi";}
   Mod+Alt+Space hotkey-overlay-title="Omarchy Menu" {spawn "~/.local/share/omarchy/bin/omarchy-menu";}
   Ctrl+Mod+Alt+L hotkey-overlay-title="Suspend" {spawn "systemctl" "suspend";}
   Mod+Shift+T hotkey-overlay-title="Btop" {spawn "~/.local/bin/kitty" "-e" "bash" "-c" "'btop'";}
@@ -580,7 +580,7 @@ binds {
   Mod+Ctrl+E hotkey-overlay-title="Emoji picker" {spawn-sh "rofi -show emoji";}
   // Mod+Ctrl+Alt+B hotkey-overlay-title="Wallpaper picker" {spawn "~/.local/bin/wallpaper-picker.sh";}
   // Mod+Ctrl+Alt+B hotkey-overlay-title="Wallpaper picker" {spawn-sh "qs -c noctalia-shell ipc call wallpaper toggle";}
-  Mod+Ctrl+Alt+B hotkey-overlay-title="Wallpaper picker" {spawn-sh "~/.config/rofi/wallpaper.sh";}
+  Mod+Ctrl+Alt+B hotkey-overlay-title="Wallpaper picker" {spawn-sh "~/.config/wallpaper/set-wallpaper.sh";}
   Mod+Ctrl+Alt+N hotkey-overlay-title="Notification Center" {spawn "swaync-client" "-t" "-sw";}
   Mod+Apostrophe hotkey-overlay-title="Launch Kitty" {spawn "~/.local/bin/kitty";}
   Mod+Slash hotkey-overlay-title="Launch Ghostty" {spawn "ghostty";}
