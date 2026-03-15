@@ -1,7 +1,7 @@
 # ---- SUPER FAST .zshrc ----
 [[ -z "$P10K_NERDFETCH_DONE" ]] && {
   export P10K_NERDFETCH_DONE=1
-  nerdfetch
+  nitch
 }
 
 # Powerlevel10k instant prompt (keep first; silence warnings)

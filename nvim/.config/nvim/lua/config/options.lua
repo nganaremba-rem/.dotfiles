@@ -23,3 +23,6 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.diagnostic.disable(0)
   end,
 })
+
+vim.opt.clipboard = "unnamedplus"
+vim.opt.termguicolors = true
