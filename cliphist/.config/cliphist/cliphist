@@ -1,0 +1,37 @@
+#!/bin/bash
+TMP_PREVIEW="/tmp/cliphist-preview"
+mkdir -p "$TMP_PREVIEW"
+
+cliphist list | fzf \
+  --prompt="Clipboard > " \
+  --with-nth=2.. \
+  --delimiter=$'\t' \
+  --preview '
+    id=$(echo {} | cut -f1)
+    if echo {} | grep -q "\[\[ binary data"; then
+        file="'"$TMP_PREVIEW"'/$id.png"
+        if [ ! -f "$file" ]; then
+            cliphist decode "$id" | magick - -resize 800x800\> "$file" 2>/dev/null \
+            || cliphist decode "$id" | convert - -resize 800x800\> "$file" 2>/dev/null
+        fi
+        if [ -f "$file" ]; then
+            kitty +kitten icat \
+              --transfer-mode=file \
+              --stdin=no \
+              --unicode-placeholder \
+              --place="${FZF_PREVIEW_COLUMNS}x${FZF_PREVIEW_LINES}@0x0" \
+              "$file"
+        fi
+    else
+        echo {} | cut -f2-
+    fi
+  ' \
+  --preview-window=right:60%:wrap \
+  --bind "ctrl-u:preview-up,ctrl-d:preview-down" |
+  {
+    read -r selection
+    id=$(printf "%s" "$selection" | cut -f1)
+    [ -z "$id" ] && exit
+    cliphist decode "$id" | wl-copy
+    kill 0
+  }

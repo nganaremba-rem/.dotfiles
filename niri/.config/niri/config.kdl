@@ -387,26 +387,17 @@ environment {
 spawn-sh-at-startup "$HOME/.config/rofi/restore-wallpaper.sh"
 spawn-at-startup "fcitx5" "-dr"
 spawn-sh-at-startup "export $(gnome-keyring-daemon --start --components=pkcs11,secrets,ssh)"
-// spawn-sh-at-startup "wl-paste --type text --watch cliphist store"
-// spawn-sh-at-startup "wl-paste --type image --watch cliphist store"
-// spawn-at-startup "qs" "-c" "noctalia-shell"
+spawn-at-startup "gammastep" "-O" "4500"
 spawn-at-startup "waybar"
-// spawn-at-startup "swaybg" "-i" "~/Pictures/wallpapers/arch.png" "-m" "fill"
-
-// spawn-sh-at-startup "sleep 2 && fcitx5 -dr"
-// spawn-at-startup "~/.config/sway/swayidle.sh"
-// spawn-at-startup "qs" "-c" "noctalia-shell"
-// spawn-sh-at-startup "sleep 5 && pkill gammastep && gammastep -O 4500"
-// spawn-at-startup "pkill" "gammastep" "&&" "gammastep" "-O" "4500"
-
-
-// To run a shell command (with variables, pipes, etc.), use spawn-sh-at-startup:
-// spawn-sh-at-startup "qs -c ~/source/qs/MyAwesomeShell"
+spawn-sh-at-startup "wl-paste --watch cliphist store"
+spawn-at-startup "~/.config/sway/swayidle.sh"
 
 hotkey-overlay {
     // Uncomment this line to disable the "Important Hotkeys" pop-up at startup.
     skip-at-startup
 }
+
+
 
 // Uncomment this line to ask the clients to omit their client-side decorations if possible.
 // If the client will specifically ask for CSD, the request will be honored.
@@ -574,7 +565,7 @@ binds {
   Ctrl+Mod+Alt+L hotkey-overlay-title="Suspend" {spawn "systemctl" "suspend";}
   Mod+Shift+T hotkey-overlay-title="Btop" {spawn "~/.local/bin/kitty" "-e" "bash" "-c" "'btop'";}
   Mod+Ctrl+Alt+V hotkey-overlay-title="Sound" {spawn "~/.local/bin/kitty" "-e" "bash" "-c" "wiremix";}
-  Mod+V hotkey-overlay-title="Clipboard History" {spawn-sh "cliphist list | fuzzel --dmenu | cliphist decode | wl-copy";}
+  Mod+V hotkey-overlay-title="Clipboard History" {spawn-sh "kitty ~/.config/cliphist/cliphist";}
   // Mod+Ctrl+E hotkey-overlay-title="Emoji picker" {spawn "~/.local/bin/emoji-picker";}
   // Mod+Ctrl+E hotkey-overlay-title="Emoji picker" {spawn-sh "qs -c noctalia-shell ipc call launcher emoji";}
   Mod+Ctrl+E hotkey-overlay-title="Emoji picker" {spawn-sh "rofi -show emoji -theme ~/.config/rofi/launchers/type-2/style-2.rasi";}
