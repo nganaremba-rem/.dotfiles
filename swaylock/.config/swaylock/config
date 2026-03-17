@@ -1,0 +1,51 @@
+### core ###
+daemonize
+screenshots
+indicator
+clock
+show-keyboard-layout
+
+### time ###
+timestr=%H:%M
+datestr=%A %d %B
+font=JetBrainsMono Nerd Font
+font-size=32
+
+### effects ###
+effect-blur=9x7
+effect-vignette=0.35:0.35
+effect-greyscale
+
+### indicator ###
+indicator-radius=130
+indicator-thickness=12
+indicator-idle-visible
+
+### colors (Nord-ish, calm eyes) ###
+inside-color=2e3440cc
+inside-clear-color=3b4252cc
+inside-ver-color=5e81accc
+inside-wrong-color=bf616acc
+
+ring-color=4c566acc
+ring-clear-color=88c0d0cc
+ring-ver-color=81a1c1cc
+ring-wrong-color=bf616acc
+
+line-color=00000000
+separator-color=00000000
+
+text-color=eceff4
+text-clear-color=eceff4
+text-ver-color=eceff4
+text-wrong-color=eceff4
+
+key-hl-color=88c0d0
+caps-lock-key-hl-color=ebcb8b
+bs-hl-color=81a1c1
+caps-lock-bs-hl-color=ebcb8b
+
+layout-bg-color=3b4252cc
+layout-border-color=88c0d0
+layout-text-color=eceff4
+
