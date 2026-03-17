@@ -1,0 +1,162 @@
+@import "colors.css";
+
+* {
+	border: none;
+	border-radius: 0;
+	font-family: "CaskaydiaMono Nerd Font Mono";
+	font-size: 14px;
+	min-height: 0;
+  /* background-color: @on-background; */
+}
+
+#waybar {
+	background: transparent;
+}
+
+#custom-weather {
+  background: alpha(@background, 0.88);
+	padding: 0 12px;
+	border-radius: 20px;
+	margin: 4px 0;
+}
+
+
+
+#workspaces,
+#custom-omarchy,
+#clock,
+#custom-update,
+#custom-screenrecording-indicator,
+#tray,
+#bluetooth,
+#network,
+#pulseaudio,
+#cpu,
+#memory,
+#battery,
+#group-tray-expander,
+#custom-expand-icon {
+	background: alpha(@background, 0.88);
+	color: @on_background;
+	padding: 0 12px;
+	border-radius: 20px;
+	margin: 4px 0;
+}
+
+#workspaces {
+	border-radius: 20px;
+	padding: 0 8px;
+}
+
+#memory {
+  background-color: rgba(133, 9, 86,1);
+  font-weight: bold;
+  font-size: 14px;
+  border: 2px solid rgba(0,0,0,0.1);
+}
+
+#custom-omarchy {
+	border-radius: 20px;
+	padding: 0 14px;
+	margin-right: -4px;
+  margin-left: 20px;
+}
+
+#workspaces button {
+	padding: 0 6px;
+	transition: all 0.3s ease;
+}
+
+#workspaces button.active {
+}
+
+#workspaces button:hover {
+	background: rgba(255, 255, 255, 0.05);
+}
+
+#clock {
+	border-radius: 20px;
+	font-weight: 500;
+	margin: 4px 4px;
+}
+
+#custom-update,
+#custom-screenrecording-indicator {
+	border-radius: 20px;
+}
+
+#battery,
+#cpu,
+#pulseaudio,
+#network,
+#bluetooth {
+	border-radius: 20px;
+}
+
+#bluetooth {
+  background-color: rgb(44, 46, 130);
+}
+
+#battery {
+	border-radius: 20px;
+}
+
+#group-tray-expander {
+	border-radius: 20px;
+	background: rgba(0, 0, 0, 0.7);
+}
+
+#custom-expand-icon {
+	background: transparent;
+	padding: 0 8px;
+}
+
+#tray {
+	border-radius: 20px;
+}
+
+#battery.warning {
+	color: #f0c674;
+}
+
+#battery.critical {
+	color: #cc6666;
+}
+
+#pulseaudio {
+  font-size: 16px;
+  background-color: rgb(5, 115, 39);
+  border: 2px solid rgba(0,0,0,0.1);
+}
+
+#pulseaudio.muted {
+	color: #707070;
+}
+
+
+#custom-notification {
+	background: purple;
+  font-weight: bold;
+	padding: 0 12px;
+	border-radius: 20px;
+	margin: 4px 0;
+  font-size: 25px;
+  margin-right: 20px;
+}
+
+#custom-notification.dnd {
+  color: @outline;
+}
+
+#custom-notification.notification {
+  color: @secondary;
+}
+
+#custom-voxtype {
+  min-width: 12px;
+  margin: 0 0 0 7.5px;
+}
+
+#custom-voxtype.recording {
+  color: #a55555;
+}

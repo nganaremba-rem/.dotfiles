@@ -1,0 +1,73 @@
+* {
+  font-family: "CaskaydiaMono Nerd Font Propo";
+  font-size: 13px;
+}
+
+window#waybar {
+  /* background: rgba(20,20,30,0.6); */
+  background: transparent;
+  border-radius: 14px;
+  min-height: 24px;
+}
+
+
+/* pill modules */
+#clock,
+#network,
+#pulseaudio,
+#battery,
+#tray,
+#custom-weather,
+#custom-launcher,
+#memory,
+#cpu,
+#bluetooth,
+#temperature,
+#custom-notifications {
+  background: #1e1e2e;
+  color: #cdd6f4;
+  padding: 2px 14px;
+  margin: 2px;
+  border-radius: 16px;
+}
+
+
+#bluetooth {
+    color: #89b4fa;
+    padding: 0 10px;
+}
+
+#bluetooth.disabled {
+    color: #6c7086;
+}
+
+#bluetooth.connected {
+    color: #a6e3a1;
+}
+
+#custom-launcher {
+  /* background: #313244; */
+  font-size: 16px;
+}
+
+#workspaces {
+  background: #1e1e2e;
+  border-radius: 16px;
+  padding: 3px;
+  margin: 5px;
+}
+
+#workspaces button {
+  padding: 2px 10px;
+  color: #a6adc8;
+  border-radius: 10px;
+}
+
+#workspaces button.active {
+  background: #89b4fa;
+  color: #1e1e2e;
+}
+
+#workspaces button:hover {
+  background: #313244;
+}
