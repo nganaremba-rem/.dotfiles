@@ -1,12 +1,12 @@
 #!/bin/bash
 TMP_PREVIEW="/tmp/cliphist-preview"
 mkdir -p "$TMP_PREVIEW"
-
-cliphist list | fzf \
-  --prompt="Clipboard > " \
-  --with-nth=2.. \
-  --delimiter=$'\t' \
-  --preview '
+selection=$(
+  cliphist list | fzf \
+    --prompt="Clipboard > " \
+    --with-nth=2.. \
+    --delimiter=$'\t' \
+    --preview '
     id=$(echo {} | cut -f1)
     if echo {} | grep -q "\[\[ binary data"; then
         file="'"$TMP_PREVIEW"'/$id.png"
@@ -26,12 +26,14 @@ cliphist list | fzf \
         echo {} | cut -f2-
     fi
   ' \
-  --preview-window=right:60%:wrap \
-  --bind "ctrl-u:preview-up,ctrl-d:preview-down" |
-  {
-    read -r selection
-    id=$(printf "%s" "$selection" | cut -f1)
-    [ -z "$id" ] && exit
-    cliphist decode "$id" | wl-copy
-    kill 0
-  }
+    --preview-window=right:60%:wrap \
+    --bind "ctrl-u:preview-up,ctrl-d:preview-down"
+)
+id=$(printf "%s" "$selection" | cut -f1)
+if [ -n "$id" ]; then
+  TMP_CONTENT=$(mktemp)
+  cliphist decode "$id" >"$TMP_CONTENT"
+  wl-copy <"$TMP_CONTENT"
+  rm -f "$TMP_CONTENT"
+  kill $PPID
+fi
