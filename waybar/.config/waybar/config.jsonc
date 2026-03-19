@@ -13,7 +13,8 @@
     "temperature"
   ],
   "modules-center": [
-    "niri/workspaces"
+    "niri/workspaces",
+    "hyprland/workspaces"
   ],
   "modules-right": [
     "custom/weather",

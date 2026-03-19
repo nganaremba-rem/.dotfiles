@@ -1,7 +1,9 @@
 #!/bin/bash
 
 wall_dir="$HOME/Pictures/wallpapers"
-cache_file="$HOME/.cache/current_wallpaper"
+cache_dir="$HOME/Pictures/wall"
+mkdir -p "$cache_dir"
+cache_file="$cache_dir/current_wallpaper"
 
 selected=$(find "$wall_dir" -type f \( -iname "*.jpg" -o -iname "*.png" -o -iname "*.jpeg" -o -iname "*.webp" \) | while read -r img; do
   name=$(basename "$img" | sed 's/\.[^.]*$//')
@@ -37,4 +39,6 @@ img_path=$(find "$wall_dir" -type f -iname "$selected.*" | head -n 1)
 
 swww img "$img_path" --transition-type grow --transition-duration 1
 
-echo "$img_path" >"$cache_file"
+cp "$img_path" "$cache_file"
+
+# echo "$img_path" >"$cache_file"

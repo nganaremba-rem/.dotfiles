@@ -1,7 +1,7 @@
 #!/bin/bash
 
 swayidle -w \
-  timeout 300 'brightnessctl set 20%' \
-  timeout 306 'swaylock -f' \
-  resume 'brightnessctl set 40%' \
+  timeout 10 'dpms off' \
+  timeout 16 'swaylock -f' \
+  resume 'dpms on' \
   before-sleep 'swaylock -f'
