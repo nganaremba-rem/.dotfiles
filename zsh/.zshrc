@@ -100,8 +100,8 @@ autoload -Uz _zinit; (( ${+_comps} )) && _comps[zinit]=_zinit
 
 # Theme first (instant-prompt friendly)
 zinit ice depth=1
-zinit light romkatv/powerlevel10k
-[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
+# zinit light romkatv/powerlevel10k
+# [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
 
 # Core plugins (deferred so prompt shows instantly)
 zinit lucid wait"1" for \
@@ -170,15 +170,15 @@ bindkey -v
 
 
 # chpwd hook
-chpwd() {
-  ls
-}
+# chpwd() {
+#   ls
+# }
 
 
 
-alias ls='ls --color=auto'
-alias ll='ls -lh --color=auto'
-alias la='ls -A --color=auto'
+# alias ls='ls --color=auto'
+# alias ll='ls -lh --color=auto'
+# alias la='ls -A --color=auto'
 alias l='ls -CF --color=auto'
 alias nhc='nv ~/.config/hypr'
 alias noc='nv ~/.local/share/omarchy'
@@ -190,6 +190,11 @@ alias cr='cargo run'
 alias nwc='nv ~/.config/waybar'
 alias nsc='nv ~/.config/swaync/'
 alias dc="/home/rem/Downloads/discord-0.0.125/Discord/Discord"
+
+alias ls="eza --icons --git"
+alias ll="eza -l --icons --git"
+alias la="eza -la --icons --git"
+alias lg="lazygit"
 
 function prevent_danger() {
   [[ $1 == "rm -rf /"* ]] && return 1
@@ -208,4 +213,8 @@ eval "$(zoxide init zsh --cmd cd)"
 precmd() { 
   update-shell-pwd 
 }
+
+sonar completion zsh > "${fpath[1]}/_sonar"   # zsh
+
+eval "$(starship init zsh)"
 

@@ -42,11 +42,24 @@
     "tooltip": false,
     "on-click": "mousam"
   },
+  // "network": {
+  //   "format-wifi": " {signalStrength}%",
+  //   "format-ethernet": "󰈀 Ethernet",
+  //   "format-disconnected": "󰖪 Offline",
+  //   "tooltip-format": "{essid}",
+  //   "on-click": "networkmanager_dmenu"
+  // },
   "network": {
-    "format-wifi": " {signalStrength}%",
-    "format-ethernet": "󰈀 Ethernet",
-    "format-disconnected": "󰖪 Offline",
-    "tooltip-format": "{essid}",
+    "format-wifi": " {essid} ▾ {bandwidthDownBytes} ▴ {bandwidthUpBytes}",
+    "format-ethernet": "󰈀 {ipaddr}/{cidr} ▾ {bandwidthDownBytes} ▴ {bandwidthUpBytes}",
+    "format-linked": "{ifname} (No IP)",
+    "format-disconnected": "Disconnected",
+    "format-alt": "{ifname}: {ipaddr}/{cidr}",
+    "speed-text-basis": 1024,
+    "format-icons": {
+      "wired": "wired",
+      "wireless": "wifi"
+    },
     "on-click": "networkmanager_dmenu"
   },
   "pulseaudio": {
