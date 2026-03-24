@@ -1,10 +1,19 @@
 #!/bin/bash
 
-case "$XDG_CURRENT_DESKTOP" in
-Hyprland)
-  source ~/.config/session/hyprland.sh
-  ;;
-niri)
-  source ~/.config/session/niri.sh
-  ;;
+desktop="${XDG_CURRENT_DESKTOP:-}"
+
+case "$desktop" in
+  *Hyprland*|*hyprland*)
+    exec "$HOME/.config/session/hyprland.sh"
+    ;;
+  *niri*)
+    exec "$HOME/.config/session/niri.sh"
+    ;;
+  *)
+    if pgrep -x Hyprland >/dev/null; then
+      exec "$HOME/.config/session/hyprland.sh"
+    elif pgrep -x niri >/dev/null; then
+      exec "$HOME/.config/session/niri.sh"
+    fi
+    ;;
 esac

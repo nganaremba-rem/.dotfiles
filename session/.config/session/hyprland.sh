@@ -1,7 +1,11 @@
 #!/bin/bash
 
+if pgrep -x swayidle >/dev/null; then
+  exit 0
+fi
+
+lock_cmd='pgrep -x hyprlock >/dev/null || hyprlock'
+
 swayidle -w \
-  timeout 300 "hyprlock" \
-  timeout 306 "hyprctl dispatch dpms off" \
-  resume "hyprctl dispatch dpms on" \
-  before-sleep "hyprlock"
+  timeout 300 "$lock_cmd" \
+  timeout 310 "hyprctl dispatch dpms off"
