@@ -7,5 +7,5 @@ fi
 lock_cmd='pgrep -x hyprlock >/dev/null || hyprlock'
 
 swayidle \
-  timeout 10 "$lock_cmd" \
-  timeout 15 "niri msg action power-off-monitors"
+  timeout 300 "$lock_cmd" \
+  timeout 310 "niri msg action power-off-monitors"
