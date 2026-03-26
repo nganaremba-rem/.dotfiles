@@ -38,6 +38,7 @@ export CHROME_EXECUTABLE=chromium
 # export XDG_SESSION_DESKTOP=niri
 export QT_QPA_PLATFORM=xcb
 export FLUTTER_ENGINE_SWITCH_1=--enable-vulkan
+export ATAC_KEY_BINDINGS="$HOME/.config/atac/vim_key_bindings.toml"
 
 
 # Japanese keyboard setup
@@ -218,3 +219,6 @@ sonar completion zsh > "${fpath[1]}/_sonar"   # zsh
 
 eval "$(starship init zsh)"
 
+
+# simutil
+export PATH="/home/rem/.local/lib/simutil:$PATH"

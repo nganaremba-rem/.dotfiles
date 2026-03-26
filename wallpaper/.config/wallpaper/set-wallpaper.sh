@@ -5,7 +5,7 @@ cache_dir="$HOME/Pictures/wall"
 mkdir -p "$cache_dir"
 cache_file="$cache_dir/current_wallpaper"
 
-selected=$(find "$wall_dir" -type f \( -iname "*.jpg" -o -iname "*.png" -o -iname "*.jpeg" -o -iname "*.webp" \) | while read -r img; do
+selected=$(fd --absolute-path -t f -i -e jpg -e png -e jpeg -e webp . "$wall_dir" | while read -r img; do
   name=$(basename "$img" | sed 's/\.[^.]*$//')
   echo -en "$name\x00icon\x1f$img\n"
 done | rofi -dmenu \
@@ -35,9 +35,9 @@ element-text {
 
 [ -z "$selected" ] && exit
 
-img_path=$(find "$wall_dir" -type f -iname "$selected.*" | head -n 1)
+img_path=$(fd --absolute-path -t f -i -e jpg -e png -e jpeg -e webp --glob "$selected.*" "$wall_dir" | head -n 1)
 
-swww img "$img_path" --transition-type grow --transition-duration 1
+awww img "$img_path" --transition-type grow --transition-duration 1
 
 cp "$img_path" "$cache_file"
 
