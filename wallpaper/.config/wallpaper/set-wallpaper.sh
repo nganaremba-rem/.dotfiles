@@ -37,6 +37,11 @@ element-text {
 
 img_path=$(fd --absolute-path -t f -i -e jpg -e png -e jpeg -e webp --glob "$selected.*" "$wall_dir" | head -n 1)
 
+if ! awww query >/dev/null 2>&1; then
+  awww-daemon &
+  sleep 0.3
+fi
+
 awww img "$img_path" --transition-type grow --transition-duration 1
 
 cp "$img_path" "$cache_file"

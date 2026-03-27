@@ -22,17 +22,22 @@ vim.keymap.set("v", "<S-A-k>", "y`<P", { desc = "Duplicate selection up" })
 -- vim.keymap.set("n", "<C-h>", ":wincmd h<CR>")
 -- vim.keymap.set("n", "<C-l>", ":wincmd l<CR>")
 --
+vim.g.tmux_navigator_no_mappings = 1
 
-vim.api.nvim_create_autocmd("BufEnter", {
-  callback = function()
-    vim.schedule(function()
-      keymap("n", "<C-h>", ":TmuxNavigateLeft<CR>", { buffer = true, noremap = true, silent = true })
-      keymap("n", "<C-j>", ":TmuxNavigateDown<CR>", { buffer = true, noremap = true, silent = true })
-      keymap("n", "<C-k>", ":TmuxNavigateUp<CR>", { buffer = true, noremap = true, silent = true })
-      keymap("n", "<C-l>", ":TmuxNavigateRight<CR>", { buffer = true, noremap = true, silent = true })
-    end)
-  end,
-})
+vim.keymap.set("n", "<C-h>", "<cmd>TmuxNavigateLeft<CR>")
+vim.keymap.set("n", "<C-j>", "<cmd>TmuxNavigateDown<CR>")
+vim.keymap.set("n", "<C-k>", "<cmd>TmuxNavigateUp<CR>")
+vim.keymap.set("n", "<C-l>", "<cmd>TmuxNavigateRight<CR>")
+-- vim.api.nvim_create_autocmd("BufEnter", {
+--   callback = function()
+--     vim.schedule(function()
+--       keymap("n", "<C-h>", ":TmuxNavigateLeft<CR>", { buffer = true, noremap = true, silent = true })
+--       keymap("n", "<C-j>", ":TmuxNavigateDown<CR>", { buffer = true, noremap = true, silent = true })
+--       keymap("n", "<C-k>", ":TmuxNavigateUp<CR>", { buffer = true, noremap = true, silent = true })
+--       keymap("n", "<C-l>", ":TmuxNavigateRight<CR>", { buffer = true, noremap = true, silent = true })
+--     end)
+--   end,
+-- })
 
 -- Neovim windows get leader keys instead
 keymap("n", "<leader>wh", "<C-w>h", { desc = "Left window" })
