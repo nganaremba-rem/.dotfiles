@@ -6,9 +6,13 @@ options="1. Yazi - TUI file manager
 4. Sound Manager
 5. Notification
 6. WiFi Manager
-7. AUR Installer"
+7. AUR Installer
+8. Lazydocker
+9. Lazygit"
 
 selected=$(echo -e "$options" | rofi -show -dmenu -i -matching fuzzy -sorting-method fzf -p "🔎" -theme ~/.config/rofi/launchers/type-2/style-2.rasi)
+
+current_dir="$(cat /tmp/niri-shell-pwd-rem 2>/dev/null || $HOME)"
 
 case "$selected" in
 "1."*)
@@ -31,6 +35,12 @@ case "$selected" in
   ;;
 "7."*)
   kitty bash -c 'paru -Slq | fzf --preview "paru -Siia {}" | xargs paru -S --noconfirm'
+  ;;
+"8"*)
+  kitty lazydocker
+  ;;
+"9"*)
+  kitty --working-directory="$current_dir" lazygit
   ;;
 *)
   exit 0
