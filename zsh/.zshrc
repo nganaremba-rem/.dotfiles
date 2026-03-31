@@ -11,7 +11,6 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
 fi
 
 
-export OPENROUTER_API_KEY="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"
 
 # ── Environment you already use
 # export LANG=en_IN.UTF-8
