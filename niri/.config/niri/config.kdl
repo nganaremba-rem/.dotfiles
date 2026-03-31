@@ -607,6 +607,7 @@ binds {
     
     // Mod+Return hotkey-overlay-title="Open a Terminal: " { spawn-sh "~/.local/bin/kitty --working-directory=$(cat /tmp/niri-shell-pwd-rem 2>/dev/null || $HOME) tmux new-session -A -s main"; }
     Mod+Return hotkey-overlay-title="Open a Terminal: " { spawn-sh "~/.local/bin/kitty --working-directory=$(cat /tmp/niri-shell-pwd-rem 2>/dev/null || $HOME)"; }
+    Mod+Alt+Return hotkey-overlay-title="Open a Terminal with tmux: " { spawn-sh "~/.local/bin/kitty --working-directory=$(cat /tmp/niri-shell-pwd-rem 2>/dev/null || $HOME) tmux"; }
     // Mod+Space hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
 
     // Use spawn-sh to run a shell command. Do this if you need pipes, multiple commands, etc.

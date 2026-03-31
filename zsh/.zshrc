@@ -11,7 +11,6 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
 fi
 
 
-
 # ── Environment you already use
 # export LANG=en_IN.UTF-8
 # export LC_ALL=en_IN.UTF-8
@@ -196,6 +195,7 @@ alias ls="eza --icons --git"
 alias ll="eza -l --icons --git"
 alias la="eza -la --icons --git"
 alias lg="lazygit"
+alias t="tmux"
 
 function prevent_danger() {
   [[ $1 == "rm -rf /"* ]] && return 1
@@ -224,3 +224,10 @@ eval "$(starship init zsh)"
 export PATH="/home/rem/.local/lib/simutil:$PATH"
 export PATH=$PATH:$HOME/.local/bin
 export FZF_DEFAULT_COMMAND="fd --hidden"
+
+# fnm
+FNM_PATH="/home/rem/.local/share/fnm"
+if [ -d "$FNM_PATH" ]; then
+  export PATH="$FNM_PATH:$PATH"
+  eval "$(fnm env --shell zsh)"
+fi
