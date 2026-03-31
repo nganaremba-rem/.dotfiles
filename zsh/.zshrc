@@ -71,6 +71,7 @@ path_prepend "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
 path_prepend "$HOME/.local/share/omarchy/bin/"
 path_prepend "$PYENV_ROOT/shims"
 path_prepend "$HOME/.pub-cache/bin"
+path_prepend "$HOME/go/bin"
 export PATH
 
 # ── Zsh options
@@ -222,3 +223,5 @@ eval "$(starship init zsh)"
 
 # simutil
 export PATH="/home/rem/.local/lib/simutil:$PATH"
+export PATH=$PATH:$HOME/.local/bin
+export FZF_DEFAULT_COMMAND="fd --hidden"
