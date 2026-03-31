@@ -1,0 +1,38 @@
+#!/bin/bash
+
+options="1. Yazi - TUI file manager
+2. Android/IOS Emulator Manager
+3. Bluetooth Manager
+4. Sound Manager
+5. Notification
+6. WiFi Manager
+7. AUR Installer"
+
+selected=$(echo -e "$options" | rofi -show -dmenu -i -matching fuzzy -sorting-method fzf -p "🔎" -theme ~/.config/rofi/launchers/type-2/style-2.rasi)
+
+case "$selected" in
+"1."*)
+  kitty yazi
+  ;;
+"2."*)
+  kitty simutil
+  ;;
+"3."*)
+  kitty bluetui
+  ;;
+"4."*)
+  kitty wiremix
+  ;;
+"5."*)
+  swaync-client -t
+  ;;
+"6."*)
+  kitty sudo impala
+  ;;
+"7."*)
+  kitty bash -c 'paru -Slq | fzf --preview "paru -Siia {}" | xargs paru -S --noconfirm'
+  ;;
+*)
+  exit 0
+  ;;
+esac
