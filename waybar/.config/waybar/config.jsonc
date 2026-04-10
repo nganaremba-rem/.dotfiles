@@ -60,7 +60,8 @@
       "wired": "wired",
       "wireless": "wifi"
     },
-    "on-click": "networkmanager_dmenu"
+    // "on-click": "networkmanager_dmenu"
+    "on-click": "kitty impala"
   },
   "pulseaudio": {
     "format": " {volume}%",

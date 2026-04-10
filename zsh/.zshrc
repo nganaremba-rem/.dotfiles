@@ -196,6 +196,8 @@ alias ll="eza -l --icons --git"
 alias la="eza -la --icons --git"
 alias lg="lazygit"
 alias t="tmux"
+alias i="sudo pacman -S --needed --noconfirm --overwrite='*'"
+alias ia="paru -S --needed --noconfirm --overwrite='*'"
 
 function prevent_danger() {
   [[ $1 == "rm -rf /"* ]] && return 1
@@ -231,3 +233,4 @@ if [ -d "$FNM_PATH" ]; then
   export PATH="$FNM_PATH:$PATH"
   eval "$(fnm env --shell zsh)"
 fi
+

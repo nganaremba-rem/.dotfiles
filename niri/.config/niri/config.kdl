@@ -367,6 +367,10 @@ environment {
   MOZC_ENABLE_WAYLAND "1"
   XDG_CURRENT_DESKTOP "niri"
   XDG_SESSION_DESKTOP "niri"
+  // http_proxy "http://10.38.31.201:8080"
+  // https_proxy "http://10.38.31.201:8080"
+  // HTTP_PROXY "http://10.38.31.201:8080"
+  // HTTPS_PROXY "http://10.38.31.201:8080"
 }
 
 // overview { 
@@ -392,6 +396,7 @@ spawn-at-startup "fcitx5" "-dr"
 spawn-sh-at-startup "export $(gnome-keyring-daemon --start --components=pkcs11,secrets,ssh)"
 spawn-at-startup "gammastep" "-O" "4500"
 spawn-at-startup "waybar"
+spawn-at-startup "wl-clip-persist"
 spawn-sh-at-startup "wl-paste --watch cliphist store"
 spawn-at-startup "~/.config/session/init.sh"
 
@@ -564,7 +569,8 @@ binds {
   // Mod+Space hotkey-overlay-title="Launcher" {spawn "fuzzel";}
   // Mod+Space hotkey-overlay-title="Noctalia launcher" {spawn-sh "qs -c noctalia-shell ipc call launcher toggle";}
   Mod+Space hotkey-overlay-title="Rofi launcher" {spawn-sh "rofi -show drun -theme ~/.config/rofi/launchers/type-2/style-2.rasi";}
-  Mod+Alt+Space hotkey-overlay-title="Omarchy Menu" {spawn "~/.local/share/omarchy/bin/omarchy-menu";}
+  // Mod+Alt+Space hotkey-overlay-title="Omarchy Menu" {spawn "~/.local/share/omarchy/bin/omarchy-menu";}
+  Mod+Alt+Space hotkey-overlay-title="Show open windows" {spawn-sh "rofi -show window -theme ~/.config/rofi/launchers/type-2/style-2.rasi";}
   Ctrl+Mod+Alt+L hotkey-overlay-title="Suspend" {spawn "systemctl" "suspend";}
   Mod+Shift+T hotkey-overlay-title="Btop" {spawn "~/.local/bin/kitty" "-e" "bash" "-c" "'btop'";}
   Mod+Ctrl+Alt+V hotkey-overlay-title="Sound" {spawn "~/.local/bin/kitty" "-e" "bash" "-c" "wiremix";}
@@ -584,6 +590,7 @@ binds {
   Mod+Ctrl+Apostrophe hotkey-overlay-title="Toggle between Floating and Tiling" { switch-focus-between-floating-and-tiling; }
   Mod+Alt+C hotkey-overlay-title="Claude AI" {spawn "google-chrome-stable" "--app=https://claude.ai/chat";}
   Mod+Alt+K hotkey-overlay-title="REMTUI" {spawn "~/.local/bin/remtui";}
+  
   // Mod+Alt+Ctrl+C hotkey-overlay-title="Control Center" {spawn-sh "qs -c noctalia-shell ipc call controlCenter toggle";}
   // Mod+Alt+Ctrl+I hotkey-overlay-title="Settings" {spawn-sh "qs -c noctalia-shell ipc call settings toggle";}
 

@@ -3,10 +3,14 @@ return {
     "stevearc/conform.nvim",
     opts = {
       formatters_by_ft = {
-        javascript = { "prettier" },
-        javascriptreact = { "prettier" },
-        typescript = { "prettier" },
-        typescriptreact = { "prettier" },
+        -- javascript = { "prettierd" },
+        -- javascriptreact = { "prettierd" },
+        -- typescript = { "prettierd" },
+        -- typescriptreact = { "prettierd" },
+        javascript = { "biome" },
+        javascriptreact = { "biome" },
+        typescript = { "biome" },
+        typescriptreact = { "biome" },
       },
     },
   },
