@@ -234,3 +234,6 @@ if [ -d "$FNM_PATH" ]; then
   eval "$(fnm env --shell zsh)"
 fi
 
+
+alias swapmine="mv ~/.config/nvim ~/.config/nvim-gg; mv ~/.config/nvim-mine ~/.config/nvim"
+alias swapgg="mv ~/.config/nvim ~/.config/nvim-mine; mv ~/.config/nvim-gg ~/.config/nvim"

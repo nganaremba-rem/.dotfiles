@@ -14,11 +14,24 @@ return {
       "nvim-tree/nvim-web-devicons",
     },
     config = function()
+      require("neo-tree").setup({
+        -- window = {
+        --   position = "right",
+        -- },
+        filesystem = {
+          window = {
+            mappings = {
+              ["<BS>"] = "noop",
+            },
+          },
+        },
+      })
       require("tokyonight").setup()
 
       vim.cmd.colorscheme("tokyonight-night")
 
       vim.keymap.set("n", "<leader>e", ":Neotree toggle position=left<CR>", { noremap = true, silent = true })
+      -- vim.keymap.set("n", "<leader>e", ":Neotree toggle position=right<CR>", { noremap = true, silent = true })
     end,
   },
   {
