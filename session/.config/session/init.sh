@@ -9,6 +9,9 @@ case "$desktop" in
   *niri*)
     exec "$HOME/.config/session/niri.sh"
     ;;
+  *mango*)
+    exec "$HOME/.config/session/mango.sh"
+    ;;
   *)
     if pgrep -x Hyprland >/dev/null; then
       exec "$HOME/.config/session/hyprland.sh"

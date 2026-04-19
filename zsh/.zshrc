@@ -185,6 +185,7 @@ alias noc='nv ~/.local/share/omarchy'
 alias nnc='nv ~/.config/nvim'
 alias cf='cd ~/Coding/flutter/'
 alias nrc='nv ~/.config/niri/config.kdl'
+alias nrm='nv ~/.config/mango/config.conf'
 alias nvc="nv ~/.config/nvim"
 alias cr='cargo run'
 alias nwc='nv ~/.config/waybar'

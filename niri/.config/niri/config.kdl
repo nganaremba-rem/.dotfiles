@@ -589,6 +589,7 @@ binds {
   // Mod+Ctrl+X hotkey-overlay-title="Voxtype Record Toggle" {spawn "voxtype-record-toggle";}
   Mod+Ctrl+Apostrophe hotkey-overlay-title="Toggle between Floating and Tiling" { switch-focus-between-floating-and-tiling; }
   Mod+Alt+C hotkey-overlay-title="Claude AI" {spawn "google-chrome-stable" "--app=https://claude.ai/chat";}
+  Mod+X hotkey-overlay-title="X" {spawn "google-chrome-stable" "--app=https://x.com";}
   Mod+Alt+K hotkey-overlay-title="REMTUI" {spawn "~/.local/bin/remtui";}
   
   // Mod+Alt+Ctrl+C hotkey-overlay-title="Control Center" {spawn-sh "qs -c noctalia-shell ipc call controlCenter toggle";}
