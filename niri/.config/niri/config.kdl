@@ -96,7 +96,7 @@ output "eDP-1" {
     // for the resolution.
     // If the mode is omitted altogether or is invalid, niri will pick one automatically.
     // Run `niri msg outputs` while inside a niri instance to list all outputs and their modes.
-    mode "1920x1080@60"
+    mode "1920x1080@60.007999"
 
     // You can use integer or fractional scale, for example use 1.5 for 150% scale.
     scale 1.25
@@ -131,7 +131,7 @@ output "DP-2" {
     // for the resolution.
     // If the mode is omitted altogether or is invalid, niri will pick one automatically.
     // Run `niri msg outputs` while inside a niri instance to list all outputs and their modes.
-    mode "1920x1080@100"
+    mode "1920x1080@100.086998"
 
     // You can use integer or fractional scale, for example use 1.5 for 150% scale.
     scale 1
@@ -166,7 +166,7 @@ output "DP-3" {
     // for the resolution.
     // If the mode is omitted altogether or is invalid, niri will pick one automatically.
     // Run `niri msg outputs` while inside a niri instance to list all outputs and their modes.
-    mode "1920x1080@100"
+    mode "1920x1080@100.086998"
 
     // You can use integer or fractional scale, for example use 1.5 for 150% scale.
     scale 1
@@ -555,7 +555,7 @@ layer-rule {
 
 binds {
   // My Custom apps
-  Mod+E hotkey-overlay-title="Open File Manager" {spawn "thunar";}
+  Mod+E hotkey-overlay-title="Open File Manager" {spawn "nautilus";}
   Mod+B hotkey-overlay-title="Browser" {spawn "google-chrome-stable" "--new-window";}
   Mod+A hotkey-overlay-title="ChatGPT" {spawn "google-chrome-stable" "--app=https://chatgpt.com";}
   Mod+Alt+P hotkey-overlay-title="Perplexity" {spawn "google-chrome-stable" "--app=https://perplexity.ai/";}
