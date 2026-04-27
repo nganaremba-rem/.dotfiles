@@ -1,0 +1,36 @@
+return {
+  {
+    "nvimdev/lspsaga.nvim",
+    keys = {
+      {
+        "K",
+        "<cmd>Lspsaga hover_doc<CR>",
+        desc = "Hover docs",
+      },
+      {
+        "<leader>ca",
+        vim.lsp.buf.code_action,
+        desc = "Code Actions",
+      },
+      {
+        "gd",
+        "<cmd>Lspsaga goto_definition<CR>",
+        desc = "Goto definition",
+      },
+      {
+        "gp",
+        "<cmd>Lspsaga peek_definition<CR>",
+        desc = "Peek definition",
+      },
+      {
+        "gt",
+        "<cmd>Lspsaga peek_type_definition<CR>",
+        desc = "Peek type definition",
+      },
+    },
+    dependencies = {
+      "nvim-treesitter/nvim-treesitter",
+      "nvim-tree/nvim-web-devicons",
+    },
+  },
+}
