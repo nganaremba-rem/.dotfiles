@@ -348,6 +348,9 @@ layout {
         // top 64
         // bottom 64
     }
+
+
+    background-color "transparent"
 }
 
 // Add lines like this to spawn processes at startup.
@@ -372,6 +375,14 @@ environment {
   // HTTP_PROXY "http://10.38.31.201:8080"
   // HTTPS_PROXY "http://10.38.31.201:8080"
 }
+
+
+overview {
+  workspace-shadow {
+    off
+  }
+}
+
 
 // overview { 
 //    zoom 0.5
@@ -515,6 +526,7 @@ window-rule {
 }
 
 
+
 // window-rule {
 //     match app-id="^chrome*$"
 //     opacity 0.95
@@ -535,11 +547,28 @@ window-rule {
 
 layer-rule {
     match namespace="^rofi$"
-    opacity 0.96
+    match layer="overlay"
     background-effect {
         blur true
+        xray false
     }
 }
+
+layer-rule {
+    match namespace="^waybar$"
+    // match layer="overlay"
+    background-effect {
+        blur true
+        xray false
+    }
+}
+
+layer-rule {
+  match namespace="^awww-daemon$"
+  place-within-backdrop true
+}
+
+
 
 
 window-rule {

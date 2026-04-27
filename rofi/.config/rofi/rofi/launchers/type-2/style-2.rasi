@@ -15,6 +15,7 @@ configuration {
 	drun-display-format:        "{name}";
 }
 
+
 /*****----- Global Properties -----*****/
 @import                          "shared/colors.rasi"
 @import                          "shared/fonts.rasi"
@@ -99,7 +100,7 @@ listview {
     reverse:                     false;
     fixed-height:                true;
     fixed-columns:               true;
-    
+
     spacing:                     5px;
     margin:                      0px;
     padding:                     0px;
@@ -136,7 +137,8 @@ element normal.normal {
 }
 element selected.normal {
     background-color:            @selected;
-    text-color:                  @background;
+    // text-color:                  @background;
+    text-color:                  transparent;
 }
 element-icon {
     background-color:            transparent;
