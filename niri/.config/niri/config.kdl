@@ -512,6 +512,14 @@ window-rule {
 }
 
 window-rule {
+  match app-id="^qalculate-gtk$"
+  opacity 0.9
+  background-effect {
+    blur true
+  }
+}
+
+window-rule {
   match app-id="^foot$"
   
   background-effect {
@@ -579,13 +587,13 @@ layer-rule {
 
 
 
-window-rule {
-    match app-id="^org.gnome.Nautilus$"
-    opacity 0.85
-    background-effect {
-        blur true
-    }
-}
+// window-rule {
+//     match app-id="^org.gnome.Nautilus$"
+//     opacity 0.85
+//     background-effect {
+//         blur true
+//     }
+// }
 
 window-rule {
   match app-id=r#"^thunar$"#
