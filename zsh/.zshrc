@@ -10,6 +10,8 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
+# Remove broken fnm runtime paths
+PATH=$(printf "%s\n" $PATH | grep -v "/run/user/.*/fnm_multishells" | paste -sd:)
 
 # ── Environment you already use
 # export LANG=en_IN.UTF-8
@@ -49,6 +51,7 @@ export ATAC_KEY_BINDINGS="$HOME/.config/atac/vim_key_bindings.toml"
 # PATH helper (append only if the dir exists)
 path_prepend() { [[ -d "$1" ]] && PATH="$1:$PATH"; }
 path_prepend "$HOME/.console-ninja/.bin"
+path_prepend "$HOME/.opencode/bin"
 path_prepend "$HOME/bin/nvim/bin"
 path_prepend "$HOME/bin/arch"
 path_prepend "$PYENV_ROOT/bin"
@@ -71,6 +74,13 @@ path_prepend "$PYENV_ROOT/shims"
 path_prepend "$HOME/.pub-cache/bin"
 path_prepend "$HOME/go/bin"
 export PATH
+
+
+pyenv() {
+  unset -f pyenv
+  eval "$(command pyenv init -)"
+  pyenv "$@"
+}
 
 # ── Zsh options
 setopt promptsubst autocd interactivecomments
@@ -207,9 +217,6 @@ function prevent_danger() {
 # Prevent dangerous command
 add-zsh-hook preexec prevent_danger 
 
-# opencode
-export PATH=/home/rem/.opencode/bin:$PATH
-
 bindkey '^?' backward-delete-char
 
 eval "$(zoxide init zsh --cmd cd)"
@@ -230,10 +237,13 @@ export FZF_DEFAULT_COMMAND="fd --hidden"
 
 # fnm
 FNM_PATH="/home/rem/.local/share/fnm"
-if [ -d "$FNM_PATH" ]; then
+
+fnm() {
+  unset -f fnm
   export PATH="$FNM_PATH:$PATH"
-  eval "$(fnm env --shell zsh)"
-fi
+  eval "$(command fnm env --shell zsh)"
+  fnm "$@"
+}
 
 
 alias swapmine="mv ~/.config/nvim ~/.config/nvim-gg; mv ~/.config/nvim-mine ~/.config/nvim"
