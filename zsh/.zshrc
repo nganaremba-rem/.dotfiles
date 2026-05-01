@@ -232,7 +232,6 @@ eval "$(starship init zsh)"
 
 # simutil
 export PATH="/home/rem/.local/lib/simutil:$PATH"
-export PATH=$PATH:$HOME/.local/bin
 export FZF_DEFAULT_COMMAND="fd --hidden"
 
 # fnm
@@ -248,3 +247,8 @@ fnm() {
 
 alias swapmine="mv ~/.config/nvim ~/.config/nvim-gg; mv ~/.config/nvim-mine ~/.config/nvim"
 alias swapgg="mv ~/.config/nvim ~/.config/nvim-mine; mv ~/.config/nvim-gg ~/.config/nvim"
+
+
+# Deduplication PATH 
+typeset -U PATH path
+

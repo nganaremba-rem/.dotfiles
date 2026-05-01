@@ -708,8 +708,8 @@ binds {
     
     // Mod+Return hotkey-overlay-title="Open a Terminal: " { spawn-sh "/usr/sbin/foot --working-directory=$(cat /tmp/niri-shell-pwd-rem 2>/dev/null || $HOME) tmux new-session -A -s main"; }
     // Mod+Return hotkey-overlay-title="Open a Terminal: " { spawn-sh "/usr/sbin/foot --working-directory=$(cat /tmp/niri-shell-pwd-rem 2>/dev/null || $HOME)"; }
-    Mod+Return hotkey-overlay-title="Open a Terminal: " { spawn-sh "foot --working-directory=$(cat /tmp/niri-shell-pwd-rem 2>/dev/null || echo $HOME)"; }
-    Mod+Alt+Return hotkey-overlay-title="Open a Terminal with tmux: " { spawn-sh "foot --working-directory=$(cat /tmp/niri-shell-pwd-rem 2>/dev/null || echo $HOME) tmux"; }
+    Mod+Return hotkey-overlay-title="Open a Terminal: " { spawn-sh "foot -e tmux"; }
+    Mod+Alt+Return hotkey-overlay-title="Open a Terminal with tmux: " { spawn-sh "foot"; }
     // Mod+Space hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
 
     // Use spawn-sh to run a shell command. Do this if you need pipes, multiple commands, etc.
