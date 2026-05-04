@@ -120,6 +120,19 @@ return {
     local servers = {
       clangd = {},
       gopls = {},
+      tailwindcss = {
+        filetypes = {
+          'html',
+          'css',
+          'javascript',
+          'javascriptreact',
+          'typescript',
+          'typescriptreact',
+          'vue',
+          'svelte',
+        },
+      },
+      emmet_ls = {},
       pyright = {},
       rust_analyzer = {},
       eslint = {

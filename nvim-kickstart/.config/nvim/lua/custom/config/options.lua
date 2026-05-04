@@ -7,6 +7,11 @@ vim.g.maplocalleader = ' '
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = true
 
+vim.opt.tabstop = 2
+vim.opt.softtabstop = 2
+vim.opt.expandtab = true
+vim.opt.shiftwidth = 2
+
 -- [[ Setting options ]]
 -- See `:help vim.o`
 -- NOTE: You can change these options as you wish!
@@ -61,8 +66,8 @@ vim.o.splitbelow = true
 --  It is very similar to `vim.o` but offers an interface for conveniently interacting with tables.
 --   See `:help lua-options`
 --   and `:help lua-guide-options`
-vim.o.list = true
-vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
+-- vim.o.list = true
+vim.opt.listchars = { tab = '| ', trail = '·', nbsp = '␣' }
 
 -- Preview substitutions live, as you type!
 vim.o.inccommand = 'split'
