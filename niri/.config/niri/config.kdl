@@ -42,7 +42,7 @@ input {
     touchpad {
         // off
         tap
-        // dwt
+        dwt
         // dwtp
         // drag false
         // drag-lock
@@ -534,6 +534,9 @@ window-rule {
   }
 }
 
+
+
+
 // window-rule {
 //   match app-id=r#"^kitty$"#
 //   open-floating true
@@ -584,14 +587,14 @@ layer-rule {
 }
 
 
-// layer-rule {
-//     match namespace="^waybar$"
-//     // match layer="overlay"
-//     background-effect {
-//         blur true
-//         xray false
-//     }
-// }
+layer-rule {
+    match namespace="^waybar$"
+    // match layer="overlay"
+    background-effect {
+        blur true
+        xray false
+    }
+}
 
 layer-rule {
   match namespace="^awww-daemon$"
@@ -715,7 +718,7 @@ binds {
 
     
     // Mod+Return hotkey-overlay-title="Open a Terminal: " { spawn-sh "/usr/sbin/foot --working-directory=$(cat /tmp/niri-shell-pwd-rem 2>/dev/null || $HOME) tmux new-session -A -s main"; }
-    Mod+Return hotkey-overlay-title="Open a Terminal: " { spawn-sh "foot"; }
+    Mod+Return hotkey-overlay-title="Open a Terminal: " { spawn-sh "kitty"; }
     Mod+Alt+Return hotkey-overlay-title="Open a Terminal with tmux: " { spawn-sh "foot -e tmux"; }
     // Mod+Space hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
 

@@ -61,7 +61,9 @@
       "wireless": "wifi"
     },
     // "on-click": "networkmanager_dmenu"
-    "on-click": "kitty impala"
+    // "on-click": "kitty impala"
+    // "on-click": "kitty gazelle"
+    "on-click": "kitty wlctl"
   },
   "pulseaudio": {
     "format": " {volume}%",
