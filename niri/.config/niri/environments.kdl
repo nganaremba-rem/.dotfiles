@@ -1,0 +1,21 @@
+environment {
+  TERM "xterm-256color"
+  QT_QPA_PLATFORM "wayland"
+  WLR_RENDERER "vulkan"
+  WLR_NO_HARDWARE_CURSORS "1"
+  GTK_USE_PORTAL "0"
+  XCURSOR_THEME "Bibata-Modern-Ice"
+  XCURSOR_SIZE "24"
+  OMARCHY_PATH "~/.local/share/omarchy"
+  MOZC_ENABLE_WAYLAND "1"
+  XDG_CURRENT_DESKTOP "niri"
+  XDG_SESSION_DESKTOP "niri"
+  QT_QPA_PLATFORMTHEME "qt6ct"
+  QT_STYLE_OVERRIDE "adwaita"
+  OZONE_PLATFORM "wayland"
+  // http_proxy "http://10.38.31.201:8080"
+  // https_proxy "http://10.38.31.201:8080"
+  // HTTP_PROXY "http://10.38.31.201:8080"
+  // HTTPS_PROXY "http://10.38.31.201:8080"
+}
+
