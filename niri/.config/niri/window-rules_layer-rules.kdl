@@ -32,7 +32,7 @@ window-rule {
 
 window-rule {
   match app-id="^foot$"
-  
+
   background-effect {
     blur true
   }
@@ -87,7 +87,7 @@ layer-rule {
     match namespace="^walker$"
     match layer="overlay"
     background-effect {
-        blur true
+        blur false
         xray false
     }
 }
