@@ -1,9 +1,10 @@
+vim.opt.backupcopy = 'yes'
 vim.opt.fileencodings = {
   'ucs-bom', -- → UTF files with BOM
+  'euc-jp', -- older Japanese encoding
   'utf-8', -- normal UTF-8
   'cp932', -- very common Japanese Windows encoding
   'sjis', -- Shift-JIS
-  'euc-jp', -- older Japanese encoding
   'latin1', -- fallback if all else fails
 }
 
@@ -93,3 +94,24 @@ vim.o.scrolloff = 10
 -- instead raise a dialog asking if you wish to save the current file(s)
 -- See `:help 'confirm'`
 vim.o.confirm = true
+
+-- Don't wrap long lines (toggle per-buffer in prose files via autocmd)
+vim.o.wrap = false
+
+-- Keep context lines visible around folds
+vim.o.foldlevel = 99
+
+-- Faster which-key / CursorHold events
+vim.o.updatetime = 200
+
+-- Show matching brackets briefly
+vim.o.showmatch = true
+
+-- Allow cursor to move past end of line in visual block mode
+vim.o.virtualedit = 'block'
+
+-- Use ripgrep for :grep if available
+if vim.fn.executable 'rg' == 1 then
+  vim.o.grepprg = 'rg --vimgrep --smart-case'
+  vim.o.grepformat = '%f:%l:%c:%m'
+end

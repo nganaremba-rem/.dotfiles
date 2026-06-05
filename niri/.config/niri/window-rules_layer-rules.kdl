@@ -12,6 +12,14 @@ window-rule {
     default-column-width {}
 }
 
+window-rule {
+  match app-id=r#"^scratchpad$"#
+  open-floating true
+  default-column-width { fixed 1200; }
+  default-window-height { fixed 800; }
+  // open-centered true
+}
+
 
 window-rule {
   match app-id="^qalculate-gtk$"
@@ -76,6 +84,15 @@ layer-rule {
 }
 
 layer-rule {
+    match namespace="^walker$"
+    match layer="overlay"
+    background-effect {
+        blur true
+        xray false
+    }
+}
+
+layer-rule {
     match namespace="swaync-notification-window"
     background-effect {
         blur false
@@ -86,6 +103,14 @@ layer-rule {
 layer-rule {
     match namespace="^waybar$"
     // match layer="overlay"
+    background-effect {
+        blur true
+        xray false
+    }
+}
+
+layer-rule {
+    match namespace="^swayosd$"
     background-effect {
         blur true
         xray false

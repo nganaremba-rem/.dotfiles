@@ -5,9 +5,11 @@
 @define-color muted #a6b1bb;
 @define-color accent #5eead4;
 @define-color accent2 #f6c177;
-@define-color good #86efac;
-/* @define-color good #d60b55; */
+/* @define-color good #86efac; */
+@define-color good #d60b55; 
 @define-color warn #fca5a5;
+
+
 
 * {
   font-family: "CaskaydiaMono Nerd Font Propo";
@@ -55,7 +57,9 @@ tooltip label {
 #cpu,
 #bluetooth,
 #temperature,
-#custom-notifications {
+#custom-notifications,
+#custom-mic,
+#custom-camera {
   background-color: @bg1;
   color: @fg;
   padding: 2px 9px;
@@ -161,4 +165,46 @@ tooltip label {
 
 #bluetooth.connected {
   color: @good;
+}
+
+/* ── Mic indicator ─────────────────────────────── */
+#custom-mic {
+  color: @muted;
+  font-size: 13px;
+}
+
+#custom-mic.on {
+  color: @fg;
+}
+
+#custom-mic.muted {
+  color: @muted;
+}
+
+/* Mic is actively recording — red privacy indicator */
+#custom-mic.active {
+  color: #f38ba8;
+  border-color: rgba(243, 139, 168, 0.35);
+  background-color: rgba(243, 139, 168, 0.10);
+}
+
+/* ── Camera indicator ──────────────────────────── */
+#custom-camera {
+  color: @muted;
+  font-size: 13px;
+}
+
+#custom-camera.on {
+  color: @fg;
+}
+
+#custom-camera.off {
+  color: @muted;
+}
+
+/* Camera is actively streaming — red privacy indicator */
+#custom-camera.active {
+  color: #f38ba8;
+  border-color: rgba(243, 139, 168, 0.35);
+  background-color: rgba(243, 139, 168, 0.10);
 }

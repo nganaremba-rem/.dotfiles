@@ -20,6 +20,8 @@
     "custom/weather",
     "network",
     "bluetooth",
+    "custom/mic",
+    "custom/camera",
     "pulseaudio",
     "battery",
     "tray",
@@ -78,6 +80,22 @@
     "format-connected": " {device_battery_percentage}%",
     "tooltip": true,
     "on-click": "kitty bluetui"
+  },
+  "custom/mic": {
+    "exec": "~/.config/waybar/scripts/mic-status.sh",
+    "interval": 3,
+    "return-type": "json",
+    "signal": 8,
+    "on-click": "/home/rem/.local/bin/mic-toggle",
+    "tooltip": true
+  },
+  "custom/camera": {
+    "exec": "~/.config/waybar/scripts/camera-status.sh",
+    "interval": 3,
+    "return-type": "json",
+    "signal": 9,
+    "on-click": "/home/rem/.local/bin/camera-toggle",
+    "tooltip": true
   },
   "custom/notifications": {
     "format": "",

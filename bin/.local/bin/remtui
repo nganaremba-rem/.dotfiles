@@ -34,7 +34,7 @@ case "$selected" in
   kitty sudo impala
   ;;
 "7."*)
-  kitty bash -c 'paru -Slq | fzf --preview "paru -Siia {}" | xargs paru -S --noconfirm --overwrite="*"'
+  kitty bash -c 'yay -Slq | fzf --preview "yay -Siia {}" | xargs yay -S --noconfirm'
   ;;
 "8"*)
   kitty lazydocker

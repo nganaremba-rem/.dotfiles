@@ -8,8 +8,12 @@ animations {
     // Slow down all animations by this factor. Values below 1 speed them up instead.
     // slowdown 1
     workspace-switch {
-            spring damping-ratio=1.0 stiffness=1000 epsilon=0.0001
-        }
+      spring damping-ratio=1.0 stiffness=1200 epsilon=0.0001  // was 1000
+    }
+    // workspace-switch {
+    //
+    //         spring damping-ratio=1.0 stiffness=1000 epsilon=0.0001
+    //     }
 
         window-open {
             duration-ms 250

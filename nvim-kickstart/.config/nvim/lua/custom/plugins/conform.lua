@@ -20,11 +20,14 @@ return { -- Autoformat
         lua = true,
         python = true,
         rust = true,
+        go = true,
         javascript = true,
+        typescript = true,
         typescriptreact = true,
         javascriptreact = true,
         dart = true,
         c = true,
+        cpp = true,
       }
       if enabled_filetypes[vim.bo[bufnr].filetype] then
         return { timeout_ms = 500 }

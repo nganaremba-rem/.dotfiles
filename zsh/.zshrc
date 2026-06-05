@@ -219,7 +219,6 @@ add-zsh-hook preexec prevent_danger
 
 bindkey '^?' backward-delete-char
 
-eval "$(zoxide init zsh --cmd cd)"
 
 precmd() { 
   update-shell-pwd 
@@ -475,3 +474,5 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 
 # direnv for python
 eval "$(direnv hook zsh)"
+
+eval "$(zoxide init zsh --cmd cd)"

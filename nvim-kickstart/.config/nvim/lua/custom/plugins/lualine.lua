@@ -14,16 +14,12 @@ return {
       inactive = { a = { fg = c.comment, bg = 'NONE' }, b = { fg = c.comment, bg = 'NONE' }, c = { fg = c.comment, bg = 'NONE' } },
     }
 
-    -- ── custom components ─────────────────────────────────────────────
-
-    -- macro recording
     local function macro_recording()
       local reg = vim.fn.reg_recording()
       if reg == '' then return '' end
       return '󰑊 @' .. reg
     end
 
-    -- search count  e.g. [3/10]
     local function search_count()
       if vim.v.hlsearch == 0 then return '' end
       local ok, result = pcall(vim.fn.searchcount, { maxcount = 999, timeout = 50 })
@@ -31,7 +27,6 @@ return {
       return ('󰍉 [%d/%d]'):format(result.current, result.total)
     end
 
-    -- active LSP clients
     local function lsp_clients()
       local clients = vim.lsp.get_clients { bufnr = 0 }
       if #clients == 0 then return '' end
@@ -39,18 +34,6 @@ return {
       return '󰒋 ' .. table.concat(names, ' ')
     end
 
-    -- LSP progress spinner
-    -- local function lsp_progress()
-    --   local spinners = { '⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏' }
-    --   local ms = vim.uv.hrtime() / 1e6
-    --   local frame = math.floor(ms / 80) % #spinners
-    --   for _, client in ipairs(vim.lsp.get_clients { bufnr = 0 }) do
-    --     if client.progress and not vim.tbl_isempty(client.progress) then return spinners[frame + 1] .. ' LSP' end
-    --   end
-    --   return ''
-    -- end
-
-    -- indent style indicator
     local function indent_info()
       if vim.bo.expandtab then
         return '󱁐 ' .. vim.bo.shiftwidth
@@ -59,7 +42,6 @@ return {
       end
     end
 
-    -- file size
     local function file_size()
       local size = vim.fn.getfsize(vim.fn.expand '%')
       if size <= 0 then return '' end
@@ -72,17 +54,14 @@ return {
       return ('󰉉 %.1f%s'):format(size, units[i])
     end
 
-    -- lazy.nvim pending updates
     local function lazy_updates()
       local ok, lazy = pcall(require, 'lazy.status')
       if ok and lazy.has_updates() then return '󰚰 ' .. lazy.updates() end
       return ''
     end
 
-    -- current time
     local function clock() return '󱑍 ' .. os.date '%H:%M' end
 
-    -- ── setup ─────────────────────────────────────────────────────────
     require('lualine').setup {
       options = {
         theme = theme,
@@ -100,67 +79,23 @@ return {
 
         lualine_b = {
           { 'branch', icon = '' },
-          {
-            'diff',
-            symbols = { added = ' ', modified = ' ', removed = ' ' },
-          },
+          { 'diff', symbols = { added = ' ', modified = ' ', removed = ' ' } },
         },
 
         lualine_c = {
-          {
-            'filename',
-            path = 1, -- relative path
-            symbols = { modified = '●', readonly = '', unnamed = '[No Name]', newfile = '[New]' },
-          },
-          {
-            'diagnostics',
-            sources = { 'nvim_lsp', 'nvim_diagnostic' },
-            symbols = { error = ' ', warn = ' ', info = ' ', hint = '󰠠 ' },
-            colored = true,
-          },
-          -- macro recording (shown in red when active)
-          {
-            macro_recording,
-            color = { fg = c.red, gui = 'bold' },
-          },
-          -- search count
-          {
-            search_count,
-            color = { fg = c.yellow },
-          },
-          -- lsp progress spinner
-          -- {
-          --   lsp_progress,
-          --   color = { fg = c.blue },
-          -- },
+          { 'filename', path = 1, symbols = { modified = '●', readonly = '', unnamed = '[No Name]', newfile = '[New]' } },
+          { 'diagnostics', sources = { 'nvim_lsp', 'nvim_diagnostic' }, symbols = { error = ' ', warn = ' ', info = ' ', hint = '󰠠 ' }, colored = true },
+          { macro_recording, color = { fg = c.red, gui = 'bold' } },
+          { search_count,    color = { fg = c.yellow } },
         },
 
         lualine_x = {
-          -- lazy pending updates
-          {
-            lazy_updates,
-            color = { fg = c.yellow },
-          },
-          -- lsp client names
-          {
-            lsp_clients,
-            color = { fg = c.cyan },
-          },
-          -- indent info
-          {
-            indent_info,
-            color = { fg = c.comment },
-          },
-          -- file size
-          {
-            file_size,
-            color = { fg = c.comment },
-          },
+          { lazy_updates, color = { fg = c.yellow } },
+          { lsp_clients,  color = { fg = c.cyan } },
+          { indent_info,  color = { fg = c.comment } },
+          { file_size,    color = { fg = c.comment } },
           { 'encoding' },
-          {
-            'fileformat',
-            symbols = { unix = 'LF', dos = 'CRLF', mac = 'CR' },
-          },
+          { 'fileformat', symbols = { unix = 'LF', dos = 'CRLF', mac = 'CR' } },
           { 'filetype' },
         },
 
@@ -180,7 +115,6 @@ return {
       extensions = { 'neo-tree', 'toggleterm', 'lazy', 'mason', 'trouble', 'quickfix' },
     }
 
-    -- ── force refresh on macro record start/stop ──────────────────────
     vim.api.nvim_create_autocmd({ 'RecordingEnter', 'RecordingLeave' }, {
       callback = function() require('lualine').refresh() end,
     })

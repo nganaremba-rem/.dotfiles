@@ -1,4 +1,7 @@
 binds {
+  Mod+Apostrophe hotkey-overlay-title="Scratchpad terminal" {
+    spawn-sh "kitty --class=scratchpad";
+  }
   Mod+Shift+Return hotkey-overlay-title="Rofi in drun mode" {spawn-sh "rofi -show drun";}
   Mod+E hotkey-overlay-title="Open File Manager" {spawn "nautilus";}
   Mod+B hotkey-overlay-title="Browser" {spawn "google-chrome-stable" "--new-window";}
@@ -13,8 +16,8 @@ binds {
   Mod+Delete hotkey-overlay-title="Power Menu" {spawn "wlogout";}
   // Mod+Space hotkey-overlay-title="Launcher" {spawn "fuzzel";}
   // Mod+Space hotkey-overlay-title="Noctalia launcher" {spawn-sh "qs -c noctalia-shell ipc call launcher toggle";}
-  Mod+Space hotkey-overlay-title="Rofi launcher" {spawn-sh "rofi -show drun -theme ~/.config/rofi/launchers/type-2/style-2.rasi";}
-  Alt+Space hotkey-overlay-title="Rofi launcher" {spawn-sh "rofi -show drun -theme ~/.config/rofi/launchers/type-2/style-2.rasi";}
+  Mod+Space hotkey-overlay-title="Walker launcher" { spawn "walker"; }
+  Alt+Space hotkey-overlay-title="Walker launcher" { spawn "walker"; }
   // Mod+Alt+Space hotkey-overlay-title="Omarchy Menu" {spawn "~/.local/share/omarchy/bin/omarchy-menu";}
   Mod+Alt+Space hotkey-overlay-title="Show open windows" {spawn-sh "rofi -show window -theme ~/.config/rofi/launchers/type-2/style-2.rasi";}
   Ctrl+Mod+Alt+L hotkey-overlay-title="Suspend" {spawn "systemctl" "suspend";}
@@ -28,7 +31,6 @@ binds {
   // Mod+Ctrl+Alt+B hotkey-overlay-title="Wallpaper picker" {spawn-sh "qs -c noctalia-shell ipc call wallpaper toggle";}
   Mod+Ctrl+Alt+B hotkey-overlay-title="Wallpaper picker" {spawn-sh "~/.config/wallpaper/set-wallpaper.sh";}
   Mod+Ctrl+Alt+N hotkey-overlay-title="Notification Center" {spawn "swaync-client" "-t" "-sw";}
-  Mod+Apostrophe hotkey-overlay-title="Launch Kitty" {spawn "~/.local/bin/kitty";}
   Mod+Slash hotkey-overlay-title="Launch Ghostty" {spawn "ghostty";}
   Mod+Ctrl+Alt+W hotkey-overlay-title="Launch WiFi" {spawn-sh "rfkill unblock wifi && foot -e bash -c impala";} 
   Mod+Ctrl+W hotkey-overlay-title="Restart waybar" {spawn-sh "pkill waybar; systemctl --user restart waybar";}
@@ -68,14 +70,12 @@ binds {
     // For example, this is a standard bind to toggle the screen reader (orca).
     Super+Alt+S allow-when-locked=true hotkey-overlay-title=null { spawn-sh "pkill orca || exec orca"; }
 
-    // Example volume keys mappings for PipeWire & WirePlumber.
-    // The allow-when-locked=true property makes them work even when the session is locked.
-    // Using spawn-sh allows to pass multiple arguments together with the command.
-    // "-l 1.0" limits the volume to 100%.
-    XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1+ -l 1.0"; }
-    XF86AudioLowerVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1-"; }
-    XF86AudioMute        allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"; }
-    XF86AudioMicMute     allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"; }
+    // Volume keys — swayosd-client controls PipeWire AND shows the OSD
+    XF86AudioRaiseVolume allow-when-locked=true { spawn "swayosd-client" "--output-volume" "raise" "--max-volume" "100"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn "swayosd-client" "--output-volume" "lower"; }
+    XF86AudioMute        allow-when-locked=true { spawn "swayosd-client" "--output-volume" "mute-toggle"; }
+    XF86AudioMicMute     allow-when-locked=true { spawn "/home/rem/.local/bin/mic-toggle"; }
+    XF86WebCam           allow-when-locked=true { spawn "/home/rem/.local/bin/camera-toggle"; }
 
     // Example media keys mapping using playerctl.
     // This will work with any MPRIS-enabled media player.
@@ -84,11 +84,9 @@ binds {
     XF86AudioPrev        allow-when-locked=true { spawn-sh "playerctl previous"; }
     XF86AudioNext        allow-when-locked=true { spawn-sh "playerctl next"; }
 
-    // Example brightness key mappings for brightnessctl.
-    // You can use regular spawn with multiple arguments too (to avoid going through "sh"),
-    // but you need to manually put each argument in separate "" quotes.
-    XF86MonBrightnessUp allow-when-locked=true { spawn "brightnessctl" "--class=backlight" "set" "+10%"; }
-    XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "--class=backlight" "set" "10%-"; }
+    // Brightness keys — swayosd-client controls brightnessctl AND shows the OSD
+    XF86MonBrightnessUp   allow-when-locked=true { spawn "swayosd-client" "--brightness" "raise"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn "swayosd-client" "--brightness" "lower"; }
 
     // Open/close the Overview: a zoomed-out view of workspaces and windows.
     // You can also move the mouse into the top-left hot corner,
@@ -299,6 +297,14 @@ binds {
     Print { screenshot; }
     Ctrl+Print { screenshot-screen; }
     Alt+Print { screenshot-window; }
+
+    // Satty annotate+copy: full screen, then area selection
+    Mod+Shift+S hotkey-overlay-title="Screenshot (full) → annotate → clipboard" {
+      spawn-sh "grim - | satty --filename - --copy-command wl-copy --early-exit";
+    }
+    Mod+Shift+A hotkey-overlay-title="Screenshot (area) → annotate → clipboard" {
+      spawn-sh "grim -g \"$(slurp)\" - | satty --filename - --copy-command wl-copy --early-exit";
+    }
 
     // Applications such as remote-desktop clients and software KVM switches may
     // request that niri stops processing the keyboard shortcuts defined here
