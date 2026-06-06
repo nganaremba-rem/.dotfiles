@@ -20,8 +20,11 @@ return {
             env = {
               NVIM_LISTEN_ADDRESS = vim.v.servername,
             },
-            on_open = function()
-              vim.schedule(function() vim.cmd 'startinsert!' end)
+            on_open = function(term)
+              vim.schedule(function()
+                vim.cmd 'startinsert!'
+                vim.keymap.set('n', 'q', '<nop>', { buffer = term.bufnr })
+              end)
             end,
             on_close = function()
               vim.cmd.checktime()
