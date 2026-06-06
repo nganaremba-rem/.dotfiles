@@ -15,7 +15,7 @@ declare -A CURVES=(
   ["cubic-bezier: soft land"]='curve "cubic-bezier" 0.25 0.46 0.45 0.94'
 )
 
-CHOICE=$(printf '%s\n' "${!CURVES[@]}" | sort | rofi -dmenu -p "window-open curve" -i)
+CHOICE=$(printf '%s\n' "${!CURVES[@]}" | sort | walker -d -p "window-open curve")
 
 [[ -z "$CHOICE" ]] && exit 0
 
