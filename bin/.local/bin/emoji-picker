@@ -1,0 +1,7 @@
+#!/bin/sh
+
+EMOJI=$(curl -s https://raw.githubusercontent.com/github/gemoji/master/db/emoji.json \
+  | jq -r '.[] | "\(.emoji) \(.description)"' \
+  | fuzzel --dmenu)
+
+[ -n "$EMOJI" ] && echo "$EMOJI" | awk '{print $1}' | wl-copy

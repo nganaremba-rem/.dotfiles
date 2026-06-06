@@ -34,6 +34,7 @@ binds {
   Mod+Slash hotkey-overlay-title="Launch Ghostty" {spawn "ghostty";}
   Mod+Ctrl+Alt+W hotkey-overlay-title="Launch WiFi" {spawn-sh "rfkill unblock wifi && foot -e bash -c impala";}
   Mod+Ctrl+W hotkey-overlay-title="Restart waybar" {spawn-sh "pkill waybar; systemctl --user restart waybar";}
+  Mod+Alt+W hotkey-overlay-title="Toggle waybar" {spawn "toggle-waybar";}
   // Mod+Ctrl+X hotkey-overlay-title="Voxtype Record Toggle" {spawn "voxtype-record-toggle";}
   Mod+Ctrl+Apostrophe hotkey-overlay-title="Toggle between Floating and Tiling" { switch-focus-between-floating-and-tiling; }
   Mod+Alt+C hotkey-overlay-title="Claude AI" {spawn "google-chrome-stable" "--app=https://claude.ai/chat";}

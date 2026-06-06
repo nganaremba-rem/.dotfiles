@@ -1,0 +1,11 @@
+#!/bin/bash
+STATE_FILE="/tmp/.camera-state"
+current="$(cat "$STATE_FILE" 2>/dev/null)"
+if [ "$current" = "on" ]; then
+    echo "off" > "$STATE_FILE"
+    swayosd-client --custom-icon "camera-disabled-symbolic" --custom-message "Camera Off"
+else
+    echo "on" > "$STATE_FILE"
+    swayosd-client --custom-icon "camera-web-symbolic" --custom-message "Camera On"
+fi
+pkill -RTMIN+9 waybar 2>/dev/null
