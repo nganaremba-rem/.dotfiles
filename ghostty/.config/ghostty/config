@@ -1,0 +1,68 @@
+# ── Font ─────────────────────────────────────────────────────────────────────
+# CaskaydiaCove (not Mono) matches your kitty setup; Mono suffix = nerd icon width
+font-family = "CaskaydiaCove Nerd Font Mono"
+font-size = 14.5
+font-feature = liga
+font-feature = calt
+
+# ── Window ───────────────────────────────────────────────────────────────────
+window-padding-x = 14
+window-padding-y = 14
+confirm-close-surface = false
+resize-overlay = never
+
+# ── Transparency ─────────────────────────────────────────────────────────────
+# background-opacity works on Wayland when the compositor allows transparency.
+# Blur is compositor-side on Linux — ghostty's background-blur-radius is macOS-only.
+# For blur on niri, add a window rule: blur { passes = 2; radius = 8; }
+background-opacity = 0.8
+
+# ── Cursor ───────────────────────────────────────────────────────────────────
+# ghostty has no cursor_trail — that is a kitty-exclusive feature.
+# Closest approximation: blink gives a subtle sense of motion (off by default in kitty too).
+cursor-style = block
+cursor-style-blink = false
+shell-integration-features = no-cursor
+cursor-color = #c0caf5
+
+# ── Scrollback & bell ────────────────────────────────────────────────────────
+scrollback-limit = 2000
+bell-features = no-system,no-audio,no-attention,no-title
+
+# ── Mouse ────────────────────────────────────────────────────────────────────
+mouse-scroll-multiplier = 0.95
+
+# ── Colors: Tokyo Night ──────────────────────────────────────────────────────
+# Your kitty.conf loads Catppuccin Mocha then overrides the base + 16-color palette
+# with Tokyo Night values. This is the effective result.
+background = 1a1b26
+foreground = a9b1d6
+selection-background = 7aa2f7
+selection-foreground = c0caf5
+
+# 16-color palette (Tokyo Night)
+palette = 0=#32344a
+palette = 1=#f7768e
+palette = 2=#9ece6a
+palette = 3=#e0af68
+palette = 4=#7aa2f7
+palette = 5=#ad8ee6
+palette = 6=#449dab
+palette = 7=#787c99
+palette = 8=#444b6a
+palette = 9=#ff7a93
+palette = 10=#b9f27c
+palette = 11=#ff9e64
+palette = 12=#7da6ff
+palette = 13=#bb9af7
+palette = 14=#0db9d7
+palette = 15=#acb0d0
+
+# ── Keybindings ──────────────────────────────────────────────────────────────
+keybind = f11=toggle_fullscreen
+keybind = shift+insert=paste_from_clipboard
+keybind = control+insert=copy_to_clipboard
+keybind = super+control+shift+alt+arrow_down=resize_split:down,100
+keybind = super+control+shift+alt+arrow_up=resize_split:up,100
+keybind = super+control+shift+alt+arrow_left=resize_split:left,100
+keybind = super+control+shift+alt+arrow_right=resize_split:right,100
