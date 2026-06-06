@@ -1,4 +1,5 @@
 environment {
+  PATH "/home/rem/.local/bin:/home/rem/bin:/home/rem/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/lib/jvm/default/bin"
   TERM "xterm-256color"
   QT_QPA_PLATFORM "wayland"
   // WLR_RENDERER "vulkan"

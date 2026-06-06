@@ -33,8 +33,8 @@ binds {
   Mod+Ctrl+Alt+N hotkey-overlay-title="Notification Center" {spawn "swaync-client" "-t" "-sw";}
   Mod+Slash hotkey-overlay-title="Launch Ghostty" {spawn "ghostty";}
   Mod+Ctrl+Alt+W hotkey-overlay-title="Launch WiFi" {spawn-sh "rfkill unblock wifi && foot -e bash -c impala";}
-  Mod+Ctrl+W hotkey-overlay-title="Toggle waybar" {spawn-sh "foot -e bash -c toggle-waybar";}
-  Mod+Ctrl+Alt+A hotkey-overlay-title="Animation curve picker" {spawn "niri-curve-pick";}
+  Mod+Ctrl+W hotkey-overlay-title="Toggle waybar" {spawn "/home/rem/.local/bin/toggle-waybar";}
+  Mod+Ctrl+Alt+A hotkey-overlay-title="Animation curve picker" {spawn "/home/rem/.local/bin/niri-curve-pick";}
   // Mod+Ctrl+X hotkey-overlay-title="Voxtype Record Toggle" {spawn "voxtype-record-toggle";}
   Mod+Ctrl+Apostrophe hotkey-overlay-title="Toggle between Floating and Tiling" { switch-focus-between-floating-and-tiling; }
   Mod+Alt+C hotkey-overlay-title="Claude AI" {spawn "google-chrome-stable" "--app=https://claude.ai/chat";}
