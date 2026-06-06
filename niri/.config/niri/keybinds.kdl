@@ -32,19 +32,19 @@ binds {
   Mod+Ctrl+Alt+B hotkey-overlay-title="Wallpaper picker" {spawn-sh "~/.config/wallpaper/set-wallpaper.sh";}
   Mod+Ctrl+Alt+N hotkey-overlay-title="Notification Center" {spawn "swaync-client" "-t" "-sw";}
   Mod+Slash hotkey-overlay-title="Launch Ghostty" {spawn "ghostty";}
-  Mod+Ctrl+Alt+W hotkey-overlay-title="Launch WiFi" {spawn-sh "rfkill unblock wifi && foot -e bash -c impala";} 
+  Mod+Ctrl+Alt+W hotkey-overlay-title="Launch WiFi" {spawn-sh "rfkill unblock wifi && foot -e bash -c impala";}
   Mod+Ctrl+W hotkey-overlay-title="Restart waybar" {spawn-sh "pkill waybar; systemctl --user restart waybar";}
   // Mod+Ctrl+X hotkey-overlay-title="Voxtype Record Toggle" {spawn "voxtype-record-toggle";}
   Mod+Ctrl+Apostrophe hotkey-overlay-title="Toggle between Floating and Tiling" { switch-focus-between-floating-and-tiling; }
   Mod+Alt+C hotkey-overlay-title="Claude AI" {spawn "google-chrome-stable" "--app=https://claude.ai/chat";}
   Mod+X hotkey-overlay-title="X" {spawn "google-chrome-stable" "--app=https://x.com";}
   Mod+Alt+K hotkey-overlay-title="REMTUI" {spawn "~/.local/bin/remtui";}
-  
+
   // Mod+Alt+Ctrl+C hotkey-overlay-title="Control Center" {spawn-sh "qs -c noctalia-shell ipc call controlCenter toggle";}
   // Mod+Alt+Ctrl+I hotkey-overlay-title="Settings" {spawn-sh "qs -c noctalia-shell ipc call settings toggle";}
 
 
-  
+
     // Keys consist of modifiers separated by + signs, followed by an XKB key name
     // in the end. To find an XKB name for a particular key, you may use a program
     // like wev.
@@ -59,9 +59,9 @@ binds {
     // shows a list of important hotkeys.
     Mod+Shift+Slash { show-hotkey-overlay; }
 
-    
+
     // Mod+Return hotkey-overlay-title="Open a Terminal: " { spawn-sh "/usr/sbin/foot --working-directory=$(cat /tmp/niri-shell-pwd-rem 2>/dev/null || $HOME) tmux new-session -A -s main"; }
-    Mod+Return hotkey-overlay-title="Open a Terminal: " { spawn-sh "kitty"; }
+    Mod+Return hotkey-overlay-title="Open a Terminal: " { spawn-sh "foot"; }
     Mod+Alt+Return hotkey-overlay-title="Open a Terminal with tmux: " { spawn-sh "foot -e tmux"; }
     // Mod+Space hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
 

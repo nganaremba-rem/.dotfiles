@@ -31,7 +31,7 @@
     // "format": "",
     "format": "",
     "tooltip": false,
-    "on-click": "rofi -show drun -theme ~/.config/rofi/launchers/type-2/style-2.rasi"
+    "on-click": "walker"
   },
   "clock": {
     "interval": 1,

@@ -113,3 +113,11 @@ vim.keymap.set('n', '<leader>cd', vim.diagnostic.open_float)
 --   end,
 --   { desc = 'Organize Imports' }
 -- )
+
+vim.keymap.set('n', '<leader>gh', '<cmd>DiffviewFileHistory %<CR>', {
+  desc = 'Git History (Current File)',
+})
+
+vim.keymap.set('n', '<leader>gH', '<cmd>DiffviewFileHistory<CR>', {
+  desc = 'Git History (Repository)',
+})

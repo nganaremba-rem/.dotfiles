@@ -1,6 +1,6 @@
 return { -- Autocompletion
   'saghen/blink.cmp',
-  event = 'VimEnter',
+  event = 'InsertEnter',
   version = '1.*',
   dependencies = {
     -- Snippet Engine
@@ -86,7 +86,9 @@ return { -- Autocompletion
     -- the rust implementation via `'prefer_rust_with_warning'`
     --
     -- See :h blink-cmp-config-fuzzy for more information
-    fuzzy = { implementation = 'lua' },
+    -- Rust fuzzy matcher: ~5x faster than the Lua fallback, downloads a
+    -- prebuilt binary automatically on first use
+    fuzzy = { implementation = 'prefer_rust_with_warning' },
 
     -- Shows a signature help window while you type arguments for a function
     signature = { enabled = true },

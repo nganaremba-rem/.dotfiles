@@ -1,3 +1,5 @@
+vim.loader.enable() -- cache compiled Lua modules to ~/.cache/nvim/luac/
+
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 vim.g.mkdp_port = '8989'

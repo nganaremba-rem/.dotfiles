@@ -83,31 +83,23 @@ require('lazy').setup({
 
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   { import = 'custom.plugins' },
-
-  checker = { enabled = true, notify = false },
-  --
-  -- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`
-  -- Or use telescope!
-  -- In normal mode type `<space>sh` then write `lazy.nvim-plugin`
-  -- you can continue same window with `<space>sr` which resumes last telescope search
 }, { ---@diagnostic disable-line: missing-fields
   ui = {
-    -- If you are using a Nerd Font: set icons to an empty table which will use the
-    -- default lazy.nvim defined Nerd Font icons, otherwise define a unicode icons table
     icons = vim.g.have_nerd_font and {} or {
-      cmd = '⌘',
-      config = '🛠',
-      event = '📅',
-      ft = '📂',
-      init = '⚙',
-      keys = '🗝',
-      plugin = '🔌',
-      runtime = '💻',
-      require = '🌙',
-      source = '📄',
-      start = '🚀',
-      task = '📌',
-      lazy = '💤 ',
+      cmd = '⌘', config = '🛠', event = '📅', ft = '📂', init = '⚙',
+      keys = '🗝', plugin = '🔌', runtime = '💻', require = '🌙',
+      source = '📄', start = '🚀', task = '📌', lazy = '💤 ',
+    },
+  },
+  -- Don't check for updates on every startup — only when you explicitly run :Lazy
+  checker = { enabled = false },
+  performance = {
+    rtp = {
+      -- Skip loading these built-ins we don't use — shaves ~5ms off startup
+      disabled_plugins = {
+        'gzip', 'matchit', 'matchparen', 'netrwPlugin',
+        'tarPlugin', 'tohtml', 'tutor', 'zipPlugin',
+      },
     },
   },
 })

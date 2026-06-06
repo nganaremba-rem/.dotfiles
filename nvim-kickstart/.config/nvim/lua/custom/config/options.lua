@@ -60,11 +60,13 @@ vim.o.smartcase = true
 -- Keep signcolumn on by default
 vim.o.signcolumn = 'yes'
 
--- Decrease update time
-vim.o.updatetime = 250
-
--- Decrease mapped sequence wait time
+-- How long before CursorHold fires and before swap is written (ms)
+vim.o.updatetime = 200
+-- How long to wait for a mapped key sequence to complete
 vim.o.timeoutlen = 300
+-- How long to wait for a terminal key code sequence (Esc, arrow keys).
+-- 0 = instant Escape response in insert/visual mode — no perceptible lag.
+vim.o.ttimeoutlen = 0
 
 -- Configure how new splits should be opened
 vim.o.splitright = true
@@ -101,8 +103,12 @@ vim.o.wrap = false
 -- Keep context lines visible around folds
 vim.o.foldlevel = 99
 
--- Faster which-key / CursorHold events
-vim.o.updatetime = 200
+-- Stop syntax/treesitter highlighting past this column — huge win on long lines
+-- (anything past 300 chars is rarely visible anyway)
+vim.o.synmaxcol = 300
+
+-- Keep context visible during horizontal scrolling
+vim.o.sidescrolloff = 8
 
 -- Show matching brackets briefly
 vim.o.showmatch = true

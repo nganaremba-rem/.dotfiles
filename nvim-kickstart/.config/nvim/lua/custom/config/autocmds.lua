@@ -1,6 +1,23 @@
 local augroup = vim.api.nvim_create_augroup
 local autocmd = vim.api.nvim_create_autocmd
 
+-- When any child process (terminal, lazygit, git, file managers) calls $EDITOR,
+-- redirect it into this running nvim via --remote instead of spawning a nested nvim.
+-- --remote-tab-wait-silent: opens in a new tab, blocks until closed, silent on error.
+autocmd('VimEnter', {
+  desc = 'Redirect $EDITOR to outer nvim via --remote for all child processes',
+  group = augroup('nvim-remote-editor', { clear = true }),
+  callback = function()
+    local server = vim.v.servername
+    if server == '' then return end
+    local editor = ('nvim --server %s --remote-tab-wait-silent'):format(server)
+    vim.env.EDITOR = editor
+    vim.env.VISUAL = editor
+    vim.env.GIT_EDITOR = editor
+    vim.env.NVIM_LISTEN_ADDRESS = server -- for tools that use the legacy var (lazygit editPreset)
+  end,
+})
+
 -- Highlight yanked text
 autocmd('TextYankPost', {
   desc = 'Highlight yanked text',
