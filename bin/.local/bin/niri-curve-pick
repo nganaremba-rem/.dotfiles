@@ -50,6 +50,45 @@ animations {
 }
 EOF
       ;;
+    "preset: barely there")
+      cat > "$ANIM_FILE" <<'EOF'
+animations {
+    workspace-switch {
+        spring damping-ratio=1.0 stiffness=3000 epsilon=0.0001
+    }
+    window-open {
+        duration-ms 40
+        curve "ease-out-expo"
+    }
+    window-close {
+        duration-ms 30
+        curve "ease-out-expo"
+    }
+    horizontal-view-movement {
+        spring damping-ratio=1.0 stiffness=3000 epsilon=0.0001
+    }
+    window-movement {
+        spring damping-ratio=1.0 stiffness=3000 epsilon=0.0001
+    }
+    window-resize {
+        spring damping-ratio=1.0 stiffness=3000 epsilon=0.0001
+    }
+    config-notification-open-close {
+        spring damping-ratio=1.0 stiffness=3000 epsilon=0.001
+    }
+    screenshot-ui-open {
+        duration-ms 30
+        curve "ease-out-expo"
+    }
+    overview-open-close {
+        spring damping-ratio=1.0 stiffness=3000 epsilon=0.0001
+    }
+    recent-windows-close {
+        spring damping-ratio=1.0 stiffness=3000 epsilon=0.001
+    }
+}
+EOF
+      ;;
     "preset: fast + smooth")
       cat > "$ANIM_FILE" <<'EOF'
 animations {
@@ -110,6 +149,7 @@ declare -A CURVES=(
 
 ALL_OPTIONS=$(printf '%s\n' \
   "preset: no animation" \
+  "preset: barely there" \
   "preset: minimal" \
   "preset: fast + smooth" \
   "${!CURVES[@]}" | sort)
