@@ -2,26 +2,127 @@
 
 ANIM_FILE="$HOME/.config/niri/animations.kdl"
 
+apply_preset() {
+  case "$1" in
+    "preset: no animation")
+      cat > "$ANIM_FILE" <<'EOF'
+animations {
+    off
+}
+EOF
+      ;;
+    "preset: minimal")
+      cat > "$ANIM_FILE" <<'EOF'
+animations {
+    workspace-switch {
+        spring damping-ratio=1.0 stiffness=1600 epsilon=0.0001
+    }
+    window-open {
+        duration-ms 80
+        curve "ease-out-expo"
+    }
+    window-close {
+        duration-ms 60
+        curve "ease-out-expo"
+    }
+    horizontal-view-movement {
+        spring damping-ratio=1.0 stiffness=1600 epsilon=0.0001
+    }
+    window-movement {
+        spring damping-ratio=1.0 stiffness=1600 epsilon=0.0001
+    }
+    window-resize {
+        spring damping-ratio=1.0 stiffness=1200 epsilon=0.0001
+    }
+    config-notification-open-close {
+        spring damping-ratio=1.0 stiffness=1200 epsilon=0.001
+    }
+    screenshot-ui-open {
+        duration-ms 60
+        curve "ease-out-expo"
+    }
+    overview-open-close {
+        spring damping-ratio=1.0 stiffness=1200 epsilon=0.0001
+    }
+    recent-windows-close {
+        spring damping-ratio=1.0 stiffness=1400 epsilon=0.001
+    }
+}
+EOF
+      ;;
+    "preset: fast + smooth")
+      cat > "$ANIM_FILE" <<'EOF'
+animations {
+    workspace-switch {
+        spring damping-ratio=1.0 stiffness=1600 epsilon=0.0001
+    }
+    window-open {
+        duration-ms 180
+        curve "ease-out-expo"
+    }
+    window-close {
+        duration-ms 120
+        curve "ease-out-expo"
+    }
+    horizontal-view-movement {
+        spring damping-ratio=1.0 stiffness=1600 epsilon=0.0001
+    }
+    window-movement {
+        spring damping-ratio=1.0 stiffness=1600 epsilon=0.0001
+    }
+    window-resize {
+        spring damping-ratio=1.0 stiffness=1200 epsilon=0.0001
+    }
+    config-notification-open-close {
+        spring damping-ratio=0.6 stiffness=1200 epsilon=0.001
+    }
+    exit-confirmation-open-close {
+        spring damping-ratio=0.7 stiffness=600 epsilon=0.01
+    }
+    screenshot-ui-open {
+        duration-ms 120
+        curve "ease-out-expo"
+    }
+    overview-open-close {
+        spring damping-ratio=1.0 stiffness=1200 epsilon=0.0001
+    }
+    recent-windows-close {
+        spring damping-ratio=1.0 stiffness=1400 epsilon=0.001
+    }
+}
+EOF
+      ;;
+  esac
+}
+
 declare -A CURVES=(
-  ["ease-out-quad"]='curve "ease-out-quad"'
-  ["ease-out-cubic"]='curve "ease-out-cubic"'
-  ["ease-out-expo"]='curve "ease-out-expo"'
-  ["linear"]='curve "linear"'
-  ["cubic-bezier: current (smooth fast)"]='curve "cubic-bezier" 0.05 0.7 0.1 1.0'
-  ["cubic-bezier: iOS/macOS spring"]='curve "cubic-bezier" 0.34 1.56 0.64 1.0'
-  ["cubic-bezier: Material Design"]='curve "cubic-bezier" 0.2 0.0 0.0 1.0'
-  ["cubic-bezier: bouncy overshoot"]='curve "cubic-bezier" 0.68 -0.55 0.27 1.55'
-  ["cubic-bezier: snappy pop"]='curve "cubic-bezier" 0.0 0.9 0.1 1.0'
-  ["cubic-bezier: soft land"]='curve "cubic-bezier" 0.25 0.46 0.45 0.94'
+  ["curve: ease-out-quad"]='curve "ease-out-quad"'
+  ["curve: ease-out-cubic"]='curve "ease-out-cubic"'
+  ["curve: ease-out-expo"]='curve "ease-out-expo"'
+  ["curve: linear"]='curve "linear"'
+  ["curve: cubic-bezier smooth fast"]='curve "cubic-bezier" 0.05 0.7 0.1 1.0'
+  ["curve: cubic-bezier iOS spring"]='curve "cubic-bezier" 0.34 1.56 0.64 1.0'
+  ["curve: cubic-bezier Material Design"]='curve "cubic-bezier" 0.2 0.0 0.0 1.0'
+  ["curve: cubic-bezier bouncy overshoot"]='curve "cubic-bezier" 0.68 -0.55 0.27 1.55'
+  ["curve: cubic-bezier snappy pop"]='curve "cubic-bezier" 0.0 0.9 0.1 1.0'
+  ["curve: cubic-bezier soft land"]='curve "cubic-bezier" 0.25 0.46 0.45 0.94'
 )
 
-CHOICE=$(printf '%s\n' "${!CURVES[@]}" | sort | walker -d -p "window-open curve")
+ALL_OPTIONS=$(printf '%s\n' \
+  "preset: no animation" \
+  "preset: minimal" \
+  "preset: fast + smooth" \
+  "${!CURVES[@]}" | sort)
+
+CHOICE=$(printf '%s\n' "$ALL_OPTIONS" | walker -d -p "niri animations")
 
 [[ -z "$CHOICE" ]] && exit 0
 
-CURVE_VALUE="${CURVES[$CHOICE]}"
+if [[ "$CHOICE" == preset:* ]]; then
+  apply_preset "$CHOICE"
+else
+  CURVE_VALUE="${CURVES[$CHOICE]}"
+  sed -i "/window-open/,/}/ s|.*curve.*|        $CURVE_VALUE|" "$ANIM_FILE"
+fi
 
-# Replace the curve line inside the window-open block only
-sed -i "/window-open/,/}/ s|.*curve.*|        $CURVE_VALUE|" "$ANIM_FILE"
-
-notify-send "niri curve" "$CHOICE" --expire-time=2000
+notify-send "niri animations" "$CHOICE" --expire-time=2000
