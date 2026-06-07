@@ -31,7 +31,8 @@ window-rule {
 
 
 window-rule {
-  match app-id="^foot$"
+  // Matches both standalone foot ("foot") and server windows ("footclient")
+  match app-id="^foot(client)?$"
 
   background-effect {
     blur true
@@ -73,6 +74,14 @@ window-rule {
 //     }
 // }
 
+
+layer-rule {
+    match namespace="wlogout"
+    background-effect {
+        blur true
+        xray false
+    }
+}
 
 layer-rule {
     match namespace="^rofi$"

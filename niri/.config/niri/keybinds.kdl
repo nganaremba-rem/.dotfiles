@@ -1,6 +1,6 @@
 binds {
   Mod+Apostrophe hotkey-overlay-title="Scratchpad terminal" {
-    spawn-sh "kitty --class=scratchpad";
+    spawn-sh "footclient --class=scratchpad";
   }
   Mod+Shift+Return hotkey-overlay-title="Rofi in drun mode" {spawn-sh "rofi -show drun";}
   Mod+E hotkey-overlay-title="Open File Manager" {spawn "nautilus";}
@@ -21,9 +21,9 @@ binds {
   // Mod+Alt+Space hotkey-overlay-title="Omarchy Menu" {spawn "~/.local/share/omarchy/bin/omarchy-menu";}
   Mod+Alt+Space hotkey-overlay-title="Show open windows" {spawn-sh "rofi -show window -theme ~/.config/rofi/launchers/type-2/style-2.rasi";}
   Ctrl+Mod+Alt+L hotkey-overlay-title="Suspend" {spawn "systemctl" "suspend";}
-  Mod+Shift+T hotkey-overlay-title="Btop" {spawn "~/.local/bin/kitty" "-e" "bash" "-c" "'btop'";}
-  Mod+Ctrl+Alt+V hotkey-overlay-title="Sound" {spawn "foot" "-e" "bash" "-c" "wiremix";}
-  Mod+V hotkey-overlay-title="Clipboard History" {spawn-sh "kitty ~/.config/cliphist/cliphist";}
+  Mod+Shift+T hotkey-overlay-title="Btop" {spawn "footclient" "-e" "btop";}
+  Mod+Ctrl+Alt+V hotkey-overlay-title="Sound" {spawn "footclient" "-e" "wiremix";}
+  Mod+V hotkey-overlay-title="Clipboard History" {spawn-sh "footclient ~/.config/cliphist/cliphist";}
   // Mod+Ctrl+E hotkey-overlay-title="Emoji picker" {spawn "~/.local/bin/emoji-picker";}
   // Mod+Ctrl+E hotkey-overlay-title="Emoji picker" {spawn-sh "qs -c noctalia-shell ipc call launcher emoji";}
   Mod+Ctrl+E hotkey-overlay-title="Emoji picker" {spawn-sh "rofi -show emoji -theme ~/.config/rofi/launchers/type-2/style-2.rasi";}
@@ -32,7 +32,10 @@ binds {
   Mod+Ctrl+Alt+B hotkey-overlay-title="Wallpaper picker" {spawn-sh "~/.config/wallpaper/set-wallpaper.sh";}
   Mod+Ctrl+Alt+N hotkey-overlay-title="Notification Center" {spawn "swaync-client" "-t" "-sw";}
   Mod+Slash hotkey-overlay-title="Launch Ghostty" {spawn "ghostty";}
-  Mod+Ctrl+Alt+W hotkey-overlay-title="Launch WiFi" {spawn-sh "rfkill unblock wifi && foot -e bash -c impala";}
+  Mod+Ctrl+Alt+W hotkey-overlay-title="Launch WiFi" {spawn-sh "rfkill unblock wifi && footclient -e wlctl";}
+  // Server reads foot.ini only at startup, so applying config edits = restart.
+  // This CLOSES all footclient windows (standalone `foot` windows are unaffected).
+  Mod+Ctrl+Alt+F hotkey-overlay-title="Restart foot server (apply config — closes windows)" {spawn-sh "systemctl --user restart foot-server.service";}
   Mod+Ctrl+W hotkey-overlay-title="Toggle waybar" {spawn "toggle-waybar";}
   Mod+Ctrl+Alt+A hotkey-overlay-title="Animation curve picker" {spawn "niri-curve-pick";}
   // Mod+Ctrl+X hotkey-overlay-title="Voxtype Record Toggle" {spawn "voxtype-record-toggle";}
@@ -62,8 +65,8 @@ binds {
 
 
     // Mod+Return hotkey-overlay-title="Open a Terminal: " { spawn-sh "/usr/sbin/foot --working-directory=$(cat /tmp/niri-shell-pwd-rem 2>/dev/null || $HOME) tmux new-session -A -s main"; }
-    Mod+Return hotkey-overlay-title="Open a Terminal: " { spawn-sh "foot"; }
-    Mod+Alt+Return hotkey-overlay-title="Open a Terminal with tmux: " { spawn-sh "foot -e tmux"; }
+    Mod+Return hotkey-overlay-title="Open a Terminal: " { spawn-sh "footclient"; }
+    Mod+Alt+Return hotkey-overlay-title="Open a Terminal with tmux: " { spawn-sh "footclient -e tmux"; }
     // Mod+Space hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
 
     // Use spawn-sh to run a shell command. Do this if you need pipes, multiple commands, etc.

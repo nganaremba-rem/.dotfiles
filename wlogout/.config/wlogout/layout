@@ -30,7 +30,7 @@
 }
 {
     "label" : "hibernate",
-    "action" : "systemctl hibernate (h)",
+    "action" : "systemctl hibernate",
     "text" : "Hibernate (h)",
     "keybind" : "h"
 }

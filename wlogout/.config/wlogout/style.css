@@ -9,7 +9,7 @@
 }
 
 window {
-  font-size: 24pt;
+  font-size: 24px;
   color: @foreground; /* text */
   background-color: rgba(30, 30, 46, 0.8);
 }
@@ -24,7 +24,7 @@ button {
     all 0.3s cubic-bezier(0.55, 0, 0.28, 1.682),
     box-shadow 0.2s ease-in-out,
     background-color 0.2s ease-in-out;
-  border-radius: 80px;
+  border-radius: 60px;
   border: 0px;
   outline-style: none;
   margin: 10px;
@@ -39,15 +39,16 @@ button:focus {
 button:hover {
   background-color: transparent;
   /* color: @color13; */
-  background-size: 25%;
+  background-size: 15%;
   /* margin: -30px; */
-  border-radius: 80px;
+  border-radius: 60px;
   outline-style: none;
 }
 
 /* Adjust the size of the icon or content inside the button */
 button span {
   font-size: 1.2em; /* Increase the font size */
+  margin-top: 100px;
 }
 
 #lock {

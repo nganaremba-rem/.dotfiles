@@ -1,7 +1,10 @@
 {
   "layer": "top",
   "position": "top",
+  // "output": "",
   "height": 26,
+  // "mode": "dock",
+  "reload_style_on_change": true,
   "margin-top": 6,
   "margin-left": 10,
   "margin-right": 10,
@@ -37,7 +40,28 @@
     "interval": 1,
     "format": "{:%H:%M %a %d %b}",
     "on-click": "gsimplecal",
-    "tooltip": false
+    "tooltip": true,
+    "tooltip-format": "<tt><span size='x-large'>{calendar}</span></tt>",
+    "calendar": {
+                    "mode"          : "year",
+                    "mode-mon-col"  : 3,
+                    "weeks-pos"     : "right",
+                    "on-scroll"     : 1,
+                    "format": {
+                              "months":     "<span color='#ffead3'><b>{}</b></span>",
+                              "days":       "<span color='#ecc6d9'><b>{}</b></span>",
+                              "weeks":      "<span color='#99ffdd'><b>W{}</b></span>",
+                              "weekdays":   "<span color='#ffcc66'><b>{}</b></span>",
+                              "today":      "<span background='#ff6699' color='#1c222a'><b>{}</b></span>"
+                              }
+                    },
+        "actions":  {
+                    "on-click-right": "mode",
+                    "on-click-forward": "tz_up",
+                    "on-click-backward": "tz_down",
+                    "on-scroll-up": "shift_up",
+                    "on-scroll-down": "shift_down"
+                    }
   },
   "custom/weather": {
     "format": "󰖙",
@@ -52,34 +76,41 @@
   //   "on-click": "networkmanager_dmenu"
   // },
   "network": {
-    "format-wifi": " {ipaddr} ▾ {bandwidthDownBytes} ▴ {bandwidthUpBytes}",
-    "format-ethernet": "󰈀 {ipaddr}/{cidr} ▾ {bandwidthDownBytes} ▴ {bandwidthUpBytes}",
+    "format-wifi": " {ipaddr} ⏬ {bandwidthDownBytes} ⏫ {bandwidthUpBytes}",
+    "format-ethernet": "󰈀 {ipaddr}/{cidr} ⏬ {bandwidthDownBytes} ⏫ {bandwidthUpBytes}",
     "format-linked": "󰈀",
     "format-disconnected": "󰖪",
-    "format-alt": "{ifname} {ipaddr}/{cidr} ▾ {bandwidthDownBytes} ▴ {bandwidthUpBytes}",
+    "format-alt": "{ifname} {ipaddr}/{cidr} ⏬ {bandwidthDownBytes} ⏫ {bandwidthUpBytes}",
     "speed-text-basis": 1024,
     "format-icons": {
       "wired": "wired",
       "wireless": "wifi"
     },
     // "on-click": "networkmanager_dmenu"
-    // "on-click": "kitty impala"
-    // "on-click": "kitty gazelle"
-    "on-click": "kitty wlctl"
+    // "on-click": "footclient -e impala"
+    // "on-click": "footclient -e gazelle"
+    "on-click": "footclient -e wlctl"
   },
   "pulseaudio": {
     "format": " {volume}%",
     "format-muted": "󰝟 Muted",
-    "on-click": "kitty wiremix"
+    "on-click": "footclient -e wiremix"
   },
   "battery": {
-    "format": " {capacity}%"
+    "format": "{power}W |  {capacity}%",
+    "states": {
+        "warning": 30,
+        "critical": 15,
+    },
+    "format-icons": ["", "", "", "", ""],
+    "format-charging": "{power}W | ⚡  {capacity}%",
+    "format-plugged": "{power}W | ⚡  {capacity}%"
   },
   "bluetooth": {
     "format": "",
     "format-connected": " {device_battery_percentage}%",
     "tooltip": true,
-    "on-click": "kitty bluetui"
+    "on-click": "footclient -e bluetui"
   },
   "custom/mic": {
     "exec": "~/.config/waybar/scripts/mic-status.sh",
