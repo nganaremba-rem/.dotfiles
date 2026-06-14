@@ -51,6 +51,16 @@ autocmd('BufWritePre', {
   end,
 })
 
+-- Make `autoread` reliable: check for external changes when refocusing nvim
+-- or entering a buffer, so files reload instead of going stale.
+autocmd({ 'FocusGained', 'BufEnter', 'TermClose', 'TermLeave' }, {
+  desc = 'Reload files changed outside nvim',
+  group = augroup('auto-checktime', { clear = true }),
+  callback = function()
+    if vim.fn.getcmdwintype() == '' then vim.cmd 'checktime' end
+  end,
+})
+
 -- Auto-resize splits when terminal is resized
 autocmd('VimResized', {
   desc = 'Auto-resize splits',

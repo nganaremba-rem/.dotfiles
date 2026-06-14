@@ -154,7 +154,7 @@ ALL_OPTIONS=$(printf '%s\n' \
   "preset: fast + smooth" \
   "${!CURVES[@]}" | sort)
 
-CHOICE=$(printf '%s\n' "$ALL_OPTIONS" | walker -d -p "niri animations")
+CHOICE=$(printf '%s\n' "$ALL_OPTIONS" | rofi -dmenu -i -p "niri animations")
 
 [[ -z "$CHOICE" ]] && exit 0
 
@@ -162,7 +162,11 @@ if [[ "$CHOICE" == preset:* ]]; then
   apply_preset "$CHOICE"
 else
   CURVE_VALUE="${CURVES[$CHOICE]}"
-  sed -i "/window-open/,/}/ s|.*curve.*|        $CURVE_VALUE|" "$ANIM_FILE"
+  # Each pick fully overwrites the previous animation: always start from a
+  # clean base preset, then apply the chosen curve to every curve line so the
+  # result is deterministic regardless of what was selected before.
+  apply_preset "preset: fast + smooth"
+  sed -i "s|.*curve.*|        $CURVE_VALUE|" "$ANIM_FILE"
 fi
 
 notify-send "niri animations" "$CHOICE" --expire-time=2000

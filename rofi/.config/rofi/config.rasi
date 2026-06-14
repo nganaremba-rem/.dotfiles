@@ -183,4 +183,4 @@ configuration {
 
 //@theme "/usr/share/rofi/themes/material.rasi"
 
-@theme "/home/rem/.local/share/rofi/themes/KooL_LonerOrZ.rasi"
+@theme "/home/rem/.config/rofi/launchers/type-2/style-2.rasi"

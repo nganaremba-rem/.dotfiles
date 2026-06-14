@@ -34,17 +34,18 @@ return {
     -- 🎯 MODERN highlight (transparent + clean)
     local hl = vim.api.nvim_set_hl
 
-    -- lowercase marks (a, b, c)
-    hl(0, 'MarkSignHL', { fg = '#a6e3a1', bg = 'none' })
-    hl(0, 'MarkSignNumHL', { fg = '#a6e3a1', bg = 'none' })
+    -- Tokyonight palette (matches the active colorscheme)
+    -- lowercase marks (a, b, c) — green
+    hl(0, 'MarkSignHL', { fg = '#9ece6a', bg = 'none' })
+    hl(0, 'MarkSignNumHL', { fg = '#9ece6a', bg = 'none' })
 
-    -- uppercase marks (A, B, C)
-    hl(0, 'MarkSignHLUpper', { fg = '#f9e2af', bg = 'none' })
-    hl(0, 'MarkSignNumHLUpper', { fg = '#f9e2af', bg = 'none' })
+    -- uppercase marks (A, B, C) — yellow/orange
+    hl(0, 'MarkSignHLUpper', { fg = '#e0af68', bg = 'none' })
+    hl(0, 'MarkSignNumHLUpper', { fg = '#e0af68', bg = 'none' })
 
-    -- built-in marks (., ^, etc.)
-    hl(0, 'MarkSignHLBuiltin', { fg = '#89b4fa', bg = 'none' })
-    hl(0, 'MarkSignNumHLBuiltin', { fg = '#89b4fa', bg = 'none' })
+    -- built-in marks (., ^, etc.) — blue
+    hl(0, 'MarkSignHLBuiltin', { fg = '#7aa2f7', bg = 'none' })
+    hl(0, 'MarkSignNumHLBuiltin', { fg = '#7aa2f7', bg = 'none' })
 
     -- 🔥 FULL transparency (important for you)
     hl(0, 'SignColumn', { bg = 'none' })

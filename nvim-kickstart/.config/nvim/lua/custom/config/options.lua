@@ -1,12 +1,30 @@
+-- Preserve inode on write so file-watchers (Vite HMR, etc.) keep working
 vim.opt.backupcopy = 'yes'
+
+-- Encoding detection order. utf-8 MUST come before the Japanese encodings:
+-- euc-jp/cp932/sjis accept almost any byte sequence, so listing them first
+-- makes nvim misdetect plain UTF-8 (e.g. .env) as euc-jp and write it back
+-- [converted], which desyncs the buffer and triggers the spurious
+-- "file changed since reading it!!!" prompt. utf-8-first fixes that; the
+-- Japanese encodings stay as fallbacks for genuinely non-UTF-8 files.
 vim.opt.fileencodings = {
-  'ucs-bom', -- → UTF files with BOM
+  'ucs-bom', -- UTF files with BOM
+  'utf-8', -- normal UTF-8 (try first; valid UTF-8 is unambiguous)
+  'cp932', -- common Japanese Windows encoding
   'euc-jp', -- older Japanese encoding
-  'utf-8', -- normal UTF-8
-  'cp932', -- very common Japanese Windows encoding
   'sjis', -- Shift-JIS
-  'latin1', -- fallback if all else fails
+  'latin1', -- last-resort fallback
 }
+
+-- Keep write-backup files OUT of the project dir (no more .env.local~ clutter
+-- in neo-tree). Backups go to a central state dir; with backup=off (default)
+-- they're deleted after a successful write anyway.
+vim.opt.backupdir = vim.fn.stdpath 'state' .. '/backup//'
+vim.fn.mkdir(vim.fn.stdpath 'state' .. '/backup', 'p')
+
+-- Auto-reload files changed on disk (and surface true external edits) instead
+-- of silently going stale.
+vim.opt.autoread = true
 
 vim.opt.swapfile = false
 -- Set <space> as the leader key

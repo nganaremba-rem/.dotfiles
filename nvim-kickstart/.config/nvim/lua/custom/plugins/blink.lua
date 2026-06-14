@@ -65,8 +65,10 @@ return { -- Autocompletion
     },
 
     completion = {
+      -- Ghost text is OFF here: the AI inline provider (see custom/plugins/ai/
+      -- completion.lua) owns ghost text. Two ghost-text sources would collide.
       ghost_text = {
-        enabled = true,
+        enabled = false,
       },
       -- By default, you may press `<c-space>` to show the documentation.
       -- Optionally, set `auto_show = true` to show the documentation after a delay.

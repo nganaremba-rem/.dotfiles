@@ -34,7 +34,7 @@
     // "format": "",
     "format": "",
     "tooltip": false,
-    "on-click": "walker"
+    "on-click": "rofi -show drun"
   },
   "clock": {
     "interval": 1,
@@ -97,14 +97,14 @@
     "on-click": "footclient -e wiremix"
   },
   "battery": {
-    "format": "{power}W |  {capacity}%",
+    "format": " {capacity}%",
     "states": {
         "warning": 30,
         "critical": 15,
     },
     "format-icons": ["", "", "", "", ""],
-    "format-charging": "{power}W | ⚡  {capacity}%",
-    "format-plugged": "{power}W | ⚡  {capacity}%"
+    "format-charging": "⚡  {capacity}%",
+    "format-plugged": "⚡  {capacity}%"
   },
   "bluetooth": {
     "format": "",

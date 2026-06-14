@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+#
+## Rofi : Web search (replaces elephant-websearch)
+#
+## Type a query and press Enter for DuckDuckGo, or prefix with an
+## engine keyword: "g " Google, "yt " YouTube, "gh " GitHub, "wiki " ArchWiki
+
+input=$(rofi -dmenu -theme ~/.config/rofi/config-search.rasi -p "🔎 Search")
+[ -z "$input" ] && exit 0
+
+read -r prefix rest <<< "$input"
+case "$prefix" in
+    g)    base="https://www.google.com/search?q=";              query="$rest" ;;
+    yt)   base="https://www.youtube.com/results?search_query="; query="$rest" ;;
+    gh)   base="https://github.com/search?q=";                  query="$rest" ;;
+    wiki) base="https://wiki.archlinux.org/index.php?search=";  query="$rest" ;;
+    *)    base="https://duckduckgo.com/?q=";                    query="$input" ;;
+esac
+
+encoded=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "$query")
+xdg-open "${base}${encoded}"

@@ -2,6 +2,14 @@
 // Find more information on the wiki:
 // https://yalter.github.io/niri/Configuration:-Window-Rules
 
+
+// Global defaults for all windows
+window-rule {
+    geometry-corner-radius 12
+    clip-to-geometry true
+}
+
+
 // Work around WezTerm's initial configure bug
 // by setting an empty default-column-width.
 window-rule {
@@ -29,18 +37,19 @@ window-rule {
   }
 }
 
-
 window-rule {
-  // Matches both standalone foot ("foot") and server windows ("footclient")
   match app-id="^foot(client)?$"
-
   background-effect {
     blur true
   }
 }
 
-
-
+window-rule {
+  match app-id="^kitty$"
+  background-effect {
+    blur true
+  }
+}
 
 // window-rule {
 //   match app-id=r#"^kitty$"#
@@ -48,13 +57,6 @@ window-rule {
 //   default-column-width { fixed 980; }
 //   default-window-height { fixed 900; }
 // }
-
-window-rule {
-    match app-id="^kitty$"
-    background-effect {
-        blur true
-    }
-}
 
 
 
@@ -93,15 +95,6 @@ layer-rule {
 }
 
 layer-rule {
-    match namespace="^walker$"
-    match layer="overlay"
-    background-effect {
-        blur false
-        xray false
-    }
-}
-
-layer-rule {
     match namespace="swaync-notification-window"
     background-effect {
         blur false
@@ -129,6 +122,20 @@ layer-rule {
 layer-rule {
   match namespace="^awww-daemon$"
   place-within-backdrop true
+}
+
+layer-rule {
+    match namespace="^translate-overlay$"
+    background-effect {
+        blur false
+    }
+}
+
+layer-rule {
+    match namespace="^selection$"
+    background-effect {
+        blur false
+    }
 }
 
 
@@ -169,12 +176,6 @@ window-rule {
     // block-out-from "screencast"
 }
 
-// Example: enable rounded corners for all windows.
-// (This example rule is commented out with a "/-" in front.)
-window-rule {
-    geometry-corner-radius 12
-    clip-to-geometry true
-}
 
 
 // set the overview wallapaper on the backdrop
@@ -182,4 +183,5 @@ layer-rule {
   match namespace="^noctalia-overview"
   place-within-backdrop true
 }
+
 

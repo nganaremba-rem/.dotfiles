@@ -12,47 +12,25 @@ return { -- Autoformat
   },
   ---@module 'conform'
   ---@type conform.setupOpts
-  opts = {
-    notify_on_error = false,
-    format_on_save = function(bufnr)
-      -- You can specify filetypes to autoformat on save here:
-      local enabled_filetypes = {
-        lua = true,
-        python = true,
-        rust = true,
-        go = true,
-        javascript = true,
-        typescript = true,
-        typescriptreact = true,
-        javascriptreact = true,
-        dart = true,
-        c = true,
-        cpp = true,
-      }
-      if enabled_filetypes[vim.bo[bufnr].filetype] then
-        return { timeout_ms = 500 }
-      else
+  opts = function()
+    local lang = require 'custom.lang'
+    -- Format-on-save for every filetype that declares a formatter in the
+    -- registry — one derived list, nothing to maintain by hand.
+    local format_on_save_fts = lang.format_on_save_fts()
+    return {
+      notify_on_error = false,
+      format_on_save = function(bufnr)
+        if format_on_save_fts[vim.bo[bufnr].filetype] then
+          return { timeout_ms = 500 }
+        end
         return nil
-      end
-    end,
-    default_format_opts = {
-      lsp_format = 'fallback', -- Use external formatters if configured below, otherwise use LSP formatting. Set to `false` to disable LSP formatting entirely.
-    },
-    -- You can also specify external formatters in here.
-    formatters_by_ft = {
-      rust = { 'rustfmt' },
-      lua = { 'stylua' },
-      -- Conform can also run multiple formatters sequentially
-      python = { 'ruff_format', 'isort', 'black', stop_after_first = true },
-      --
-      -- You can use 'stop_after_first' to run the first available formatter from the list
-      javascript = { 'prettierd', 'prettier', stop_after_first = true },
-      javascriptreact = { 'prettierd', 'prettier', stop_after_first = true },
-      typescript = { 'prettierd', 'prettier', stop_after_first = true },
-      typescriptreact = { 'prettierd', 'prettier', stop_after_first = true },
-      dart = { 'dart_format' },
-      c = { 'clang_format' },
-      cpp = { 'clang_format' },
-    },
-  },
+      end,
+      default_format_opts = {
+        -- Use registry formatters when present, otherwise fall back to the LSP.
+        lsp_format = 'fallback',
+      },
+      -- Formatters per filetype come straight from the language registry.
+      formatters_by_ft = lang.formatters_by_ft(),
+    }
+  end,
 }

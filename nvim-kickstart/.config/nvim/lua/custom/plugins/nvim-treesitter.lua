@@ -5,8 +5,10 @@ return { -- Highlight, edit, and navigate code
   branch = 'main',
   -- [[ Configure Treesitter ]] See `:help nvim-treesitter-intro`
   config = function()
-    -- ensure basic parser are installed
-    local parsers = { 'javascript', 'typescript', 'tsx', 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' }
+    -- Editor-essential parsers (not tied to any one language) + every parser the
+    -- language registry asks for. New languages add parsers via the registry only.
+    local parsers = { 'diff', 'query', 'vim', 'vimdoc', 'regex' }
+    vim.list_extend(parsers, require('custom.lang').treesitter_ensure())
     require('nvim-treesitter').install(parsers)
 
     ---@param buf integer

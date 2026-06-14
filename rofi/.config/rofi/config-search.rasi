@@ -1,25 +1,62 @@
-/* ---- 💫 https://github.com/JaKooLit 💫 ---- */
-/* Rofi Config for Google Search) */
+/* ---- Web search — centered spotlight-style search bar ---- */
+/* Self-contained theme (no inherited chain) — Catppuccin palette */
 
-@import "~/.config/rofi/config.rasi"  
+* {
+    bg:        #1E1D2FEE;
+    bg-alt:    #282839FF;
+    fg:        #D9E0EEFF;
+    fg-muted:  #9399B2FF;
+    accent:    #7AA2F7FF;
 
-/* ---- Window ---- */
-window {
-	width: 40%;
-	//orientation: horizontal;
-	height: inherit;
-    y-offset: 10px;
-    location: north;
-    children: [ "entry", "message" ];
-    border: 2px;
-    border-color: white/25%;
+    font: "CaskaydiaMono Nerd Font Propo 12";
 }
 
-/* ---- Entry ---- */ 
+window {
+    location:        center;
+    anchor:          center;
+    x-offset:        0px;
+    y-offset:        -200px;
+
+    width:           560px;
+    height:          70px;
+
+    transparency:    "real";
+    background-color: @bg;
+    border:          2px;
+    border-radius:   18px;
+    border-color:    @accent;
+
+    children:        [ "mainbox" ];
+}
+
+mainbox {
+    background-color: transparent;
+    children:         [ "inputbar" ];
+    padding:          0px;
+}
+
+inputbar {
+    background-color: transparent;
+    text-color:       @fg;
+    expand:           true;
+    spacing:          12px;
+    padding:          16px 22px;
+    children:         [ "prompt", "entry" ];
+}
+
+prompt {
+    background-color: transparent;
+    text-color:       @accent;
+    font:             "CaskaydiaMono Nerd Font Propo 13";
+    vertical-align:   0.5;
+}
+
 entry {
-	expand: true;
-	placeholder: " 🔎 Google Search";
-	horizontal-align: 0.5;
-	padding: 15px;
-	border-radius: inherit;
+    background-color: transparent;
+    text-color:       @fg;
+    placeholder:      "Search the web — \"g \" Google · \"yt \" YouTube · \"gh \" GitHub · \"wiki \" ArchWiki";
+    placeholder-color: @fg-muted;
+    cursor:           text;
+    vertical-align:   0.5;
+    expand:           true;
 }

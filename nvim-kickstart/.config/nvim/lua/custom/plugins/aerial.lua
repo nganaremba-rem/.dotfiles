@@ -5,7 +5,8 @@ return {
     'nvim-tree/nvim-web-devicons',
   },
   keys = {
-    { '<leader>a',  '<cmd>AerialToggle!<cr>', desc = 'Toggle code outline (Aerial)' },
+    -- Moved off <leader>a to avoid colliding with avante.nvim's <leader>a… group.
+    { '<leader>cs', '<cmd>AerialToggle!<cr>', desc = 'Toggle code [s]ymbols outline (Aerial)' },
     { '[[',         '<cmd>AerialPrev<cr>',    desc = 'Prev symbol' },
     { ']]',         '<cmd>AerialNext<cr>',    desc = 'Next symbol' },
     { '[A',         '<cmd>AerialPrevUp<cr>',  desc = 'Prev symbol (up a level)' },
