@@ -1,0 +1,2 @@
+# Secrets — never commit real keys/tokens. Track only the .example template.
+zsh/.config/zsh/secrets.zsh
