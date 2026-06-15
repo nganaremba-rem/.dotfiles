@@ -16,6 +16,7 @@ binds {
   Mod+Alt+H hotkey-overlay-title="Hotstar" {spawn "google-chrome-stable" "--app=https://hotstar.com";}
   Mod+Ctrl+N hotkey-overlay-title="Night light" {spawn "~/bin/arch/toggle-gammastep";}
   Mod+Delete hotkey-overlay-title="Power Menu" {spawn "wlogout";}
+  Mod+Alt+L hotkey-overlay-title="Lock screen (hyprlock)" {spawn-sh "pgrep -x hyprlock >/dev/null || hyprlock";}
   // Mod+Space hotkey-overlay-title="Launcher" {spawn "fuzzel";}
   // Mod+Space hotkey-overlay-title="Noctalia launcher" {spawn-sh "qs -c noctalia-shell ipc call launcher toggle";}
   Mod+Space hotkey-overlay-title="Rofi launcher" {spawn-sh "rofi -show drun";}
