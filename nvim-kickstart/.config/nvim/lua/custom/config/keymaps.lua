@@ -6,6 +6,11 @@ local map = vim.keymap.set
 --  See `:help hlsearch`
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
+-- Soft-wrap lines
+map('n', '<Leader>uw', ':set wrap!<CR>', { noremap = true, silent = true })
+-- Breakindent
+map('n', '<Leader>bi', ':set breakindent!<CR>', { noremap = true, silent = true })
+
 -- Diagnostic Config & Keymaps
 -- See :help vim.diagnostic.Opts
 vim.diagnostic.config {

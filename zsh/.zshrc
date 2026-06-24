@@ -360,3 +360,6 @@ x() {
 # ── zoxide (initialized LAST, on purpose — see note in the eval-cache section) ─
 _eval_cache zoxide zoxide init zsh --cmd cd
 
+
+# nub
+export PATH="$HOME/.nub/bin:$PATH"
