@@ -13,7 +13,7 @@ if [[ -z "$_NITCH_SHOWN" ]]; then
 fi
 
 # ── Environment ──────────────────────────────────────────────────────────────
-export EDITOR=nvim  VISUAL=nvim  SUDO_EDITOR=/usr/bin/nvim
+export EDITOR=nvim VISUAL=nvim SUDO_EDITOR=/usr/bin/nvim
 # Let each terminal set its own TERM (foot=foot, kitty=xterm-kitty) so neovim
 # gets full capability info. Fall back only when the terminal hasn't set one.
 [[ -z "$TERM" || "$TERM" == "dumb" ]] && export TERM=xterm-256color
@@ -99,15 +99,16 @@ zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 zstyle ':completion:*:descriptions' format '%F{green}── %d ──%f'
-zstyle ':completion:*:warnings'     format '%F{red}no matches%f'
-zstyle ':completion::complete:*'    use-cache yes
-zstyle ':completion::complete:*'    cache-path "$HOME/.zsh/cache"
-zstyle ':fzf-tab:complete:cd:*'     fzf-preview 'eza --tree --icons --color=always $realpath 2>/dev/null | head -20'
-zstyle ':fzf-tab:*'                 switch-group '<' '>'
+zstyle ':completion:*:warnings' format '%F{red}no matches%f'
+zstyle ':completion::complete:*' use-cache yes
+zstyle ':completion::complete:*' cache-path "$HOME/.zsh/cache"
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza --tree --icons --color=always $realpath 2>/dev/null | head -20'
+zstyle ':fzf-tab:*' switch-group '<' '>'
 
 # ── Zinit ────────────────────────────────────────────────────────────────────
 source "$HOME/.local/share/zinit/zinit.git/zinit.zsh"
-autoload -Uz _zinit; (( ${+_comps} )) && _comps[zinit]=_zinit
+autoload -Uz _zinit
+((${+_comps})) && _comps[zinit]=_zinit
 
 ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 ZSH_AUTOSUGGEST_USE_ASYNC=1
@@ -122,40 +123,9 @@ zinit lucid wait for \
     done
     unset k
   ' \
-    zdharma-continuum/fast-syntax-highlighting \
+  zdharma-continuum/fast-syntax-highlighting \
   zsh-users/zsh-autosuggestions \
   Aloxaf/fzf-tab
-
-# ── Lazy loaders ─────────────────────────────────────────────────────────────
-# fnm — fast Node version manager; stubs initialize on first use
-FNM_PATH="$HOME/.local/share/fnm"
-_fnm_init() {
-  unset -f fnm node npm npx pnpm yarn corepack
-  [[ -x "$FNM_PATH/fnm" ]] && export PATH="$FNM_PATH:$PATH"
-  eval "$(command fnm env --use-on-cd --shell zsh 2>/dev/null)"
-}
-fnm()      { _fnm_init; fnm      "$@"; }
-node()     { _fnm_init; node     "$@"; }
-npm()      { _fnm_init; npm      "$@"; }
-npx()      { _fnm_init; npx      "$@"; }
-pnpm()     { _fnm_init; pnpm     "$@"; }
-yarn()     { _fnm_init; yarn     "$@"; }
-corepack() { _fnm_init; corepack "$@"; }
-
-# Make `--use-on-cd` actually work despite lazy-loading. The stubs above only
-# fire when you *run* node/npm — so entering a project with .nvmrc/.node-version
-# wouldn't auto-switch. This bootstrap inits fnm (which installs fnm's own chpwd
-# hook) the first time you're in a Node-versioned dir, switches immediately, then
-# removes itself so fnm's native hook takes over.
-autoload -Uz add-zsh-hook
-_fnm_autoload() {
-  [[ -f .nvmrc || -f .node-version ]] || return
-  _fnm_init
-  command -v fnm >/dev/null && fnm use 2>/dev/null
-  add-zsh-hook -d chpwd _fnm_autoload
-}
-add-zsh-hook chpwd _fnm_autoload
-_fnm_autoload   # also handle a shell started inside a Node project
 
 # pyenv — shims already in PATH handle python/pip; this adds shell integration
 pyenv() {
@@ -173,21 +143,25 @@ sdk() {
 
 # ── Cache slow evals (regenerate only when binary changes) ───────────────────
 _eval_cache() {
-  local name="$1" cmd cache; shift
+  local name="$1" cmd cache
+  shift
   cmd="$(command -v "$1" 2>/dev/null)" || return
   cache="$HOME/.cache/zsh/${name}.zsh"
-  [[ -f "$cache" && "$cache" -nt "$cmd" ]] || { mkdir -p "${cache%/*}"; "$@" > "$cache" 2>/dev/null; }
+  [[ -f "$cache" && "$cache" -nt "$cmd" ]] || {
+    mkdir -p "${cache%/*}"
+    "$@" >"$cache" 2>/dev/null
+  }
   source "$cache"
 }
 
 _eval_cache starship starship init zsh
-_eval_cache direnv   direnv   hook zsh
+_eval_cache direnv direnv hook zsh
 # zoxide is initialized at the very end of this file — it wants to be last
 # (otherwise `zoxide`'s self-check prints a configuration warning).
 
 # fzf shell integration
 source /usr/share/fzf/key-bindings.zsh 2>/dev/null
-source /usr/share/fzf/completion.zsh   2>/dev/null
+source /usr/share/fzf/completion.zsh 2>/dev/null
 
 # Bun completions
 [[ -s "$HOME/.oh-my-zsh/completions/_bun" ]] && source "$HOME/.oh-my-zsh/completions/_bun"
@@ -199,25 +173,26 @@ KEYTIMEOUT=1
 # Cursor: block in both modes — steady block in normal, blinking block in insert
 _zsh_set_cursor() {
   case "$KEYMAP" in
-    vicmd)         print -n '\e[2 q' ;;
-    viins|main|'') print -n '\e[1 q' ;;
+  vicmd) print -n '\e[2 q' ;;
+  viins | main | '') print -n '\e[1 q' ;;
   esac
 }
 zle -N zle-keymap-select _zsh_set_cursor
-zle -N zle-line-init     _zsh_set_cursor
+zle -N zle-line-init _zsh_set_cursor
 
 # Restore expected insert-mode bindings that vi mode breaks
-bindkey '^?'   backward-delete-char
-bindkey '^h'   backward-delete-char
-bindkey '^w'   backward-kill-word
-bindkey '^a'   beginning-of-line
-bindkey '^e'   end-of-line
-bindkey '^k'   kill-line
-bindkey ' '    magic-space                  # expand !!, !$
-bindkey '^r'   history-incremental-search-backward
+bindkey '^?' backward-delete-char
+bindkey '^h' backward-delete-char
+bindkey '^w' backward-kill-word
+bindkey '^a' beginning-of-line
+bindkey '^e' end-of-line
+bindkey '^k' kill-line
+bindkey ' ' magic-space # expand !!, !$
+bindkey '^r' history-incremental-search-backward
 
-autoload -Uz edit-command-line; zle -N edit-command-line
-bindkey '^x^e' edit-command-line            # edit current line in $EDITOR
+autoload -Uz edit-command-line
+zle -N edit-command-line
+bindkey '^x^e' edit-command-line # edit current line in $EDITOR
 
 # ── Hooks ────────────────────────────────────────────────────────────────────
 autoload -Uz add-zsh-hook
@@ -226,7 +201,7 @@ autoload -Uz add-zsh-hook
 add-zsh-hook precmd _precmd_hooks
 _precmd_hooks() {
   update-shell-pwd 2>/dev/null
-  print -Pn '\e]2;%~\a'                    # set terminal title to cwd
+  print -Pn '\e]2;%~\a' # set terminal title to cwd
 }
 
 # Soft guard against obvious foot-guns
@@ -248,7 +223,7 @@ alias lt='eza --tree --icons --git -L 3'
 alias l='eza -1 --icons'
 
 # Core tools
-alias cat='bat'
+# alias cat='bat'
 alias grep='grep --color=auto'
 alias lg='lazygit'
 alias t='tmux'
@@ -306,16 +281,21 @@ alias dc='/home/rem/Downloads/discord-0.0.125/Discord/Discord'
 alias swapmine='mv ~/.config/nvim ~/.config/nvim-gg && mv ~/.config/nvim-mine ~/.config/nvim'
 alias swapgg='mv ~/.config/nvim ~/.config/nvim-mine && mv ~/.config/nvim-gg ~/.config/nvim'
 
-
 # ── Functions ────────────────────────────────────────────────────────────────
 # nv: smart nvim wrapper — cd + open
 nv() {
-  command -v nvim >/dev/null || { echo 'nv: nvim not found in PATH' >&2; return 1; }
-  if [[ $# -eq 0 ]]; then nvim; return; fi
+  command -v nvim >/dev/null || {
+    echo 'nv: nvim not found in PATH' >&2
+    return 1
+  }
+  if [[ $# -eq 0 ]]; then
+    nvim
+    return
+  fi
   case "$1" in
-    */)   cd "${1%/}"  && nvim . ;;
-    */*)  [[ -d "$1" ]] && { cd "${1%/}" && nvim .; } || { cd "${1%/*}" && nvim "${1##*/}"; } ;;
-    *)    nvim "$1" ;;
+  */) cd "${1%/}" && nvim . ;;
+  */*) [[ -d "$1" ]] && { cd "${1%/}" && nvim .; } || { cd "${1%/*}" && nvim "${1##*/}"; } ;;
+  *) nvim "$1" ;;
   esac
 }
 
@@ -324,7 +304,7 @@ y() {
   local tmp cwd
   tmp="$(mktemp -t yazi-cwd.XXXXXX)"
   command yazi "$@" --cwd-file="$tmp"
-  IFS= read -r -d '' cwd < "$tmp"
+  IFS= read -r -d '' cwd <"$tmp"
   rm -f -- "$tmp"
   [[ -n "$cwd" && "$cwd" != "$PWD" ]] && builtin cd -- "$cwd"
 }
@@ -334,19 +314,22 @@ mkcd() { mkdir -p "$@" && cd "${@: -1}"; }
 
 # x: universal archive extractor
 x() {
-  [[ ! -f "$1" ]] && { echo "not a file: $1"; return 1; }
+  [[ ! -f "$1" ]] && {
+    echo "not a file: $1"
+    return 1
+  }
   case "$1" in
-    *.tar.bz2|*.tbz2) tar xjf "$1"        ;;
-    *.tar.gz|*.tgz)   tar xzf "$1"        ;;
-    *.tar.xz)         tar xJf "$1"        ;;
-    *.tar.zst)        tar --zstd -xf "$1" ;;
-    *.tar)            tar xf  "$1"        ;;
-    *.bz2)            bunzip2 "$1"        ;;
-    *.gz)             gunzip  "$1"        ;;
-    *.zip)            unzip   "$1"        ;;
-    *.7z)             7z x    "$1"        ;;
-    *.zst)            unzstd  "$1"        ;;
-    *)                echo "unknown format: $1" ;;
+  *.tar.bz2 | *.tbz2) tar xjf "$1" ;;
+  *.tar.gz | *.tgz) tar xzf "$1" ;;
+  *.tar.xz) tar xJf "$1" ;;
+  *.tar.zst) tar --zstd -xf "$1" ;;
+  *.tar) tar xf "$1" ;;
+  *.bz2) bunzip2 "$1" ;;
+  *.gz) gunzip "$1" ;;
+  *.zip) unzip "$1" ;;
+  *.7z) 7z x "$1" ;;
+  *.zst) unzstd "$1" ;;
+  *) echo "unknown format: $1" ;;
   esac
 }
 
@@ -360,6 +343,12 @@ x() {
 # ── zoxide (initialized LAST, on purpose — see note in the eval-cache section) ─
 _eval_cache zoxide zoxide init zsh --cmd cd
 
-
 # nub
 export PATH="$HOME/.nub/bin:$PATH"
+
+# fnm
+FNM_PATH="/home/rem/.local/share/fnm"
+if [ -d "$FNM_PATH" ]; then
+  export PATH="$FNM_PATH:$PATH"
+  eval "$(fnm env --shell zsh)"
+fi

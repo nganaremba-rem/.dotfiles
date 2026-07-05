@@ -13,6 +13,10 @@ return {
           filter = { event = 'notify', find = 'No information available' },
           opts = { skip = true },
         },
+        {
+          filter = { event = 'msg_show', kind = { 'shell_out', 'shell_err', 'shell_ret' } },
+          view = 'split',
+        },
       },
       lsp = {
         progress = {
