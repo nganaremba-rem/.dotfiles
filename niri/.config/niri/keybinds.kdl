@@ -1,4 +1,14 @@
 binds {
+  Mod+Ctrl+Alt+B hotkey-overlay-title="Browse Wallpapers" {
+      spawn "dms" "ipc" "call" "dash" "toggle" "wallpaper";
+  }
+
+  Mod+S hotkey-overlay-title="Settings" {
+      spawn "dms" "ipc" "call" "settings" "focusOrToggle";
+  }
+
+
+
   Mod+Alt+T hotkey-overlay-title="Screen Translate (OCR)" {spawn "screen-translate";}
 
   Mod+Apostrophe hotkey-overlay-title="Scratchpad terminal" {
@@ -19,13 +29,14 @@ binds {
   Mod+Alt+L hotkey-overlay-title="Lock screen (hyprlock)" {spawn-sh "pgrep -x hyprlock >/dev/null || hyprlock";}
   // Mod+Space hotkey-overlay-title="Launcher" {spawn "fuzzel";}
   // Mod+Space hotkey-overlay-title="Noctalia launcher" {spawn-sh "qs -c noctalia-shell ipc call launcher toggle";}
-  Mod+Space hotkey-overlay-title="Rofi launcher" {spawn-sh "rofi -show drun";}
+  // Mod+Space hotkey-overlay-title="Rofi launcher" {spawn-sh "rofi -show drun";}
+  Mod+Space hotkey-overlay-title="Rofi launcher" {spawn "dms" "ipc" "call" "spotlight" "toggle";}
   Alt+Space hotkey-overlay-title="Rofi launcher" {spawn-sh "rofi -show drun";}
   // Mod+Alt+Space hotkey-overlay-title="Omarchy Menu" {spawn "~/.local/share/omarchy/bin/omarchy-menu";}
   Mod+Alt+Space hotkey-overlay-title="Show open windows" {spawn-sh "rofi -show window";}
   Alt+W hotkey-overlay-title="Show open windows" {spawn-sh "rofi -show window";}
   Ctrl+Mod+Alt+L hotkey-overlay-title="Suspend" {spawn "systemctl" "suspend";}
-  Mod+Shift+T hotkey-overlay-title="Btop" {spawn "footclient" "-e" "btop";}
+  Mod+Shift+T hotkey-overlay-title="Btop" {spawn "footclient" "--app-id=btop" "--" "btop";}
   Mod+Ctrl+Alt+V hotkey-overlay-title="Sound" {spawn "footclient" "-e" "wiremix";}
   Mod+V hotkey-overlay-title="Clipboard History" {spawn-sh "footclient ~/.config/cliphist/cliphist";}
   // Mod+Ctrl+E hotkey-overlay-title="Emoji picker" {spawn "~/.local/bin/emoji-picker";}
@@ -35,8 +46,10 @@ binds {
   Mod+D hotkey-overlay-title="Todo (taskwarrior-tui)" {spawn-sh "footclient -e taskwarrior-tui";}
   // Mod+Ctrl+Alt+B hotkey-overlay-title="Wallpaper picker" {spawn "~/.local/bin/wallpaper-picker.sh";}
   // Mod+Ctrl+Alt+B hotkey-overlay-title="Wallpaper picker" {spawn-sh "qs -c noctalia-shell ipc call wallpaper toggle";}
-  Mod+Ctrl+Alt+B hotkey-overlay-title="Wallpaper picker" {spawn-sh "~/.config/wallpaper/set-wallpaper.sh";}
-  Mod+Ctrl+Alt+N hotkey-overlay-title="Notification Center" {spawn "swaync-client" "-t" "-sw";}
+  // Mod+Ctrl+Alt+B hotkey-overlay-title="Wallpaper picker" {spawn-sh "~/.config/wallpaper/set-wallpaper.sh";}
+  // Mod+Ctrl+Alt+N hotkey-overlay-title="Notification Center" {spawn "swaync-client" "-t" "-sw";}
+  Mod+Ctrl+Alt+N hotkey-overlay-title="Notification Center" { spawn "dms" "ipc" "call" "notifications" "toggle"; }
+
   Mod+Slash hotkey-overlay-title="Launch Ghostty" {spawn "ghostty";}
   Mod+Ctrl+Alt+W hotkey-overlay-title="Launch WiFi" {spawn-sh "rfkill unblock wifi && footclient -e wlctl";}
   // Server reads foot.ini only at startup, so applying config edits = restart.
@@ -333,5 +346,7 @@ binds {
     // Powers off the monitors. To turn them back on, do any input like
     // moving the mouse or pressing any other key.
     Mod+Shift+P { power-off-monitors; }
+
+
 }
 
