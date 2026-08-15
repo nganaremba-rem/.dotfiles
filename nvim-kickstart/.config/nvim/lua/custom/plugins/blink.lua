@@ -76,7 +76,12 @@ return { -- Autocompletion
     },
 
     sources = {
-      default = { 'lsp', 'path', 'snippets' },
+      default = { 'lsp', 'path', 'snippets', 'lazydev' },
+      providers = {
+        -- lazydev feeds Neovim-API completions into Lua buffers. score_offset
+        -- ranks them above lua_ls's own (often duplicate) suggestions.
+        lazydev = { name = 'LazyDev', module = 'lazydev.integrations.blink', score_offset = 100 },
+      },
     },
 
     snippets = { preset = 'luasnip' },

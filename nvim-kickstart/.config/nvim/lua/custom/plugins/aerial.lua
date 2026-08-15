@@ -2,7 +2,6 @@ return {
   'stevearc/aerial.nvim',
   dependencies = {
     'nvim-treesitter/nvim-treesitter',
-    'nvim-tree/nvim-web-devicons',
   },
   keys = {
     -- Moved off <leader>a to avoid colliding with avante.nvim's <leader>a… group.

@@ -4,7 +4,7 @@ spawn-at-startup "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
 // spawn-sh-at-startup "$HOME/.config/rofi/restore-wallpaper.sh"
 spawn-at-startup "fcitx5" "-dr"
 spawn-sh-at-startup "export $(gnome-keyring-daemon --start --components=pkcs11,secrets,ssh)"
-spawn-at-startup "gammastep" "-O" "4500"
+// spawn-at-startup "gammastep" "-O" "4500"
 // waybar is managed by waybar.service (systemd) — do not spawn here
 spawn-at-startup "wl-clip-persist"
 spawn-sh-at-startup "wl-paste --watch cliphist store"

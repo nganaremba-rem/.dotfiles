@@ -8,13 +8,28 @@ return {
   version = '*',
   dependencies = {
     'nvim-lua/plenary.nvim',
-    'nvim-tree/nvim-web-devicons', -- not strictly required, but recommended
+    -- icons come from mini.icons via mock_nvim_web_devicons (custom/plugins/mini.lua)
     'MunifTanjim/nui.nvim',
   },
-  lazy = false,
+  -- Loads on the keymap or on `nvim <dir>` (see `init`), not at startup.
+  cmd = 'Neotree',
   keys = {
-    { '<leader>e', ':Neotree toggle<CR>', desc = 'NeoTree toggle', silent = true },
+    { '<leader>e', '<cmd>Neotree toggle<cr>', desc = 'Explorer (NeoTree) toggle' },
+    { '<leader>E', '<cmd>Neotree reveal<cr>', desc = 'Explorer reveal current file' },
   },
+  init = function()
+    -- `nvim some/dir` should open the tree instead of netrw's directory listing.
+    vim.api.nvim_create_autocmd('BufEnter', {
+      group = vim.api.nvim_create_augroup('neotree-dir-start', { clear = true }),
+      desc = 'Open neo-tree when nvim is started on a directory',
+      callback = function(args)
+        if vim.fn.isdirectory(args.file) == 1 then
+          require 'neo-tree'
+          return true -- one-shot
+        end
+      end,
+    })
+  end,
   ---@module 'neo-tree'
   ---@type neotree.Config
   opts = {
@@ -25,6 +40,16 @@ return {
       use_libuv_file_watcher = true,
       follow_current_file = {
         enabled = true,
+      },
+      -- Match the picker: dotfiles AND gitignored files stay visible, so `.env`
+      -- shows up here as well. Only genuinely noisy directories are hidden.
+      -- See the FIND profile in custom/plugins/snacks.lua.
+      filtered_items = {
+        visible = true,
+        hide_dotfiles = false,
+        hide_gitignored = false,
+        hide_by_name = { '.git', 'node_modules' },
+        never_show = { '.DS_Store' },
       },
       window = {
         mappings = {

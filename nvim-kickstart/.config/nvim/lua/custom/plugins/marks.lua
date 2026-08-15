@@ -1,19 +1,20 @@
+-- Mark signs in the gutter. This plugin owns ONLY the MarkSign* highlights —
+-- `signcolumn` is set in custom/config/options.lua and the global SignColumn /
+-- LineNr / CursorLineNr transparency comes from tokyonight's `on_highlights`
+-- (custom/plugins/tokyonight.lua). Setting those here fought the colorscheme and
+-- broke on any theme switch.
 return {
   'chentoast/marks.nvim',
-
-  -- modern lazy.nvim trigger
   event = 'BufReadPost',
 
   opts = {
-    -- ❌ disable default mappings (they override built-ins)
+    -- Default mappings shadow built-in mark motions — leave them off.
     default_mappings = false,
 
-    -- ✅ show important built-in marks too
+    -- Also sign the useful built-in marks.
     builtin_marks = { '.', '<', '>', '^' },
 
     cyclic = true,
-
-    -- 🔥 performance + smooth updates
     refresh_interval = 100,
 
     sign_priority = {
@@ -25,31 +26,26 @@ return {
   },
 
   config = function(_, opts)
-    local marks = require 'marks'
-    marks.setup(opts)
+    require('marks').setup(opts)
 
-    -- ✅ ALWAYS show sign column (modern recommended)
-    vim.opt.signcolumn = 'yes:1'
+    -- Colours come from the active colorscheme, not hardcoded hexes.
+    local ok, colors = pcall(function() return require('tokyonight.colors').setup() end)
+    if not ok then return end
 
-    -- 🎯 MODERN highlight (transparent + clean)
     local hl = vim.api.nvim_set_hl
-
-    -- Tokyonight palette (matches the active colorscheme)
-    -- lowercase marks (a, b, c) — green
-    hl(0, 'MarkSignHL', { fg = '#9ece6a', bg = 'none' })
-    hl(0, 'MarkSignNumHL', { fg = '#9ece6a', bg = 'none' })
-
-    -- uppercase marks (A, B, C) — yellow/orange
-    hl(0, 'MarkSignHLUpper', { fg = '#e0af68', bg = 'none' })
-    hl(0, 'MarkSignNumHLUpper', { fg = '#e0af68', bg = 'none' })
-
-    -- built-in marks (., ^, etc.) — blue
-    hl(0, 'MarkSignHLBuiltin', { fg = '#7aa2f7', bg = 'none' })
-    hl(0, 'MarkSignNumHLBuiltin', { fg = '#7aa2f7', bg = 'none' })
-
-    -- 🔥 FULL transparency (important for you)
-    hl(0, 'SignColumn', { bg = 'none' })
-    hl(0, 'LineNr', { bg = 'none' })
-    hl(0, 'CursorLineNr', { bg = 'none' })
+    local groups = {
+      -- lowercase marks (a, b, c)
+      MarkSignHL = colors.green,
+      MarkSignNumHL = colors.green,
+      -- uppercase marks (A, B, C)
+      MarkSignHLUpper = colors.yellow,
+      MarkSignNumHLUpper = colors.yellow,
+      -- built-in marks (., ^, <, >)
+      MarkSignHLBuiltin = colors.blue,
+      MarkSignNumHLBuiltin = colors.blue,
+    }
+    for group, fg in pairs(groups) do
+      hl(0, group, { fg = fg, bg = 'none' })
+    end
   end,
 }

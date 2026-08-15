@@ -3,11 +3,17 @@ return {
   {
     'folke/noice.nvim',
     event = 'VeryLazy',
+    -- Moved off <leader>dn so <leader>d is a clean debug group.
     keys = {
-      { '<leader>dn', '<cmd>NoiceDismiss<cr>' },
+      { '<leader>un', '<cmd>NoiceDismiss<cr>', desc = 'Dismiss [n]otifications' },
+      { '<leader>uN', '<cmd>Noice history<cr>', desc = '[N]otification history' },
     },
     opts = {
-      -- add any options here
+      -- Division of labour: noice owns the cmdline, messages and LSP UI;
+      -- Snacks.notifier owns notifications. Both plugins want to replace
+      -- `vim.notify`, and whichever loads last silently wins — so noice's
+      -- notifier is turned off explicitly rather than left to load order.
+      notify = { enabled = false },
       routes = {
         {
           filter = { event = 'notify', find = 'No information available' },
@@ -37,12 +43,10 @@ return {
       },
     },
     dependencies = {
-      -- if you lazy-load any plugin below, make sure to add proper `module="..."` entries
+      -- nvim-notify is deliberately absent: notifications go to Snacks.notifier
+      -- (see `notify = { enabled = false }` above), so noice never needs a
+      -- notification backend of its own.
       'MunifTanjim/nui.nvim',
-      -- OPTIONAL:
-      --   `nvim-notify` is only needed, if you want to use the notification view.
-      --   If not available, we use `mini` as the fallback
-      'rcarriga/nvim-notify',
     },
   },
 }

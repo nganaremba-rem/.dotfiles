@@ -14,7 +14,22 @@
 --      linters    = { 'linter1' },     -- nvim-lint syntax
 --      treesitter = { 'parser1' },     -- extra parsers (filetype is added anyway)
 --      mason      = { 'extra-pkg' },   -- escape hatch: extra Mason packages to install
+--      tasks      = {                  -- overseer templates (<leader>r…)
+--        run   = 'cargo run',          --   <leader>rr  run the project
+--        build = 'cargo build',        --   <leader>rb  build
+--        test  = 'cargo test',         --   <leader>rt  test
+--        file  = 'go run $FILE',       --   <leader>rf  run just this file
+--        serve = 'npm run dev',        --   <leader>rl  dev / live server
+--      },
 --    }
+--
+--  Task placeholders, expanded when the task is built:
+--    $FILE  absolute path of the current file      $DIR   its directory
+--    $STEM  basename without extension             $ROOT  detected project root
+--    $TMP   a scratch directory                    $PM    npm | pnpm | yarn | bun
+--    $OUT   pre-joined build output path — use this for compiler -o targets
+--    $NAME  identifier-safe stem (rustc --crate-name, javac class name, …)
+--  All except $PM are shell-quoted, so never wrap them in quotes yourself.
 --
 --  Tool→Mason package name translation lives in `custom.lang`; tools that ship
 --  with their own toolchain (rustfmt, dart_format, gofmt) are intentionally not
@@ -59,6 +74,10 @@ return {
     },
     formatters = { 'stylua' },
     treesitter = { 'lua', 'luadoc' },
+    tasks = {
+      file = 'nvim -l $FILE',
+      test = 'busted',
+    },
   },
 
   python = {
@@ -66,6 +85,11 @@ return {
     lsp = { pyright = {} },
     formatters = { 'ruff_format', 'isort', 'black', stop_after_first = true },
     treesitter = { 'python' },
+    tasks = {
+      run = 'python3 $FILE',
+      file = 'python3 $FILE',
+      test = 'pytest',
+    },
   },
 
   rust = {
@@ -73,6 +97,14 @@ return {
     lsp = { rust_analyzer = {} },
     formatters = { 'rustfmt' }, -- ships with the rust toolchain (rustup component)
     treesitter = { 'rust' },
+    tasks = {
+      run = 'cargo run',
+      build = 'cargo build',
+      test = 'cargo test',
+      -- Single-file: compile into the cache dir so the project stays clean.
+      -- --crate-name: rustc derives it from the filename, and rejects spaces.
+      file = 'rustc $FILE --crate-name $NAME -o $OUT && $OUT',
+    },
   },
 
   go = {
@@ -80,6 +112,12 @@ return {
     lsp = { gopls = {} },
     formatters = { 'gofmt' }, -- ships with the Go toolchain
     treesitter = { 'go', 'gomod', 'gosum' },
+    tasks = {
+      run = 'go run .',
+      build = 'go build ./...',
+      test = 'go test ./...',
+      file = 'go run $FILE',
+    },
   },
 
   c = {
@@ -87,6 +125,12 @@ return {
     lsp = { clangd = {} },
     formatters = { 'clang_format' },
     treesitter = { 'c', 'cpp' },
+    tasks = {
+      run = 'make run',
+      build = 'make',
+      test = 'make test',
+      file = 'cc $FILE -Wall -o $OUT && $OUT',
+    },
   },
 
   -- Web stack: one entry owns JS/TS + the servers that span those filetypes.
@@ -107,6 +151,14 @@ return {
     },
     formatters = { 'biome', 'prettierd', 'prettier', stop_after_first = true },
     treesitter = { 'javascript', 'typescript', 'tsx' },
+    -- $PM resolves to bun / pnpm / npm from the project's lockfile.
+    tasks = {
+      run = '$PM run dev',
+      build = '$PM run build',
+      test = '$PM test',
+      file = 'node $FILE',
+      serve = '$PM run dev',
+    },
   },
 
   css = {
@@ -114,6 +166,9 @@ return {
     lsp = { cssls = {} },
     formatters = { 'biome', 'prettierd', 'prettier', stop_after_first = true },
     treesitter = { 'css' },
+    tasks = {
+      serve = 'live-server $ROOT',
+    },
   },
 
   html = {
@@ -121,6 +176,11 @@ return {
     lsp = { emmet_ls = {} },
     formatters = { 'biome', 'prettierd', 'prettier', stop_after_first = true },
     treesitter = { 'html' },
+    tasks = {
+      -- Plain static page: serve the file's own directory so relative assets work.
+      run = 'live-server $DIR',
+      serve = 'live-server $DIR',
+    },
   },
 
   dart = {
@@ -128,6 +188,14 @@ return {
     -- LSP/format for Dart is owned by flutter-tools.nvim, not Mason.
     formatters = { 'dart_format' },
     treesitter = { 'dart' },
+    -- NOTE: <leader>fi… (flutter-tools) is preferred for app work — it does hot
+    -- reload, which a one-shot task cannot.
+    tasks = {
+      run = 'flutter run',
+      build = 'flutter build apk --debug',
+      test = 'flutter test',
+      file = 'dart run $FILE',
+    },
   },
 
   json = {
@@ -162,6 +230,10 @@ return {
     lsp = { bashls = {} },
     formatters = { 'shfmt' },
     treesitter = { 'bash' },
+    tasks = {
+      run = 'bash $FILE',
+      file = 'bash $FILE',
+    },
   },
 
   docker = {

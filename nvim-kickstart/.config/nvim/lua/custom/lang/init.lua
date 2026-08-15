@@ -11,6 +11,9 @@
 --    format_on_save_fts() -> { ft = true }              (conform format-on-save)
 --    mason_ensure()       -> { 'pkg', ... }             (mason-tool-installer)
 --    ensure_for_ft(ft)    -> installs missing Mason pkgs for a filetype, once
+--    tasks_for_ft(ft,buf) -> { run=, build=, test=, file=, serve= } (overseer)
+--    task_fts()           -> { ft, ... } that declare any task
+--    project_root(buf)    -> detected root dir for the buffer
 -- ════════════════════════════════════════════════════════════════════════════
 
 local registry = require 'custom.languages'
@@ -204,6 +207,98 @@ local function mason_pkgs_for_ft(ft)
     end
   end
   return dedupe(pkgs)
+end
+
+-- ── Tasks (overseer) ─────────────────────────────────────────────────────────
+-- Registry entries may declare `tasks = { run=, build=, test=, file=, serve= }`.
+-- Commands are stored with placeholders and expanded per-buffer at run time.
+
+local ROOT_MARKERS = {
+  'package.json',
+  'Cargo.toml',
+  'go.mod',
+  'pubspec.yaml',
+  'pyproject.toml',
+  'Makefile',
+  'CMakeLists.txt',
+  '.git',
+}
+
+-- Nearest ancestor holding a project marker; falls back to the file's own dir,
+-- then cwd for unnamed buffers.
+function M.project_root(buf)
+  buf = buf or 0
+  local name = vim.api.nvim_buf_get_name(buf)
+  if name == '' then return vim.uv.cwd() end
+  return vim.fs.root(buf, ROOT_MARKERS) or vim.fs.dirname(name)
+end
+
+-- Node package manager for a project, chosen by lockfile. Falls back to npm.
+local function package_manager(root)
+  if vim.uv.fs_stat(root .. '/bun.lockb') or vim.uv.fs_stat(root .. '/bun.lock') then return 'bun' end
+  if vim.uv.fs_stat(root .. '/pnpm-lock.yaml') then return 'pnpm' end
+  if vim.uv.fs_stat(root .. '/yarn.lock') then return 'yarn' end
+  return 'npm'
+end
+
+local function expand(cmd, buf)
+  local file = vim.api.nvim_buf_get_name(buf)
+  local root = M.project_root(buf)
+  local tmp = vim.fn.stdpath 'cache' .. '/run'
+  vim.fn.mkdir(tmp, 'p')
+
+  local stem = vim.fn.fnamemodify(file, ':t:r')
+  -- Identifier-safe form of the stem, for tools that turn a filename into a symbol
+  -- (rustc's crate name, javac's class name, …).
+  local name = stem:gsub('[^%w_]', '_'):gsub('^(%d)', '_%1')
+
+  local subs = {
+    FILE = vim.fn.shellescape(file),
+    DIR = vim.fn.shellescape(file ~= '' and vim.fs.dirname(file) or root),
+    STEM = vim.fn.shellescape(stem),
+    ROOT = vim.fn.shellescape(root),
+    TMP = vim.fn.shellescape(tmp),
+    -- Pre-joined build output path. Use this instead of `$TMP/$STEM`: joining two
+    -- separately-quoted parts yields `'/dir'/name`, which breaks on spaces. The
+    -- basename is also sanitised — rustc rejects a crate name containing spaces,
+    -- and most toolchains dislike punctuation in an output binary.
+    OUT = vim.fn.shellescape(tmp .. '/' .. name),
+    NAME = name,
+    PM = package_manager(root),
+  }
+
+  -- Longer keys first, so $NAME is never partially matched as $N.. by a shorter key.
+  for _, key in ipairs { 'FILE', 'STEM', 'ROOT', 'NAME', 'DIR', 'TMP', 'OUT', 'PM' } do
+    cmd = cmd:gsub('%$' .. key, (subs[key]:gsub('%%', '%%%%')))
+  end
+  return cmd
+end
+
+-- Resolved task commands for a filetype. Returns an empty table when the
+-- filetype declares none.
+function M.tasks_for_ft(ft, buf)
+  buf = buf or vim.api.nvim_get_current_buf()
+  local out = {}
+  for name, entry in pairs(registry) do
+    if entry.tasks and vim.tbl_contains(entry_filetypes(name, entry), ft) then
+      for kind, cmd in pairs(entry.tasks) do
+        out[kind] = expand(cmd, buf)
+      end
+    end
+  end
+  return out
+end
+
+-- Every filetype that declares at least one task — used to scope overseer
+-- template registration.
+function M.task_fts()
+  local fts = {}
+  for name, entry in pairs(registry) do
+    if entry.tasks then
+      vim.list_extend(fts, entry_filetypes(name, entry))
+    end
+  end
+  return dedupe(fts)
 end
 
 local seen_fts = {}

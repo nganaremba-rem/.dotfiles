@@ -26,16 +26,29 @@ return {
     -- Add your own debuggers here
     'leoluz/nvim-dap-go',
   },
+  -- Everything lives under <leader>d. The old <leader>b / <leader>B breakpoint keys
+  -- made <leader>b both a standalone map AND a prefix (<leader>bd, <leader>bi), so
+  -- every press stalled for `timeoutlen` before firing.
+  --
+  -- F-keys follow the VS Code / DAP convention: F5 continue, F10 step over,
+  -- F11 step into, S-F11 step out. (<F1> is help, <F2>/<F3> are free again.)
   keys = {
-    -- Basic debugging keymaps, feel free to change to your liking!
     { '<F5>', function() require('dap').continue() end, desc = 'Debug: Start/Continue' },
-    { '<F1>', function() require('dap').step_into() end, desc = 'Debug: Step Into' },
-    { '<F2>', function() require('dap').step_over() end, desc = 'Debug: Step Over' },
-    { '<F3>', function() require('dap').step_out() end, desc = 'Debug: Step Out' },
-    { '<leader>b', function() require('dap').toggle_breakpoint() end, desc = 'Debug: Toggle Breakpoint' },
-    { '<leader>B', function() require('dap').set_breakpoint(vim.fn.input 'Breakpoint condition: ') end, desc = 'Debug: Set Breakpoint' },
-    -- Toggle to see last session result. Without this, you can't see session output in case of unhandled exception.
-    { '<F7>', function() require('dapui').toggle() end, desc = 'Debug: See last session result.' },
+    { '<F10>', function() require('dap').step_over() end, desc = 'Debug: Step Over' },
+    { '<F11>', function() require('dap').step_into() end, desc = 'Debug: Step Into' },
+    { '<S-F11>', function() require('dap').step_out() end, desc = 'Debug: Step Out' },
+    { '<F7>', function() require('dapui').toggle() end, desc = 'Debug: Toggle UI / last session result' },
+
+    { '<leader>dc', function() require('dap').continue() end, desc = 'Debug: [c]ontinue / start' },
+    { '<leader>db', function() require('dap').toggle_breakpoint() end, desc = 'Debug: toggle [b]reakpoint' },
+    { '<leader>dB', function() require('dap').set_breakpoint(vim.fn.input 'Breakpoint condition: ') end, desc = 'Debug: conditional [B]reakpoint' },
+    { '<leader>di', function() require('dap').step_into() end, desc = 'Debug: step [i]nto' },
+    { '<leader>do', function() require('dap').step_over() end, desc = 'Debug: step [o]ver' },
+    { '<leader>dO', function() require('dap').step_out() end, desc = 'Debug: step [O]ut' },
+    { '<leader>du', function() require('dapui').toggle() end, desc = 'Debug: toggle [u]I' },
+    { '<leader>dr', function() require('dap').repl.toggle() end, desc = 'Debug: toggle [r]EPL' },
+    { '<leader>dl', function() require('dap').run_last() end, desc = 'Debug: run [l]ast' },
+    { '<leader>dt', function() require('dap').terminate() end, desc = 'Debug: [t]erminate' },
   },
   config = function()
     local dap = require 'dap'

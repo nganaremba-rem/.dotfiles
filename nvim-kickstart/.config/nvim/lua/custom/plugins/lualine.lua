@@ -1,6 +1,5 @@
 return {
   'nvim-lualine/lualine.nvim',
-  dependencies = { 'nvim-tree/nvim-web-devicons' },
   config = function()
     local c = require('tokyonight.colors').setup()
 
@@ -112,7 +111,7 @@ return {
         lualine_x = { 'location' },
       },
 
-      extensions = { 'neo-tree', 'toggleterm', 'lazy', 'mason', 'trouble', 'quickfix' },
+      extensions = { 'neo-tree', 'lazy', 'mason', 'trouble', 'quickfix', 'overseer' },
     }
 
     vim.api.nvim_create_autocmd({ 'RecordingEnter', 'RecordingLeave' }, {

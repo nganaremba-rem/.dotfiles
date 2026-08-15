@@ -2,12 +2,15 @@ return { -- Autoformat
   'stevearc/conform.nvim',
   event = { 'BufWritePre' },
   cmd = { 'ConformInfo' },
+  -- Moved off <leader>f: that key was BOTH a standalone map and the prefix for
+  -- <leader>fr / <leader>fi*, so it stalled for `timeoutlen` on every press. The
+  -- old `mode = ''` also bound operator-pending, making `d<leader>f` format.
   keys = {
     {
-      '<leader>f',
+      '<leader>cf',
       function() require('conform').format { async = true } end,
-      mode = '',
-      desc = '[F]ormat buffer',
+      mode = { 'n', 'v' },
+      desc = 'Code: [f]ormat buffer/selection',
     },
   },
   ---@module 'conform'

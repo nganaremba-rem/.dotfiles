@@ -43,8 +43,6 @@ return {
   dependencies = {
     'nvim-lua/plenary.nvim',
     'MunifTanjim/nui.nvim',
-    'stevearc/dressing.nvim', -- already in your setup (flutter-tools dep)
-    'nvim-tree/nvim-web-devicons',
     {
       -- Pretty markdown rendering inside the avante chat window.
       'MeanderingProgrammer/render-markdown.nvim',

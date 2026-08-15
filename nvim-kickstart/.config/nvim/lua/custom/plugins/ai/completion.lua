@@ -20,15 +20,15 @@ local providers = {
   supermaven = {
     'supermaven-inc/supermaven-nvim',
     event = 'InsertEnter',
-    -- Toggle inline ghost text on/off. <leader>a… is avante's namespace, so the
-    -- AI-suggestion toggle lives under <leader>t (toggles).
+    -- Toggle inline ghost text on/off. <leader>a… is avante's namespace and <leader>t
+    -- is the terminal group, so the AI-suggestion toggle lives under <leader>u (UI).
     keys = {
       {
-        '<leader>ts',
+        '<leader>ua',
         function()
           require('supermaven-nvim.api').toggle()
         end,
-        desc = '[T]oggle AI [s]uggestions (ghost text)',
+        desc = 'Toggle [a]I suggestions (ghost text)',
       },
     },
     opts = {

@@ -67,6 +67,7 @@ path=(
   "$HOME/bin/idea-IC-252.25557.131/bin"
   "/opt/mssql-tools18/bin"
   "$HOME/.lmstudio/bin"
+  "$HOME/bin/ventoy-1.1.17"
   $path
 )
 

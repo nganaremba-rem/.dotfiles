@@ -1,6 +1,6 @@
 return { -- Useful plugin to show you pending keybinds.
   'folke/which-key.nvim',
-  event = 'VimEnter',
+  event = 'VeryLazy',
   ---@module 'which-key'
   ---@type wk.Opts
   ---@diagnostic disable-next-line: missing-fields
@@ -9,15 +9,25 @@ return { -- Useful plugin to show you pending keybinds.
     delay = 0,
     icons = { mappings = vim.g.have_nerd_font },
 
-    -- Document existing key chains
+    -- Every prefix that owns keys is registered, so nothing shows up unlabelled.
+    -- Invariant worth keeping: a prefix is EITHER a group OR a standalone map,
+    -- never both — otherwise the standalone one stalls for `timeoutlen` (300ms).
     spec = {
-      { '<leader>s',  group = '[S]earch',       mode = { 'n', 'v' } },
-      { '<leader>t',  group = '[T]oggle' },
-      { '<leader>h',  group = 'Git [H]unk',     mode = { 'n', 'v' } },
-      { '<leader>x',  group = 'Diagnostics' },
-      { '<leader>g',  group = '[G]it' },
-      { '<leader>u',  group = '[U]ndo' },
-      { 'gr',         group = 'LSP Actions',    mode = { 'n' } },
+      { '<leader>b', group = '[B]uffer' },
+      { '<leader>c', group = '[C]ode' },
+      { '<leader>d', group = '[D]ebug' },
+      { '<leader>f', group = '[F]ind / Replace' },
+      { '<leader>fi', group = 'Flutter' },
+      { '<leader>g', group = '[G]it' },
+      { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
+      { '<leader>m', group = 'Har[m]poon (marks)' },
+      { '<leader>r', group = '[R]un / Build' },
+      { '<leader>s', group = '[S]earch', mode = { 'n', 'v' } },
+      { '<leader>t', group = '[T]erminal' },
+      { '<leader>u', group = '[U]I / Toggle' },
+      { '<leader>x', group = 'Diagnostics' },
+      { '<leader>a', group = '[A]I (avante)', mode = { 'n', 'v' } },
+      { 'gr', group = 'LSP Actions', mode = { 'n' } },
     },
   },
 }

@@ -75,8 +75,10 @@ vim.o.undofile = true
 vim.o.ignorecase = true
 vim.o.smartcase = true
 
--- Keep signcolumn on by default
-vim.o.signcolumn = 'yes'
+-- Always reserve exactly one sign column so the text never shifts when a
+-- diagnostic/git/mark sign appears. (marks.nvim used to set this from its own
+-- config — it belongs here.)
+vim.o.signcolumn = 'yes:1'
 
 -- How long before CursorHold fires and before swap is written (ms)
 vim.o.updatetime = 200
@@ -133,6 +135,10 @@ vim.o.showmatch = true
 
 -- Allow cursor to move past end of line in visual block mode
 vim.o.virtualedit = 'block'
+
+-- Trim startup/search noise: I = no intro screen, c/C = no completion-menu
+-- messages, s = no "search hit BOTTOM" spam.
+vim.opt.shortmess:append 'sIcC'
 
 -- Use ripgrep for :grep if available
 if vim.fn.executable 'rg' == 1 then

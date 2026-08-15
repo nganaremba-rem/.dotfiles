@@ -29,6 +29,14 @@ return {
         map('gra', vim.lsp.buf.code_action, '[G]oto Code [A]ction', { 'n', 'x' })
         map('grD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
 
+        -- Previously supplied by lspsaga (now disabled). Native hover takes a
+        -- border since 0.11; noice still owns the markdown styling.
+        map('K', function() vim.lsp.buf.hover { border = 'rounded' } end, 'Hover documentation')
+        map('<leader>ca', vim.lsp.buf.code_action, 'Code [a]ction', { 'n', 'x' })
+        map('<leader>cD', vim.lsp.buf.declaration, 'Code: goto [D]eclaration')
+        -- Signature help is <C-k> in insert mode, owned by blink.cmp's super-tab
+        -- preset — do not bind it here as well.
+
         local client = vim.lsp.get_client_by_id(event.data.client_id)
 
         -- Highlight references of the symbol under the cursor on CursorHold.
@@ -53,12 +61,9 @@ return {
           })
         end
 
-        -- Toggle inlay hints if the server supports them.
-        if client and client:supports_method('textDocument/inlayHint', event.buf) then
-          map('<leader>th', function()
-            vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf })
-          end, '[T]oggle Inlay [H]ints')
-        end
+        -- Inlay hints are toggled by the global <leader>uh in custom/config/keymaps.lua.
+        -- A buffer-local duplicate used to live on <leader>th; that prefix now belongs
+        -- to the terminal group.
       end,
     })
 

@@ -1,6 +1,16 @@
 return { -- Collection of various small independent plugins/modules
   'nvim-mini/mini.nvim',
+  -- NOT lazy: mini.icons must finish mocking nvim-web-devicons before any
+  -- consumer (neo-tree, bufferline, lualine, aerial, trouble) first requires it.
+  lazy = false,
+  priority = 900,
   config = function()
+    -- Icon provider. mini.icons is faster than nvim-web-devicons and caches by
+    -- filetype; `mock_nvim_web_devicons` makes every plugin that hard-requires
+    -- 'nvim-web-devicons' transparently use it, so the old plugin can go away.
+    require('mini.icons').setup()
+    MiniIcons.mock_nvim_web_devicons()
+
     -- Better Around/Inside textobjects
     --
     -- Examples:
