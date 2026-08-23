@@ -148,6 +148,13 @@ return {
       tailwindcss = {
         filetypes = { 'html', 'css', 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue', 'svelte' },
       },
+      -- Emmet abbreviations (`div` -> <div></div>, `ul>li*3`, `.card`). Declared
+      -- here, once, for EVERY markup filetype including html — `M.servers()` keys
+      -- by server name, so a second emmet entry elsewhere would just overwrite
+      -- this one. jsx/tsx get className instead of class automatically.
+      emmet_language_server = {
+        filetypes = { 'html', 'css', 'scss', 'less', 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue', 'svelte' },
+      },
     },
     formatters = { 'biome', 'prettierd', 'prettier', stop_after_first = true },
     treesitter = { 'javascript', 'typescript', 'tsx' },
@@ -173,7 +180,9 @@ return {
 
   html = {
     filetypes = { 'html' },
-    lsp = { emmet_ls = {} },
+    -- LSP: emmet_language_server is declared in the `web` entry above and already
+    -- covers html; vscode-html-language-server is not used here.
+    lsp = {},
     formatters = { 'biome', 'prettierd', 'prettier', stop_after_first = true },
     treesitter = { 'html' },
     tasks = {

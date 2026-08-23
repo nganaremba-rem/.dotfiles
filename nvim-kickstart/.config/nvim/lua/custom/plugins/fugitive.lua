@@ -12,7 +12,8 @@ return {
       { '<leader>gC', '<cmd>Git commit<cr>',                desc = 'Git commit' },
       { '<leader>gp', '<cmd>Git push<cr>',                  desc = 'Git push' },
       { '<leader>gP', '<cmd>Git pull<cr>',                  desc = 'Git pull' },
-      { '<leader>gB', '<cmd>GBrowse<cr>', mode = { 'n', 'v' }, desc = 'Git browse (open in web)' },
+      -- <leader>gB lives in snacks.lua (Snacks.gitbrowse, no vim-rhubarb needed).
+      -- Binding :GBrowse here too made the winner depend on load order.
     },
   },
   -- GBrowse support for GitHub repos

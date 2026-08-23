@@ -1,7 +1,13 @@
 return {
   'nvim-lualine/lualine.nvim',
   config = function()
-    local c = require('tokyonight.colors').setup()
+    -- Hard-requiring the colorscheme module would turn "I switched themes" into
+    -- an error on every startup. Fall back to lualine's own 'auto' theme instead.
+    local ok, c = pcall(function() return require('tokyonight.colors').setup() end)
+    if not ok then
+      require('lualine').setup { options = { theme = 'auto', globalstatus = true } }
+      return
+    end
 
     -- ── transparent per-mode theme ────────────────────────────────────
     local theme = {

@@ -4,7 +4,8 @@ return {
   keys = {
     { '<S-h>', '<cmd>BufferLineCyclePrev<cr>', desc = 'Prev buffer' },
     { '<S-l>', '<cmd>BufferLineCycleNext<cr>', desc = 'Next buffer' },
-    { '<leader>bd', '<cmd>bdelete<cr>', desc = 'Delete buffer' },
+    -- <leader>bd lives in snacks.lua (Snacks.bufdelete keeps the window layout).
+    -- Defining it here too meant whichever plugin loaded last silently won.
   },
   opts = {
     options = {

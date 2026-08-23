@@ -53,7 +53,11 @@ return { -- Autocompletion
       -- See :h blink-cmp-config-keymap for defining your own keymap
       -- preset = 'default',
       preset = 'super-tab',
-      ['<CR>'] = { 'select_and_accept', 'fallback' },
+      -- 'accept' (not 'select_and_accept'): only takes an item the user has
+      -- actually selected. With preselect = false below, plain <CR> after typing
+      -- `{` in a jsx/tsx file inserts a newline instead of silently swallowing
+      -- the brace by accepting the auto-highlighted first item.
+      ['<CR>'] = { 'accept', 'fallback' },
       -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
       --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
     },
@@ -73,6 +77,17 @@ return { -- Autocompletion
       -- By default, you may press `<c-space>` to show the documentation.
       -- Optionally, set `auto_show = true` to show the documentation after a delay.
       documentation = { auto_show = true, auto_show_delay_ms = 500 },
+      list = {
+        selection = {
+          -- Preselect the top item only when the menu was opened by typing a
+          -- word, so <CR> accepts it (with LSP auto-import). When the menu was
+          -- opened BY a trigger character — `{` in jsx, `.` before you type the
+          -- member, `<` in tsx — nothing is selected, so <CR> falls through to
+          -- nvim-autopairs and inserts a newline instead of eating the brace.
+          preselect = function(ctx) return ctx.trigger.kind ~= 'trigger_character' end,
+          auto_insert = false,
+        },
+      },
     },
 
     sources = {

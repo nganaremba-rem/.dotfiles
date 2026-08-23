@@ -6,8 +6,11 @@ return {
   keys = {
     -- Moved off <leader>a to avoid colliding with avante.nvim's <leader>a… group.
     { '<leader>cs', '<cmd>AerialToggle!<cr>', desc = 'Toggle code [s]ymbols outline (Aerial)' },
-    { '[[',         '<cmd>AerialPrev<cr>',    desc = 'Prev symbol' },
-    { ']]',         '<cmd>AerialNext<cr>',    desc = 'Next symbol' },
+    -- [a/]a, NOT [[/]] — those belong to Snacks.words (LSP reference hopping,
+    -- custom/plugins/snacks.lua). Two lazy `keys` specs on one lhs means the
+    -- winner is decided by load order, which is not something to rely on.
+    { '[a',         '<cmd>AerialPrev<cr>',    desc = 'Prev symbol' },
+    { ']a',         '<cmd>AerialNext<cr>',    desc = 'Next symbol' },
     { '[A',         '<cmd>AerialPrevUp<cr>',  desc = 'Prev symbol (up a level)' },
     { ']A',         '<cmd>AerialNextUp<cr>',  desc = 'Next symbol (up a level)' },
   },

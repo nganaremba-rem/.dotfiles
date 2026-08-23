@@ -85,21 +85,64 @@ return {
       end
     end)
 
+    -- Git writes `.git/index` by writing `index.lock` and RENAMING it over the
+    -- old file. The rename replaces the inode, so a libuv watcher pointed at the
+    -- old inode goes deaf after the very first commit/stage. Re-arming the watch
+    -- inside the callback is what keeps it alive for the whole session.
+    local watchers = {}
+
+    local function watch(path)
+      local w = vim.uv.new_fs_event()
+      if not w then return end
+      watchers[#watchers + 1] = w
+
+      -- `arm` re-arms ITSELF, so the watch survives any number of index
+      -- rewrites, not just the first.
+      local function arm()
+        w:start(path, {}, function(err)
+          if err then return end
+          refresh()
+          vim.schedule(function()
+            pcall(function() w:stop() end)
+            if vim.uv.fs_stat(path) then arm() end
+          end)
+        end)
+      end
+
+      arm()
+    end
+
     local git_dir = vim.fn.finddir('.git', vim.fn.getcwd() .. ';')
     if git_dir ~= '' then
       local abs_git = vim.fn.fnamemodify(git_dir, ':p')
-      local watch_paths = { abs_git .. 'index', abs_git .. 'HEAD', abs_git .. 'refs' }
-      for _, path in ipairs(watch_paths) do
-        local w = vim.uv.new_fs_event()
-        if w then w:start(path, {}, function(err)
-          if not err then refresh() end
-        end) end
+      for _, path in ipairs { abs_git .. 'index', abs_git .. 'HEAD', abs_git .. 'refs' } do
+        watch(path)
       end
     end
 
-    -- Also refresh on BufWritePost so edits show up immediately
+    -- Close every watcher on exit so nvim never hangs waiting on a live handle.
+    vim.api.nvim_create_autocmd('VimLeavePre', {
+      group = vim.api.nvim_create_augroup('neotree-git-watch', { clear = true }),
+      callback = function()
+        for _, w in ipairs(watchers) do pcall(function() w:stop() end) end
+      end,
+    })
+
+    -- Also refresh on BufWritePost so edits show up immediately. Grouped (so a
+    -- `:Lazy reload` cannot stack duplicates) and skipped entirely when no
+    -- neo-tree window is open — otherwise every write in every buffer pays for
+    -- a refresh nobody can see.
     vim.api.nvim_create_autocmd('BufWritePost', {
-      callback = refresh,
+      group = vim.api.nvim_create_augroup('neotree-refresh-on-write', { clear = true }),
+      callback = function()
+        for _, win in ipairs(vim.api.nvim_list_wins()) do
+          local buf = vim.api.nvim_win_get_buf(win)
+          if vim.api.nvim_get_option_value('filetype', { buf = buf }) == 'neo-tree' then
+            refresh()
+            return
+          end
+        end
+      end,
     })
   end,
 }

@@ -97,9 +97,15 @@ require('lazy').setup({
   checker = { enabled = false },
   performance = {
     rtp = {
-      -- Skip loading these built-ins we don't use — shaves ~5ms off startup
+      -- Skip loading these built-ins we don't use — shaves ~5ms off startup.
+      --
+      -- matchit and matchparen are deliberately NOT in this list: matchit is what
+      -- makes `%` jump between <div> and </div>, if/end and do/done (plain `%`
+      -- only knows brackets), and matchparen highlights the bracket matching the
+      -- one under the cursor. `showmatch` in options.lua is a different, weaker
+      -- feature (a brief cursor jump while typing) and replaces neither.
       disabled_plugins = {
-        'gzip', 'matchit', 'matchparen', 'netrwPlugin',
+        'gzip', 'netrwPlugin',
         'tarPlugin', 'tohtml', 'tutor', 'zipPlugin',
       },
     },

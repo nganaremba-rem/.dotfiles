@@ -87,6 +87,14 @@ local function dedupe(list)
   return out
 end
 
+-- Mason package name for a conform/nvim-lint tool, or nil when the tool ships
+-- with its own toolchain (rustfmt, gofmt, dart_format) and must never be
+-- Mason-installed. Public so `:checkhealth custom` can verify the translation
+-- table actually covers every tool the registry references.
+function M.mason_pkg_for_tool(tool)
+  return FORMATTER_TO_MASON[tool] or LINTER_TO_MASON[tool]
+end
+
 -- ── Public API ───────────────────────────────────────────────────────────────
 
 function M.servers()

@@ -38,12 +38,16 @@ autocmd('BufReadPost', {
   end,
 })
 
--- Trim trailing whitespace on save (non-binary files)
+-- Trim trailing whitespace on save (non-binary files).
+-- markdown is exempt: two trailing spaces are a hard line break there, and
+-- gitcommit/text can carry deliberate trailing whitespace too.
+local no_trim_ft = { diff = true, markdown = true, gitcommit = true, text = true }
+
 autocmd('BufWritePre', {
   desc = 'Trim trailing whitespace',
   group = augroup('trim-whitespace', { clear = true }),
   callback = function()
-    if not vim.bo.binary and vim.bo.filetype ~= 'diff' then
+    if not vim.bo.binary and not no_trim_ft[vim.bo.filetype] then
       local view = vim.fn.winsaveview()
       vim.cmd [[keeppatterns %s/\s\+$//e]]
       vim.fn.winrestview(view)
