@@ -341,8 +341,6 @@ x() {
 # $PNPM_HOME/bin), so no extra path entry is needed. (Removed a duplicate,
 # inconsistent `$PNPM_HOME/bin` block that the pnpm installer had appended.)
 
-# ── zoxide (initialized LAST, on purpose — see note in the eval-cache section) ─
-_eval_cache zoxide zoxide init zsh --cmd cd
 
 # nub
 export PATH="$HOME/.nub/bin:$PATH"
@@ -356,3 +354,19 @@ fi
 
 # Adguard auto completion
 # [ -s "/opt/adguardvpn_cli/bash-completion.sh" ] && \. "/opt/adguardvpn_cli/bash-completion.sh"
+
+# ── zoxide (initialized LAST, on purpose — see note in the eval-cache section) ─
+#
+# zoxide replaces `cd` with a function that, on every call, checks that
+# __zoxide_hook is still present in $chpwd_functions and prints a
+# "possible configuration issue" warning if it is not.
+#
+# That check is right for an interactive shell but produces a FALSE POSITIVE in
+# any shell that restores functions without restoring zsh arrays — tool
+# harnesses and editor shells that snapshot the environment do exactly that, so
+# `cd` exists while $chpwd_functions comes back empty, and every command prints
+# the warning. Silence the doctor there only; interactive shells keep it, so a
+# genuine ordering mistake in this file would still be reported.
+[[ -o interactive ]] || export _ZO_DOCTOR=0
+
+_eval_cache zoxide zoxide init zsh --cmd cd

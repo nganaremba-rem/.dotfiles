@@ -4,29 +4,45 @@
     {
       "id": "w12",
       "custom_name": null,
-      "identity_cwd": "/home/rem",
+      "identity_cwd": "/home/rem/coding/rust/w3school",
       "public_pane_numbers": {
-        "4": 1
+        "1": 1,
+        "2": 2
       },
-      "next_public_pane_number": 2,
+      "next_public_pane_number": 7,
       "public_tab_numbers": [
-        1
+        1,
+        2
       ],
-      "next_public_tab_number": 2,
+      "next_public_tab_number": 3,
       "tabs": [
         {
           "custom_name": null,
           "layout": {
-            "Pane": 4
+            "Pane": 1
           },
           "panes": {
-            "4": {
-              "cwd": "/home/rem"
+            "1": {
+              "cwd": "/home/rem/coding/rust/w3school"
             }
           },
           "zoomed": false,
-          "focused": 4,
-          "root_pane": 4
+          "focused": 1,
+          "root_pane": 1
+        },
+        {
+          "custom_name": null,
+          "layout": {
+            "Pane": 2
+          },
+          "panes": {
+            "2": {
+              "cwd": "/home/rem/coding/rust/w3school"
+            }
+          },
+          "zoomed": false,
+          "focused": 2,
+          "root_pane": 2
         }
       ],
       "active_tab": 0

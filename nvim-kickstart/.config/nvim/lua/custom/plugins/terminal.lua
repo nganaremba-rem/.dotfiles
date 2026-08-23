@@ -60,11 +60,27 @@ return {
     { '<leader>tv', term(WIN.right), desc = 'Terminal: [v]ertical split' },
 
     -- ── Numbered slots ────────────────────────────────────────────────────
+    --
+    -- <leader>t1..5 are NORMAL-mode only, on purpose. Inside a terminal you are
+    -- in terminal-mode, where <leader> is a literal space that belongs to the
+    -- shell — mapping a space-prefixed sequence there would make every space you
+    -- type in the shell stall for `timeoutlen` while Neovim waits to see whether
+    -- a `t` is coming. So the leader maps get you INTO a terminal, and the
+    -- Alt maps below move BETWEEN terminals once you are in one.
     { '<leader>t1', slot(1), desc = 'Terminal 1' },
     { '<leader>t2', slot(2), desc = 'Terminal 2' },
     { '<leader>t3', slot(3), desc = 'Terminal 3' },
     { '<leader>t4', slot(4), desc = 'Terminal 4' },
     { '<leader>t5', slot(5), desc = 'Terminal 5' },
+
+    -- Same five slots, reachable from inside a terminal (and from normal mode).
+    -- Alt+digit is safe here: it is not a key any shell reads, and foot/kitty
+    -- send it as ESC+digit which Neovim decodes as <M-N>.
+    { '<M-1>', slot(1), mode = { 'n', 't' }, desc = 'Terminal 1' },
+    { '<M-2>', slot(2), mode = { 'n', 't' }, desc = 'Terminal 2' },
+    { '<M-3>', slot(3), mode = { 'n', 't' }, desc = 'Terminal 3' },
+    { '<M-4>', slot(4), mode = { 'n', 't' }, desc = 'Terminal 4' },
+    { '<M-5>', slot(5), mode = { 'n', 't' }, desc = 'Terminal 5' },
 
     -- ── Context / lifecycle ───────────────────────────────────────────────
     {
@@ -96,8 +112,21 @@ return {
           Snacks.notify.warn 'Not in a terminal buffer'
         end
       end,
-      mode = { 'n', 't' },
+      -- normal mode only — see the note on the numbered slots above.
       desc = 'Terminal: [k]ill focused',
+    },
+    -- Terminal-mode twin of <leader>tk.
+    {
+      '<M-k>',
+      function()
+        if vim.bo.buftype == 'terminal' then
+          vim.cmd 'bdelete!'
+        else
+          Snacks.notify.warn 'Not in a terminal buffer'
+        end
+      end,
+      mode = { 'n', 't' },
+      desc = 'Terminal: kill focused',
     },
     { '<leader>tg', function() Snacks.lazygit() end, desc = 'Terminal: lazy[g]it' },
   },

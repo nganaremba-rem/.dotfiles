@@ -87,6 +87,17 @@ local function dedupe(list)
   return out
 end
 
+-- Tools an entry has opted OUT of Mason for, as a set. Used when the real tool
+-- comes from the language's own toolchain (rustup, go, dart) and a Mason copy
+-- would be a second, never-run installation that still downloads and updates.
+local function mason_excluded(entry)
+  local set = {}
+  for _, name in ipairs(entry.mason_exclude or {}) do
+    set[name] = true
+  end
+  return set
+end
+
 -- Mason package name for a conform/nvim-lint tool, or nil when the tool ships
 -- with its own toolchain (rustfmt, gofmt, dart_format) and must never be
 -- Mason-installed. Public so `:checkhealth custom` can verify the translation
@@ -159,16 +170,17 @@ end
 function M.mason_ensure()
   local pkgs = {}
   for _, entry in pairs(registry) do
+    local skip = mason_excluded(entry)
     for server in pairs(entry.lsp or {}) do
-      pkgs[#pkgs + 1] = server
+      if not skip[server] then pkgs[#pkgs + 1] = server end
     end
     for _, fmt in ipairs(tool_names(entry.formatters or {})) do
-      if FORMATTER_TO_MASON[fmt] then
+      if FORMATTER_TO_MASON[fmt] and not skip[fmt] then
         pkgs[#pkgs + 1] = FORMATTER_TO_MASON[fmt]
       end
     end
     for _, lnt in ipairs(tool_names(entry.linters or {})) do
-      if LINTER_TO_MASON[lnt] then
+      if LINTER_TO_MASON[lnt] and not skip[lnt] then
         pkgs[#pkgs + 1] = LINTER_TO_MASON[lnt]
       end
     end
@@ -196,16 +208,17 @@ local function mason_pkgs_for_ft(ft)
       end
     end
     if applies then
+      local skip = mason_excluded(entry)
       for server in pairs(entry.lsp or {}) do
-        pkgs[#pkgs + 1] = server_to_mason(server)
+        if not skip[server] then pkgs[#pkgs + 1] = server_to_mason(server) end
       end
       for _, fmt in ipairs(tool_names(entry.formatters or {})) do
-        if FORMATTER_TO_MASON[fmt] then
+        if FORMATTER_TO_MASON[fmt] and not skip[fmt] then
           pkgs[#pkgs + 1] = FORMATTER_TO_MASON[fmt]
         end
       end
       for _, lnt in ipairs(tool_names(entry.linters or {})) do
-        if LINTER_TO_MASON[lnt] then
+        if LINTER_TO_MASON[lnt] and not skip[lnt] then
           pkgs[#pkgs + 1] = LINTER_TO_MASON[lnt]
         end
       end

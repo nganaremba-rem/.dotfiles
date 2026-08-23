@@ -136,8 +136,10 @@ return {
     { '<leader>cR', function() Snacks.rename.rename_file() end, desc = 'Code: [R]ename file (LSP-aware)' },
 
     -- ── LSP reference hopping (snacks.words) ──────────────────────────────
-    { ']]', function() Snacks.words.jump(vim.v.count1) end, mode = { 'n', 't' }, desc = 'Next reference' },
-    { '[[', function() Snacks.words.jump(-vim.v.count1) end, mode = { 'n', 't' }, desc = 'Prev reference' },
+    -- Normal mode only. Upstream suggests { 'n', 't' }, but in terminal mode that
+    -- swallows `[[` — which is everyday shell syntax (`if [[ -f x ]]`).
+    { ']]', function() Snacks.words.jump(vim.v.count1) end, desc = 'Next reference' },
+    { '[[', function() Snacks.words.jump(-vim.v.count1) end, desc = 'Prev reference' },
   },
 
   init = function()

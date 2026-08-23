@@ -222,6 +222,66 @@ Instead the config:
 That last check is why JSX/TSX indentation works: `tsx` has `indents.scm`, so
 `indentexpr` is set for it.
 
+Two details in that function are load-bearing:
+
+- It writes `vim.bo[buf].indentexpr`, **not** `vim.bo.indentexpr`. The same
+  function runs from the async `install():await(...)` callback when a parser
+  finishes downloading, and by then the current buffer is usually a different
+  one — writing to `vim.bo` sets the option on whatever buffer you switched to
+  and leaves the buffer that needs it with no `indentexpr` at all.
+- The parser install is asynchronous, so on a brand-new machine the first file of
+  a language can open before its parser exists. That is expected; reopen it.
+
+### Fixing an indent rule (`after/queries/`)
+
+nvim-treesitter's ecma indent query does not handle **broken method chains**, so
+this config extends it in `after/queries/{tsx,typescript,javascript}/indents.scm`.
+Any file in `after/queries/<lang>/` starting with a `; extends` modeline is merged
+into (not substituted for) the plugin's query.
+
+The rule this config adds:
+
+```scm
+; extends
+(variable_declarator
+  value: (call_expression
+    function: (member_expression
+      object: (_) @_object
+      property: (_) @_property)) @indent.begin
+  (#not-same-line? @_object @_property))
+```
+
+Why it is needed: `ecma/indents.scm` deliberately excludes a `call_expression`
+value from `(variable_declarator …) @indent.begin`, because for `const x = fn(a)`
+the `(arguments)` node already supplies the indent. That exclusion also swallows
+the chain case, where nothing supplies it:
+
+```tsx
+const filtered = items
+  .filter((i) => i.ok)     // ← got base+0, prettier wants base+2
+  .map((i) => i.id);
+```
+
+Why the `#not-same-line?` guard is not optional: without it, every callback body
+in the codebase gains a phantom level, because `const x = items.map((i) => {…})`
+matches the same shape. The guard restricts the rule to chains actually broken
+across lines (object and property on different rows).
+
+`#not-same-line?` is not a predicate Neovim ships. `plugins/nvim-treesitter.lua`
+registers the **positive** `same-line?` at the top of `config`: Neovim resolves a
+leading `not-` by looking up the rest of the name and inverting it, so
+`#not-same-line?` then works in queries. Registering `not-same-line?` directly
+compiles fine and fails at *match* time with `No handler for not-same-line?` —
+which surfaces as every line indenting to column 0, not as an error message.
+
+**How to verify an indent change** (the technique matters more than this one fix):
+take a prettier-formatted file as ground truth, strip each line's indent, re-indent
+with `==` (the same `indentexpr` that `o` and `<CR>` use), and diff against the
+original. That turns "indentation feels off sometimes" into an exact list of
+failing lines, and proves a fix causes no regressions. The current rule set scores
+0 mismatches over ~170 lines of ts/js/tsx covering chains, callbacks, JSX, switch,
+try/catch and nested config objects.
+
 ---
 
 ## 8. Stage 7 — LSP, and the language registry idea
@@ -254,7 +314,7 @@ web = {
 | `linters_by_ft()` | nvim-lint |
 | `treesitter_ensure()` | nvim-treesitter install list |
 | `format_on_save_fts()` | conform's format-on-save predicate (derived: anything with a formatter) |
-| `mason_ensure()` | mason-tool-installer at startup |
+| `mason_ensure()` | mason-tool-installer at startup (minus anything in `mason_exclude`) |
 | `ensure_for_ft(ft)` | on-demand Mason install the first time you open a filetype |
 | `tasks_for_ft(ft, buf)` | overseer `<leader>r…` |
 
@@ -274,6 +334,47 @@ Two sharp edges this design has, both now covered by `:checkhealth custom`:
 shipped defaults for that server (`lsp/<name>.lua` in the plugin), then
 `vim.lsp.enable(name)` arms it. Keymaps are attached in one `LspAttach` autocmd,
 never per-server.
+
+**Pinning a server binary (`cmd`) and opting out of Mason.** nvim-lspconfig
+defaults rust_analyzer to `cmd = { 'rust-analyzer' }` — a bare name, resolved by
+PATH, and mason.nvim prepends its own bin dir, so Mason's copy always wins even
+when the rustup component is installed. The registry pins the toolchain's binary
+instead:
+
+```lua
+rust_analyzer = { cmd = rust_analyzer_cmd() },  -- $CARGO_HOME/bin/rust-analyzer
+mason_exclude = { 'rust_analyzer' },            -- so Mason stops shipping a 2nd copy
+```
+
+Why the rustup component and not Mason's: it is built against the exact toolchain
+that compiles your code, so the proc-macro server ABI always matches (a mismatch
+surfaces as "proc macro server crashed" on serde/derive-heavy crates), and the
+rustup shim honours a project's `rust-toolchain.toml` override on its own.
+`rust_analyzer_cmd()` falls back to the bare name when rustup is absent, so the
+config still works on a machine without it.
+
+`mason_exclude` is the general form of this: a list of servers/tools an entry
+opts out of Mason for, because the language's own toolchain provides them
+(rustup, go, dart). `:checkhealth custom` verifies that any absolute-path `cmd`
+is still executable — otherwise a later `rustup component remove` would turn into
+a bare "spawn failed" mid-edit.
+
+**A server can attach and still be useless.** rust-analyzer on a `.rs` file that
+is not inside a cargo project attaches, advertises `completionProvider`, and then
+returns zero items for every request — there is no workspace to analyse. Nothing
+errors; the completion menu is just always empty. The `LspAttach` handler in
+`plugins/nvim-lspconfig.lua` detects that case (no `Cargo.toml` /
+`rust-project.json` up-tree) and registers the file through rust-analyzer's
+`linkedProjects`, which accepts a `.rs` path and treats it as a standalone
+project. Measured: 0 completion items before, 135 after; files inside a real
+cargo project are untouched.
+
+That fix deliberately lives in the LspAttach handler rather than the registry:
+nvim-lspconfig already defines `on_attach` for rust_analyzer (it creates
+`:LspCargoReload`), and `vim.lsp.config` merges with `force`, so a registry-level
+`on_attach` would silently delete that command. **Before overriding any function
+field of a server config, check whether nvim-lspconfig's `lsp/<server>.lua`
+already defines it.**
 
 **Task placeholders** (`tasks_for_ft`) expand `$FILE`, `$DIR`, `$ROOT`, `$STEM`,
 `$OUT`, `$NAME`, `$TMP`, `$PM`. All are shell-quoted except `$PM` (which resolves
@@ -398,6 +499,32 @@ stops on `VimLeavePre` so a live handle cannot hold the editor open. The
 Passing a distinct `NVIM_TERM_SLOT` per slot is what makes `<leader>t1..t5` five
 independent shells that survive toggling.
 
+*Leader keys do not work inside a terminal, and must not.* A terminal buffer puts
+you in **terminal-mode**, where every key you press is sent to the shell — a space
+is a space. Mapping a `<leader>`-prefixed sequence in terminal-mode would make
+every space you type in the shell stall for `timeoutlen` while Neovim waits to see
+whether the rest of the sequence is coming, and would eat the ones that happen to
+match. So the split is:
+
+| Reach | Keys | Modes |
+|---|---|---|
+| get into / out of a terminal | `<C-\>`, `` <C-`> `` | normal + terminal |
+| open a specific terminal | `<leader>t1..t5`, `<leader>tt/th/tv/tf/tn` | normal only |
+| switch between terminals *while inside one* | `<M-1>..<M-5>` | normal + terminal |
+| kill the focused terminal | `<leader>tk` (normal), `<M-k>` (also terminal) | see left |
+| move to another window from a terminal | `<C-h/j/k/l>` | terminal (buffer-local) |
+
+Alt+digit is the right key class for terminal-mode maps: no shell reads it, and
+foot/kitty send it as `ESC`+digit which Neovim decodes as `<M-N>`. Inside tmux this
+needs no extra setting (unlike `` <C-`> ``, which requires `extended-keys on`).
+
+The same reasoning applies to any `mode = { 'n', 't' }` map you copy from a plugin
+README: `Snacks.words`' `[[`/`]]` ship with terminal-mode included, which swallows
+`if [[ -f x ]]` — everyday shell syntax. They are normal-mode only here.
+
+The other route, always available and worth knowing: `<Esc><Esc>` leaves
+terminal-mode for normal mode, after which every leader map works as usual.
+
 **Tasks**: overseer, driven by the registry's `tasks` field. `build`/`test`/`file`
 run under the `jobstart` strategy, not a terminal, because a PTY hard-wraps long
 lines and a wrapped `path/file.c:12:5: error: …` no longer matches the
@@ -459,6 +586,12 @@ Every entry here is a real bug this config hit, with the shape of the diagnosis.
 | "file changed since reading it!!!" on a UTF-8 file | `fileencodings` order | utf-8 before the Japanese encodings |
 | Save no longer triggers Vite HMR | inode changed on write | `backupcopy = 'yes'` |
 | Statusline lost its colours after a transparency tweak | `nvim_set_hl` replaces the whole group | read-merge-write (`config/transparent.lua`) |
+| `o`/`<CR>` under-indents a broken method chain | ecma indent query excludes `call_expression` declarator values | `after/queries/*/indents.scm` rule above |
+| Every line indents to column 0 | an indents query raised at match time (e.g. unknown predicate) — `get_indent` errors and returns nothing | `:lua =require('nvim-treesitter.indent').get_indent(<lnum>)` shows the real error |
+| One file stopped indenting, others fine | `indentexpr` was written to the wrong buffer by an async parser-install callback | `vim.bo[buf]`, not `vim.bo` |
+| No completions in a `.rs` file, but rust-analyzer is attached | the file is not in a cargo project, so rust-analyzer has no workspace and answers every request with an empty list | handled: LspAttach registers it via `linkedProjects` (see §8) |
+| Space feels laggy / gets eaten while typing in a terminal | a `<leader>`-prefixed map claimed terminal-mode | drop `'t'` from its `mode`; use an Alt key instead |
+| Indent width is 4 (or tabs) when you expect 2 | guess-indent.nvim adapted to that file's existing indentation | `:set sw? et?` — this is working as designed |
 | Formatter appears to do nothing | tool name has no Mason package mapping, so it was never installed | add it to `FORMATTER_TO_MASON`; `:checkhealth custom` finds these |
 | Quickfix entries all point at line 0 | task ran in a PTY and wrapped the compiler output | `jobstart` strategy for parsed task kinds |
 

@@ -149,6 +149,26 @@ local function check_registry()
     report_ok(('%d filetypes, each owned by one entry'):format(vim.tbl_count(ft_owner)))
   end
 
+  -- A server whose `cmd` is pinned to an absolute path (rust_analyzer is pinned
+  -- to the rustup component) fails to start with a bare "spawn failed" if that
+  -- path ever moves — e.g. after `rustup component remove`. Check it here rather
+  -- than discovering it mid-edit.
+  local pinned_bad = 0
+  for server, settings in pairs(lang.servers()) do
+    local cmd = type(settings) == 'table' and settings.cmd
+    if type(cmd) == 'table' and type(cmd[1]) == 'string' and cmd[1]:sub(1, 1) == '/' then
+      if vim.fn.executable(cmd[1]) == 1 then
+        report_ok(('%s pinned to %s'):format(server, cmd[1]))
+      else
+        pinned_bad = pinned_bad + 1
+        err(('%s is pinned to %s, which is not executable'):format(server, cmd[1]))
+      end
+    end
+  end
+  if pinned_bad > 0 then
+    info 'Fix: reinstall the tool (e.g. `rustup component add rust-analyzer`) or drop the `cmd` pin from the registry entry.'
+  end
+
   -- A formatter/linter with no Mason translation is never installed, so conform
   -- silently formats nothing. Tools that ship with their own toolchain
   -- (rustfmt, gofmt, dart_format) are expected here and are not an error.
@@ -200,6 +220,7 @@ local function check_binaries()
     make = 'building LuaSnip jsregexp and avante',
     unzip = 'Mason package extraction',
     ['live-server'] = '<leader>rl for plain html projects',
+    cargo = 'rust-analyzer analysis + <leader>r… rust tasks',
   }
 
   for exe, why in pairs(required) do

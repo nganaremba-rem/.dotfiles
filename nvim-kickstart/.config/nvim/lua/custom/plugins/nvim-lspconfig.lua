@@ -39,6 +39,39 @@ return {
 
         local client = vim.lsp.get_client_by_id(event.data.client_id)
 
+        -- ── rust-analyzer: make single-file .rs buffers work ────────────────
+        --
+        -- A .rs file that is not inside a cargo project gets NO completions, no
+        -- hover and no diagnostics: rust-analyzer attaches, reports
+        -- `completionProvider`, and then answers every request with an empty
+        -- list because it has no workspace to analyse. Nothing looks broken —
+        -- the menu is simply always empty, which reads as "suggestions don't
+        -- work in Rust".
+        --
+        -- The fix is rust-analyzer's own `linkedProjects`, which accepts a path
+        -- to a `.rs` file and treats it as a standalone project. Files inside a
+        -- real cargo project are left completely alone.
+        --
+        -- This lives here rather than in the registry because nvim-lspconfig
+        -- already defines `on_attach` for rust_analyzer (it creates
+        -- :LspCargoReload) and `vim.lsp.config` merges with `force` — declaring
+        -- our own would silently drop that command.
+        if client and client.name == 'rust_analyzer' then
+          local fname = vim.api.nvim_buf_get_name(event.buf)
+          if fname ~= '' and not vim.fs.root(fname, { 'Cargo.toml', 'rust-project.json' }) then
+            local settings = vim.deepcopy(client.settings or {})
+            local ra = settings['rust-analyzer'] or {}
+            local linked = ra.linkedProjects or {}
+            if not vim.tbl_contains(linked, fname) then
+              table.insert(linked, fname)
+              ra.linkedProjects = linked
+              settings['rust-analyzer'] = ra
+              client.settings = settings
+              client:notify('workspace/didChangeConfiguration', { settings = settings })
+            end
+          end
+        end
+
         -- Highlight references of the symbol under the cursor on CursorHold.
         if client and client:supports_method('textDocument/documentHighlight', event.buf) then
           local highlight_augroup = vim.api.nvim_create_augroup('kickstart-lsp-highlight', { clear = false })

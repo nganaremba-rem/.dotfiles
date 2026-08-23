@@ -5,6 +5,22 @@ return { -- Highlight, edit, and navigate code
   branch = 'main',
   -- [[ Configure Treesitter ]] See `:help nvim-treesitter-intro`
   config = function()
+    -- `#same-line?` — true when two captures start on the same row. Neovim ships
+    -- no such predicate and nvim-treesitter only adds `kind-eq?`, so the indent
+    -- queries in after/queries/{tsx,typescript,javascript} register it here.
+    --
+    -- Register the POSITIVE form only: Neovim resolves a leading `not-` by
+    -- looking up the rest of the name and inverting it, so `#not-same-line?` in
+    -- a query works for free. Registering `not-same-line?` directly instead
+    -- fails at match time with "No handler for not-same-line?".
+    --
+    -- Must run before any indents query is compiled — hence the top of `config`.
+    vim.treesitter.query.add_predicate('same-line?', function(match, _, _, pred)
+      local a, b = match[pred[2]], match[pred[3]]
+      if not a or not b or #a == 0 or #b == 0 then return false end
+      return a[1]:start() == b[1]:start()
+    end, { force = true, all = true })
+
     -- Editor-essential parsers (not tied to any one language) + every parser the
     -- language registry asks for. New languages add parsers via the registry only.
     local parsers = { 'diff', 'query', 'vim', 'vimdoc', 'regex' }
@@ -28,8 +44,15 @@ return { -- Highlight, edit, and navigate code
       -- in case there is no indent query, the indentexpr will fallback to the vim's built in one
       local has_indent_query = vim.treesitter.query.get(language, 'indents') ~= nil
 
-      -- enables treesitter based indentation
-      if has_indent_query then vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()" end
+      -- enables treesitter based indentation.
+      --
+      -- `vim.bo[buf]`, NOT `vim.bo`: this function also runs from the async
+      -- `install():await(...)` callback below, which fires whenever the parser
+      -- download finishes — by then the current buffer is very often a different
+      -- one. Writing to `vim.bo` would set indentexpr on whatever buffer you had
+      -- switched to and leave the buffer that actually needs it without any,
+      -- which shows up as "`o`/<CR> stopped indenting in this one file".
+      if has_indent_query then vim.bo[buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()" end
     end
 
     local available_parsers = require('nvim-treesitter').get_available()

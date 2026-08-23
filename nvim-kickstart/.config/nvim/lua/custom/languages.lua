@@ -14,6 +14,8 @@
 --      linters    = { 'linter1' },     -- nvim-lint syntax
 --      treesitter = { 'parser1' },     -- extra parsers (filetype is added anyway)
 --      mason      = { 'extra-pkg' },   -- escape hatch: extra Mason packages to install
+--      mason_exclude = { 'tool' },     -- never Mason-install these (the toolchain
+--                                      -- provides them: rustup, go, dart, …)
 --      tasks      = {                  -- overseer templates (<leader>r…)
 --        run   = 'cargo run',          --   <leader>rr  run the project
 --        build = 'cargo build',        --   <leader>rb  build
@@ -35,6 +37,25 @@
 --  with their own toolchain (rustfmt, dart_format, gofmt) are intentionally not
 --  Mason-installed.
 -- ════════════════════════════════════════════════════════════════════════════
+
+-- rust-analyzer, preferring the rustup COMPONENT over the Mason package.
+--
+-- Both can be installed at once, and `cmd = { 'rust-analyzer' }` (nvim-lspconfig's
+-- default) just takes whatever PATH resolves first — which is Mason's, because
+-- mason.nvim prepends its bin dir. The rustup component is the better choice
+-- here: it is built against the exact toolchain that compiles your code, so the
+-- proc-macro server ABI always matches (a mismatch shows up as "proc macro
+-- server crashed" on serde/derive-heavy crates), and the shim honours a
+-- project's `rust-toolchain.toml` override automatically.
+--
+-- Falls back to a bare 'rust-analyzer' (i.e. PATH, i.e. Mason) on a machine with
+-- no rustup, so this config still works there.
+local function rust_analyzer_cmd()
+  local cargo_home = vim.env.CARGO_HOME or (vim.env.HOME .. '/.cargo')
+  local shim = cargo_home .. '/bin/rust-analyzer'
+  if vim.fn.executable(shim) == 1 then return { shim } end
+  return { 'rust-analyzer' }
+end
 
 return {
   lua = {
@@ -94,7 +115,15 @@ return {
 
   rust = {
     filetypes = { 'rust' },
-    lsp = { rust_analyzer = {} },
+    -- Single-file .rs buffers (no Cargo.toml) get no completions from
+    -- rust-analyzer until they are registered as a standalone `linkedProjects`
+    -- entry. That happens in the LspAttach handler in
+    -- custom/plugins/nvim-lspconfig.lua — it cannot live here, because
+    -- nvim-lspconfig already owns `on_attach` for this server.
+    lsp = { rust_analyzer = { cmd = rust_analyzer_cmd() } },
+    -- ...and with the toolchain's own binary pinned above, the Mason package
+    -- would be a second copy that is downloaded, updated, and never run.
+    mason_exclude = { 'rust_analyzer' },
     formatters = { 'rustfmt' }, -- ships with the rust toolchain (rustup component)
     treesitter = { 'rust' },
     tasks = {

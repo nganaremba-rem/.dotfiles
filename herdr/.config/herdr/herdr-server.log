@@ -1766,3 +1766,72 @@
 2026-08-03T16:26:18.181291Z  INFO herdr::server::headless: client detach requested via keybind client_id=4
 2026-08-03T16:26:18.182068Z  INFO herdr::server::headless: client disconnected client_id=4
 2026-08-03T16:26:20.519567Z  INFO herdr::logging: session saved event="persist.save" subsystem="persist" outcome="ok" path=/home/rem/.config/herdr/session.json workspaces=1
+2026-08-23T07:22:08.141198Z  INFO herdr::api::server: api server listening path=/home/rem/.config/herdr/herdr.sock
+2026-08-23T07:22:08.144536Z  INFO herdr::logging: spawning pane terminal event="pane.spawn.start" subsystem="pane" outcome="started" pane_id=1 rows=24 cols=80 scrollback_limit_bytes=10000000
+2026-08-23T07:22:08.147037Z  INFO herdr::logging: pane child spawned event="pane.spawned" subsystem="pane" outcome="ok" pane_id=1 pid=719402
+2026-08-23T07:22:08.148005Z  INFO herdr::logging: session restore evaluated event="persist.restore" subsystem="persist" outcome="ok" workspaces=1
+2026-08-23T07:22:08.148151Z  INFO herdr::app: using pane scrollback configuration pane_scrollback_limit_bytes=10000000
+2026-08-23T07:22:08.197236Z  INFO herdr::server::headless: restored session already has workspaces; ignoring startup cwd cwd=/home/rem/coding/rust/w3school
+2026-08-23T07:22:08.197251Z  INFO herdr::logging: checking for updates event="update.check.start" subsystem="update" outcome="started"
+2026-08-23T07:22:08.197480Z  INFO herdr::server::headless: client protocol socket listening path=/home/rem/.config/herdr/herdr-client.sock
+2026-08-23T07:22:08.197548Z  INFO herdr::server::headless: herdr server started api_socket=/home/rem/.config/herdr/herdr.sock client_socket=/home/rem/.config/herdr/herdr-client.sock
+2026-08-23T07:22:08.197575Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="server" outcome="started" pid=719388
+2026-08-23T07:22:08.482540Z  WARN herdr::detect::manifest_update: skipping unknown remote manifest agent agent="maki"
+2026-08-23T07:22:08.482565Z  WARN herdr::detect::manifest_update: skipping unknown remote manifest agent agent="qwen"
+2026-08-23T07:22:08.483484Z  INFO herdr::server::headless: client connected client_id=2 cols=144 rows=39 cell_width_px=0 cell_height_px=0 render_encoding=SemanticFrame
+2026-08-23T07:22:08.707713Z  INFO herdr::logging: update available event="update.available" subsystem="update" outcome="ok" version="0.8.2"
+2026-08-23T07:22:08.707734Z  INFO herdr::update: new stable build available at https://github.com/herdrdev/herdr/releases/download/v0.8.2/herdr-linux-x86_64
+2026-08-23T07:22:08.708693Z  INFO herdr::update: auto-update check: 0.8.2 available, waiting for explicit install
+2026-08-23T07:22:09.635578Z  WARN herdr::detect::manifest_update: agent detection manifest update failed for agent agent="codex" error=rule trust_directory uses invalid region: top_non_empty_lines(20)
+2026-08-23T07:22:29.898354Z  INFO herdr::logging: spawning pane terminal event="pane.spawn.start" subsystem="pane" outcome="started" pane_id=2 rows=38 cols=128 scrollback_limit_bytes=10000000
+2026-08-23T07:22:29.899324Z  INFO herdr::logging: pane child spawned event="pane.spawned" subsystem="pane" outcome="ok" pane_id=2 pid=719942
+2026-08-23T07:22:29.899402Z  INFO herdr::logging: tab focused event="tab.focus" subsystem="tab" outcome="ok" workspace_id="w12" tab_id="w12:t2"
+2026-08-23T07:22:29.899406Z  INFO herdr::logging: tab created event="tab.create" subsystem="tab" outcome="ok" workspace_id="w12" tab_id="w12:t2" pane_id=2
+2026-08-23T07:22:34.906530Z  INFO herdr::logging: session saved event="persist.save" subsystem="persist" outcome="ok" path=/home/rem/.config/herdr/session.json workspaces=1
+2026-08-23T07:22:35.282574Z  INFO herdr::logging: tab focused event="tab.focus" subsystem="tab" outcome="ok" workspace_id="w12" tab_id="w12:t1"
+2026-08-23T07:22:36.202642Z  INFO herdr::logging: tab focused event="tab.focus" subsystem="tab" outcome="ok" workspace_id="w12" tab_id="w12:t2"
+2026-08-23T07:22:36.890554Z  INFO herdr::logging: tab focused event="tab.focus" subsystem="tab" outcome="ok" workspace_id="w12" tab_id="w12:t1"
+2026-08-23T07:22:40.002798Z  INFO herdr::logging: spawning pane terminal event="pane.spawn.start" subsystem="pane" outcome="started" pane_id=3 rows=19 cols=64 scrollback_limit_bytes=10000000
+2026-08-23T07:22:40.003783Z  INFO herdr::logging: pane child spawned event="pane.spawned" subsystem="pane" outcome="ok" pane_id=3 pid=720091
+2026-08-23T07:22:45.005856Z  INFO herdr::logging: session saved event="persist.save" subsystem="persist" outcome="ok" path=/home/rem/.config/herdr/session.json workspaces=1
+2026-08-23T07:22:51.147030Z  INFO herdr::logging: spawning pane terminal event="pane.spawn.start" subsystem="pane" outcome="started" pane_id=4 rows=19 cols=128 scrollback_limit_bytes=10000000
+2026-08-23T07:22:51.147996Z  INFO herdr::logging: pane child spawned event="pane.spawned" subsystem="pane" outcome="ok" pane_id=4 pid=720415
+2026-08-23T07:22:57.703723Z  INFO herdr::logging: pane child exited event="pane.exit" subsystem="pane" outcome="completed" pane_id=4 status="ExitStatus { code: 0, signal: None }"
+2026-08-23T07:22:57.703834Z  INFO herdr::pane: pane session terminated pane=4 pid=720415 signal=Hangup
+2026-08-23T07:22:59.691971Z  INFO herdr::logging: pane child exited event="pane.exit" subsystem="pane" outcome="completed" pane_id=3 status="ExitStatus { code: 0, signal: None }"
+2026-08-23T07:22:59.692048Z  INFO herdr::pane: pane session terminated pane=3 pid=720091 signal=Hangup
+2026-08-23T07:23:04.693786Z  INFO herdr::logging: session saved event="persist.save" subsystem="persist" outcome="ok" path=/home/rem/.config/herdr/session.json workspaces=1
+2026-08-23T07:23:15.252395Z  INFO herdr::logging: spawning pane terminal event="pane.spawn.start" subsystem="pane" outcome="started" pane_id=5 rows=19 cols=64 scrollback_limit_bytes=10000000
+2026-08-23T07:23:15.253324Z  INFO herdr::logging: pane child spawned event="pane.spawned" subsystem="pane" outcome="ok" pane_id=5 pid=720716
+2026-08-23T07:23:20.256288Z  INFO herdr::logging: session saved event="persist.save" subsystem="persist" outcome="ok" path=/home/rem/.config/herdr/session.json workspaces=1
+2026-08-23T07:23:25.324319Z  INFO herdr::logging: tab focused event="tab.focus" subsystem="tab" outcome="ok" workspace_id="w12" tab_id="w12:t1"
+2026-08-23T07:23:30.326057Z  INFO herdr::logging: session saved event="persist.save" subsystem="persist" outcome="ok" path=/home/rem/.config/herdr/session.json workspaces=1
+2026-08-23T07:23:32.548404Z  INFO herdr::logging: tab focused event="tab.focus" subsystem="tab" outcome="ok" workspace_id="w12" tab_id="w12:t1"
+2026-08-23T07:23:36.439394Z  INFO herdr::logging: tab focused event="tab.focus" subsystem="tab" outcome="ok" workspace_id="w12" tab_id="w12:t1"
+2026-08-23T07:23:40.292756Z  INFO herdr::logging: tab focused event="tab.focus" subsystem="tab" outcome="ok" workspace_id="w12" tab_id="w12:t1"
+2026-08-23T07:23:45.294548Z  INFO herdr::logging: session saved event="persist.save" subsystem="persist" outcome="ok" path=/home/rem/.config/herdr/session.json workspaces=1
+2026-08-23T07:23:45.781225Z  INFO herdr::logging: tab focused event="tab.focus" subsystem="tab" outcome="ok" workspace_id="w12" tab_id="w12:t1"
+2026-08-23T07:23:46.444819Z  INFO herdr::logging: tab focused event="tab.focus" subsystem="tab" outcome="ok" workspace_id="w12" tab_id="w12:t1"
+2026-08-23T07:23:46.591075Z  INFO herdr::logging: tab focused event="tab.focus" subsystem="tab" outcome="ok" workspace_id="w12" tab_id="w12:t1"
+2026-08-23T07:23:47.149191Z  INFO herdr::logging: tab focused event="tab.focus" subsystem="tab" outcome="ok" workspace_id="w12" tab_id="w12:t1"
+2026-08-23T07:23:47.317396Z  INFO herdr::logging: tab focused event="tab.focus" subsystem="tab" outcome="ok" workspace_id="w12" tab_id="w12:t1"
+2026-08-23T07:23:47.469153Z  INFO herdr::logging: tab focused event="tab.focus" subsystem="tab" outcome="ok" workspace_id="w12" tab_id="w12:t1"
+2026-08-23T07:23:47.613213Z  INFO herdr::logging: tab focused event="tab.focus" subsystem="tab" outcome="ok" workspace_id="w12" tab_id="w12:t1"
+2026-08-23T07:23:48.125435Z  INFO herdr::logging: workspace focused event="workspace.focus" subsystem="workspace" outcome="ok" workspace_id="w12"
+2026-08-23T07:23:48.125458Z  INFO herdr::logging: tab focused event="tab.focus" subsystem="tab" outcome="ok" workspace_id="w12" tab_id="w12:t1"
+2026-08-23T07:23:53.126817Z  INFO herdr::logging: session saved event="persist.save" subsystem="persist" outcome="ok" path=/home/rem/.config/herdr/session.json workspaces=1
+2026-08-23T07:23:54.176548Z  INFO herdr::logging: spawning pane terminal event="pane.spawn.start" subsystem="pane" outcome="started" pane_id=6 rows=19 cols=128 scrollback_limit_bytes=10000000
+2026-08-23T07:23:54.177580Z  INFO herdr::logging: pane child spawned event="pane.spawned" subsystem="pane" outcome="ok" pane_id=6 pid=721237
+2026-08-23T07:23:56.116441Z  INFO herdr::logging: pane child exited event="pane.exit" subsystem="pane" outcome="completed" pane_id=6 status="ExitStatus { code: 0, signal: None }"
+2026-08-23T07:23:56.116631Z  INFO herdr::pane: pane session terminated pane=6 pid=721237 signal=Hangup
+2026-08-23T07:23:58.885609Z  INFO herdr::logging: tab focused event="tab.focus" subsystem="tab" outcome="ok" workspace_id="w12" tab_id="w12:t1"
+2026-08-23T07:23:59.309292Z  INFO herdr::logging: workspace focused event="workspace.focus" subsystem="workspace" outcome="ok" workspace_id="w12"
+2026-08-23T07:23:59.309316Z  INFO herdr::logging: tab focused event="tab.focus" subsystem="tab" outcome="ok" workspace_id="w12" tab_id="w12:t1"
+2026-08-23T07:24:00.151012Z  INFO herdr::logging: pane child exited event="pane.exit" subsystem="pane" outcome="completed" pane_id=5 status="ExitStatus { code: 0, signal: None }"
+2026-08-23T07:24:00.151217Z  INFO herdr::pane: pane session terminated pane=5 pid=720716 signal=Hangup
+2026-08-23T07:24:05.152955Z  INFO herdr::logging: session saved event="persist.save" subsystem="persist" outcome="ok" path=/home/rem/.config/herdr/session.json workspaces=1
+2026-08-23T07:25:04.607590Z  INFO herdr::server::headless: client detach requested via keybind client_id=2
+2026-08-23T07:25:04.608184Z  INFO herdr::server::headless: client disconnected client_id=2
+2026-08-23T07:52:08.476699Z  WARN herdr::detect::manifest_update: skipping unknown remote manifest agent agent="maki"
+2026-08-23T07:52:08.476727Z  WARN herdr::detect::manifest_update: skipping unknown remote manifest agent agent="qwen"
+2026-08-23T07:52:09.612883Z  WARN herdr::detect::manifest_update: agent detection manifest update failed for agent agent="codex" error=rule trust_directory uses invalid region: top_non_empty_lines(20)
