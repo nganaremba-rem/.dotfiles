@@ -1,0 +1,405 @@
+#!/usr/bin/env bash
+# ocr — grab text off the screen.
+#
+# Region-select (or window / output / clipboard / file) -> OCR -> clipboard
+# -> interactive overlay. Local tesseract by default, Claude vision on
+# demand, with automatic escalation when the local pass looks unreliable.
+
+set -uo pipefail
+
+LOG=/tmp/ocr.log
+LAST_IMG=/tmp/ocr-last.png
+LAST_TXT=/tmp/ocr-last.txt
+LAST_META=/tmp/ocr-last.meta
+
+# ── Defaults (override in ~/.config/ocr/config) ─────────────────────────
+LANGS="eng"
+ENGINE="auto"
+ACTION="text"
+MODEL="claude-sonnet-5"
+UPSCALE=300
+CONF_MIN=60
+AI_TIMEOUT=30
+MODE="region"
+FILE=""
+OVERLAY=1
+UNWRAP=0
+RERUN=0
+
+CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/ocr/config"
+[[ -r "$CONFIG" ]] && . "$CONFIG"
+
+log() { printf '%s %s\n' "$(date '+%H:%M:%S')" "$*" >> "$LOG"; }
+die() {
+    log "FATAL: $*"
+    notify-send "OCR" "$1" -i dialog-error -t 4000
+    exit 1
+}
+
+usage() {
+    sed -n '2,6p' "$0" | sed 's/^# \?//'
+    cat <<'EOF'
+
+Usage: ocr [options]
+
+Capture source (pick one, default --region):
+  --region              drag a box (slurp)
+  --window              the focused window
+  --output              the whole focused monitor
+  --clip                the image currently in the clipboard
+  --file PATH           an image file
+
+Options:
+  -e, --engine ENGINE   tess | ai | auto        (default: auto)
+  -l, --lang LANGS      tesseract langs, e.g. eng+jpn   (default: eng)
+  -a, --action ACTION   text | table | latex | code | translate | explain
+                        (anything but 'text' forces the AI engine)
+  -u, --unwrap          rejoin soft-wrapped prose into paragraphs
+  -n, --no-overlay      print to stdout, skip the result panel
+  -r, --rerun           reuse /tmp/ocr-last.png, do not capture again
+  -m, --menu            pick an action from a fuzzel menu first
+  -h, --help            this text
+EOF
+}
+
+# ── Arguments ───────────────────────────────────────────────────────────
+MENU=0
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --region)            MODE=region ;;
+        --window)            MODE=window ;;
+        --output|--screen)   MODE=output ;;
+        --clip|--clipboard)  MODE=clip ;;
+        --file)              MODE=file; FILE="${2:-}"; shift ;;
+        -e|--engine)         ENGINE="${2:-}"; shift ;;
+        -l|--lang)           LANGS="${2:-}"; shift ;;
+        -a|--action)         ACTION="${2:-}"; shift ;;
+        -u|--unwrap)         UNWRAP=1 ;;
+        -n|--no-overlay)     OVERLAY=0 ;;
+        -r|--rerun)          RERUN=1 ;;
+        -m|--menu)           MENU=1 ;;
+        -h|--help)           usage; exit 0 ;;
+        *)                   usage >&2; exit 2 ;;
+    esac
+    shift
+done
+
+log "--- start mode=$MODE lang=$LANGS action=$ACTION rerun=$RERUN"
+
+for bin in grim slurp wl-copy magick tesseract notify-send jq curl; do
+    command -v "$bin" >/dev/null || die "missing dependency: $bin"
+done
+
+# Structured extraction only makes sense on the vision path.
+[[ "$ACTION" != "text" ]] && ENGINE="ai"
+log "engine=$ENGINE"
+
+if (( MENU )); then
+    CHOICE=$(printf '%s\n' \
+        "text        plain text (local)" \
+        "smart       plain text (Claude vision)" \
+        "table       table → markdown" \
+        "latex       math → LaTeX" \
+        "code        code → fenced block" \
+        "translate   translate to English" \
+        "explain     explain what this says" \
+        | fuzzel --dmenu --prompt 'ocr > ' 2>>"$LOG" | awk '{print $1}')
+    [[ -z "$CHOICE" ]] && { log "menu cancelled"; exit 0; }
+    if [[ "$CHOICE" == "smart" ]]; then
+        ACTION=text; ENGINE=ai
+    elif [[ "$CHOICE" != "text" ]]; then
+        ACTION="$CHOICE"; ENGINE=ai
+    fi
+    log "menu picked action=$ACTION engine=$ENGINE"
+fi
+
+TMPDIR_OCR=$(mktemp -d /tmp/ocr-run-XXXXXX)
+SHOT="$TMPDIR_OCR/shot.png"
+PROC="$TMPDIR_OCR/proc.png"
+trap 'rm -rf "$TMPDIR_OCR"' EXIT
+
+# Where to anchor the overlay. Filled in by the capture step.
+GX=0 GY=0 GW=0 GH=0
+
+# ── 1. Capture ──────────────────────────────────────────────────────────
+focused_output_name() { niri msg --json focused-output 2>>"$LOG" | jq -r '.name // empty'; }
+
+capture_region() {
+    local geom
+    geom=$(slurp -d \
+        -b "#00000000" \
+        -c "#cba6f7ff" \
+        -s "#cba6f722" \
+        -w 2 2>>"$LOG")
+    [[ -z "$geom" ]] && { log "slurp cancelled"; exit 0; }
+    log "geom: $geom"
+    GX=${geom%%,*}
+    GY=$(echo "$geom" | cut -d',' -f2 | cut -d' ' -f1)
+    GW=$(echo "$geom" | cut -d' ' -f2 | cut -d'x' -f1)
+    GH=${geom##*x}
+    grim -g "$geom" "$SHOT" 2>>"$LOG" || die "screenshot failed"
+}
+
+capture_output() {
+    local out; out=$(focused_output_name)
+    [[ -z "$out" ]] && die "cannot determine focused output"
+    grim -o "$out" "$SHOT" 2>>"$LOG" || die "screenshot failed"
+    read -r GX GY < <(niri msg --json outputs 2>>"$LOG" \
+        | jq -r --arg o "$out" '.[$o].logical | "\(.x) \(.y)"' 2>/dev/null || echo "0 0")
+    [[ "$GX" == "null" || -z "$GX" ]] && { GX=0; GY=0; }
+    read -r GW GH < <(magick identify -format '%w %h' "$SHOT")
+    log "output capture: $out ${GW}x${GH}+${GX}+${GY}"
+}
+
+read_clipboard_image() {
+    local dest="$1" t raw="$TMPDIR_OCR/clipdata"
+    timeout 5 wl-paste --list-types 2>/dev/null | grep -q '^image/' || return 1
+    t=$(timeout 5 wl-paste --list-types 2>/dev/null | grep -m1 '^image/')
+    timeout 10 wl-paste --type "$t" > "$raw" 2>>"$LOG" || return 1
+    [[ -s "$raw" ]] || return 1
+    magick "$raw" "$dest" 2>>"$LOG"
+}
+
+# niri knows the exact window bounds, so ask the compositor rather than
+# reconstructing them from IPC geometry — `tile_pos_in_workspace_view` is null
+# in common cases and the arithmetic misses window decorations anyway.
+capture_window() {
+    local out
+    if niri msg action screenshot-window -d false -p false >>"$LOG" 2>&1 \
+       && sleep 0.3 && read_clipboard_image "$SHOT"; then
+        read -r GW GH < <(magick identify -format '%w %h' "$SHOT")
+        out=$(focused_output_name)
+        read -r GX GY < <(niri msg --json outputs 2>>"$LOG" \
+            | jq -r --arg o "$out" '.[$o].logical | "\(.x) \(.y)"' 2>/dev/null || echo "0 0")
+        [[ "$GX" == "null" || -z "$GX" ]] && { GX=0; GY=0; }
+        log "window capture via niri: ${GW}x${GH}"
+        return 0
+    fi
+    log "niri screenshot-window failed, falling back to full output"
+    capture_output
+}
+
+if (( RERUN )); then
+    [[ -r "$LAST_IMG" ]] || die "no previous capture to re-run"
+    cp "$LAST_IMG" "$SHOT"
+    if [[ -r "$LAST_META" ]]; then
+        # shellcheck disable=SC1090
+        . "$LAST_META"
+        GX=${META_X:-0}; GY=${META_Y:-0}; GW=${META_W:-0}; GH=${META_H:-0}
+    fi
+    log "rerun on cached image"
+else
+    case "$MODE" in
+        region) capture_region ;;
+        window) capture_window ;;
+        output) capture_output ;;
+        clip)
+            read_clipboard_image "$SHOT" || die "no usable image in clipboard"
+            read -r GW GH < <(magick identify -format '%w %h' "$SHOT")
+            ;;
+        file)
+            [[ -r "$FILE" ]] || die "cannot read $FILE"
+            magick "$FILE" "$SHOT" 2>>"$LOG" || die "not an image: $FILE"
+            read -r GW GH < <(magick identify -format '%w %h' "$SHOT")
+            ;;
+    esac
+fi
+
+[[ -s "$SHOT" ]] || die "empty capture"
+cp "$SHOT" "$LAST_IMG"
+
+# ── 2. Preprocess (tesseract path) ──────────────────────────────────────
+# Screen text is small and often light-on-dark. Upscaling recovers glyph
+# detail the engine needs; tesseract is trained on dark-on-light scans, so a
+# dark background gets inverted before recognition.
+preprocess() {
+    local mean invert=""
+    mean=$(magick "$SHOT" -alpha off -colorspace gray -format '%[fx:mean]' info: 2>>"$LOG")
+    if [[ -n "$mean" ]] && awk -v m="$mean" 'BEGIN{exit !(m < 0.5)}'; then
+        invert="-negate"
+        log "invert: dark background (mean=$mean)"
+    else
+        log "no invert (mean=$mean)"
+    fi
+    magick "$SHOT" -alpha off -resize "${UPSCALE}%" -colorspace gray $invert \
+        -normalize -sharpen 0x1 "$PROC" 2>>"$LOG" \
+        || cp "$SHOT" "$PROC"
+}
+
+# ── 3. Recognize ────────────────────────────────────────────────────────
+PSM=6
+[[ "$MODE" == "window" || "$MODE" == "output" ]] && PSM=3
+
+CONF=""
+CONF_FILE="$TMPDIR_OCR/conf"
+read_conf() { CONF=$(cat "$CONF_FILE" 2>/dev/null); CONF=${CONF:-0}; }
+
+run_tesseract() {
+    preprocess
+    local tsv
+    tsv=$(tesseract "$PROC" stdout -l "$LANGS" --oem 1 --psm "$PSM" tsv 2>>"$LOG")
+
+    # Column 11 is the word, 12 is its confidence; -1 marks layout rows.
+    awk -F'\t' 'NR>1 && $11 >= 0 && $12 ~ /[^[:space:]]/ {s+=$11; n++}
+                 END {if (n) printf "%.0f", s/n; else print 0}' <<<"$tsv" > "$CONF_FILE"
+
+    # Rebuild text from the TSV so line and block breaks survive.
+    awk -F'\t' '
+        NR == 1 { next }
+        $11 < 0 { next }
+        $12 !~ /[^[:space:]]/ { next }
+        {
+            if (started && ($5 != pl || $4 != pp || $3 != pb)) printf "\n"
+            else if (started) printf " "
+            printf "%s", $12
+            started = 1; pl = $5; pp = $4; pb = $3
+        }
+        END { if (started) printf "\n" }
+    ' <<<"$tsv"
+}
+
+ai_prompt() {
+    case "$ACTION" in
+        table)     echo "Extract the table from this image as a GitHub-flavored markdown table. Output only the table." ;;
+        latex)     echo "Transcribe the mathematics in this image as LaTeX. Output only the LaTeX, no delimiters or commentary." ;;
+        code)      echo "Transcribe the source code in this image exactly, preserving indentation. Output only a fenced code block with the language tag." ;;
+        translate) echo "Transcribe the text in this image and translate it into English. Output only the English translation." ;;
+        explain)   echo "Read the text in this image and explain what it says in a few plain sentences." ;;
+        *)         echo "Transcribe all text in this image verbatim, preserving line and paragraph breaks. Output only the transcribed text: no commentary, no preamble, no markdown fences." ;;
+    esac
+}
+
+# niri spawns processes from the compositor's environment, which never sourced
+# ~/.zshrc — so the key has to be loaded here rather than inherited.
+load_api_key() {
+    [[ -n "${ANTHROPIC_API_KEY:-}" ]] && return 0
+    local secrets="${XDG_CONFIG_HOME:-$HOME/.config}/zsh/secrets.zsh"
+    [[ -r "$secrets" ]] || return 1
+    ANTHROPIC_API_KEY=$(sed -n 's/^[[:space:]]*export[[:space:]]\+ANTHROPIC_API_KEY=["'"'"']\?\([^"'"'"']*\)["'"'"']\?[[:space:]]*$/\1/p' "$secrets" | tail -1)
+    [[ -n "$ANTHROPIC_API_KEY" ]]
+}
+
+run_ai() {
+    load_api_key || { log "AI: no ANTHROPIC_API_KEY"; return 1; }
+    local b64 body resp err
+    b64=$(base64 -w0 < "$SHOT")
+    body=$(jq -n --arg model "$MODEL" --arg img "$b64" --arg prompt "$(ai_prompt)" '{
+        model: $model,
+        max_tokens: 4096,
+        messages: [{
+            role: "user",
+            content: [
+                {type: "image", source: {type: "base64", media_type: "image/png", data: $img}},
+                {type: "text", text: $prompt}
+            ]
+        }]
+    }')
+    resp=$(curl -sS --max-time "$AI_TIMEOUT" https://api.anthropic.com/v1/messages \
+        -H "x-api-key: $ANTHROPIC_API_KEY" \
+        -H "anthropic-version: 2023-06-01" \
+        -H "content-type: application/json" \
+        -d "$body" 2>>"$LOG") || { log "AI: curl failed"; return 1; }
+
+    err=$(jq -r '.error.message // empty' <<<"$resp" 2>/dev/null)
+    if [[ -n "$err" ]]; then
+        log "AI: API error: $err"
+        AI_ERR="$err"
+        return 1
+    fi
+    jq -r '[.content[] | select(.type == "text") | .text] | join("")' <<<"$resp" 2>>"$LOG"
+}
+
+AI_ERR=""
+USED_ENGINE=""
+TEXT=""
+
+case "$ENGINE" in
+    tess)
+        TEXT=$(run_tesseract); read_conf; USED_ENGINE="tess"
+        ;;
+    ai)
+        if TEXT=$(run_ai) && [[ -n "${TEXT//[[:space:]]/}" ]]; then
+            USED_ENGINE="claude"
+        else
+            log "AI failed, falling back to tesseract"
+            notify-send "OCR" "Claude unavailable${AI_ERR:+: $AI_ERR} — used local OCR" \
+                -i dialog-warning -t 4000
+            TEXT=$(run_tesseract); read_conf; USED_ENGINE="tess"
+        fi
+        ;;
+    auto)
+        TEXT=$(run_tesseract); read_conf; USED_ENGINE="tess"
+        log "tesseract confidence: ${CONF:-?}"
+        if { [[ -z "${TEXT//[[:space:]]/}" ]] || (( ${CONF:-0} < CONF_MIN )); } && load_api_key; then
+            log "escalating to AI (conf=${CONF:-0} < $CONF_MIN)"
+            if AI_TEXT=$(run_ai) && [[ -n "${AI_TEXT//[[:space:]]/}" ]]; then
+                TEXT="$AI_TEXT"; USED_ENGINE="claude"
+            fi
+        fi
+        ;;
+    *)
+        die "unknown engine: $ENGINE"
+        ;;
+esac
+
+# ── 4. Post-process ─────────────────────────────────────────────────────
+# Raw OCR is rarely pasteable: stray blank lines, hyphens split across line
+# ends, and hard wraps that were only an artifact of the source layout.
+TEXT=$(printf '%s' "$TEXT" | awk '
+    { sub(/[[:space:]]+$/, ""); lines[n++] = $0 }
+    END {
+        s = 0; while (s < n && lines[s] == "") s++
+        e = n - 1; while (e >= s && lines[e] == "") e--
+        blank = 0
+        for (i = s; i <= e; i++) {
+            if (lines[i] == "") { blank++; if (blank > 1) continue }
+            else blank = 0
+            print lines[i]
+        }
+    }')
+
+# Join words broken by an end-of-line hyphen.
+TEXT=$(printf '%s\n' "$TEXT" | sed -z 's/\([[:alnum:]]\)-\n\([[:alnum:]]\)/\1\2/g')
+
+if (( UNWRAP )); then
+    TEXT=$(printf '%s\n' "$TEXT" | awk '
+        /^[[:space:]]*$/ { print "\n"; next }
+        { printf "%s%s", (prev ? " " : ""), $0; prev = 1 }
+        END { if (prev) printf "\n" }
+    ' | sed -z 's/\n\n\n*/\n\n/g')
+fi
+
+if [[ -z "${TEXT//[[:space:]]/}" ]]; then
+    log "no text detected"
+    notify-send "OCR" "No text detected" -i dialog-warning -t 3000
+    exit 1
+fi
+
+log "engine=$USED_ENGINE conf=${CONF:-n/a} chars=${#TEXT}"
+
+# ── 5. Deliver ──────────────────────────────────────────────────────────
+printf '%s' "$TEXT" | wl-copy
+printf '%s' "$TEXT" | wl-copy --primary 2>/dev/null
+printf '%s' "$TEXT" > "$LAST_TXT"
+cat > "$LAST_META" <<META
+META_X=$GX
+META_Y=$GY
+META_W=$GW
+META_H=$GH
+META_ENGINE=$USED_ENGINE
+META_LANGS=$LANGS
+META_ACTION=$ACTION
+META_CONF=${CONF:-}
+META_UNWRAP=$UNWRAP
+META
+
+if (( OVERLAY )) && command -v ocr-overlay >/dev/null; then
+    BADGE="${USED_ENGINE^^}"
+    [[ "$USED_ENGINE" == "tess" ]] && BADGE="TESS · $LANGS" || BADGE="CLAUDE · $ACTION"
+    setsid ocr-overlay "$GX" "$GY" "$BADGE" "$LAST_TXT" >>"$LOG" 2>&1 < /dev/null &
+    disown
+else
+    printf '%s\n' "$TEXT"
+    PREVIEW=$(printf '%s' "$TEXT" | tr '\n' ' ' | cut -c1-80)
+    (( OVERLAY )) && notify-send "OCR · $USED_ENGINE" "$PREVIEW" -t 4000
+fi

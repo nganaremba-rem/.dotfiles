@@ -1,0 +1,380 @@
+#!/usr/bin/python3
+# ocr-overlay — result panel for `ocr`.
+#
+# Usage: ocr-overlay <x> <y> <badge> <textfile>
+#
+# The shebang is deliberately /usr/bin/python3 and not `env python3`:
+# PyGObject and GtkLayerShell are distro packages that only exist on the
+# system interpreter, while `python3` on PATH resolves to a mise shim.
+import os
+import subprocess
+import sys
+
+import gi
+
+# Gdk must be pinned explicitly: importing it before Gtk (alphabetical import
+# order) would otherwise load Gdk 4.0 and break the Gtk 3 stack.
+gi.require_version('Gtk', '3.0')
+gi.require_version('Gdk', '3.0')
+gi.require_version('GtkLayerShell', '0.1')
+from gi.repository import Gdk, GLib, Gtk, GtkLayerShell  # noqa: E402
+
+DEFAULT_W_RATIO = 0.42
+DEFAULT_H_RATIO = 0.38
+CHROME_H = 110  # header + footer + resize handle + padding
+
+LAST_IMG = "/tmp/ocr-last.png"
+
+CSS = b"""
+window {
+    background-color: #1e1e2e;
+    border: 1px solid #313244;
+    border-radius: 12px;
+}
+.header {
+    background-color: #181825;
+    border-radius: 12px 12px 0 0;
+    padding: 8px 14px;
+    border-bottom: 1px solid #313244;
+}
+.badge {
+    background-color: #313244;
+    border-radius: 6px;
+    padding: 2px 8px;
+    color: #cba6f7;
+    font-size: 11px;
+    font-weight: bold;
+}
+.close-btn {
+    background: none;
+    border: none;
+    color: #6c7086;
+    font-size: 16px;
+    padding: 0 4px;
+    min-width: 0;
+    min-height: 0;
+}
+.close-btn:hover { color: #f38ba8; }
+textview, textview text {
+    background-color: transparent;
+    color: #cdd6f4;
+    font-family: monospace;
+    font-size: 14px;
+    padding: 4px;
+}
+.text-scroll {
+    background-color: transparent;
+    padding: 6px 14px;
+}
+.footer {
+    background-color: #181825;
+    padding: 6px 14px;
+    border-top: 1px solid #313244;
+}
+.act-btn {
+    background-color: #313244;
+    border: none;
+    border-radius: 6px;
+    color: #cdd6f4;
+    font-size: 12px;
+    padding: 4px 12px;
+}
+.act-btn:hover { background-color: #45475a; }
+.hint { color: #45475a; font-size: 11px; }
+.ok { color: #a6e3a1; font-size: 11px; }
+.resize-handle {
+    background-color: #181825;
+    border-radius: 0 0 12px 12px;
+    border-top: 1px solid #313244;
+    padding: 3px 0;
+}
+.resize-grip {
+    background-color: #45475a;
+    border-radius: 2px;
+    min-width: 40px;
+    min-height: 4px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+"""
+
+
+def find_monitor(display, gx, gy):
+    for i in range(display.get_n_monitors()):
+        mon = display.get_monitor(i)
+        geo = mon.get_geometry()
+        if geo.x <= gx < geo.x + geo.width and geo.y <= gy < geo.y + geo.height:
+            return mon, geo.x, geo.y
+    mon = display.get_primary_monitor() or display.get_monitor(0)
+    geo = mon.get_geometry()
+    return mon, geo.x, geo.y
+
+
+def copy_to_clipboard(text):
+    cb = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+    cb.set_text(text, -1)
+    cb.store()
+
+
+def main():
+    if len(sys.argv) < 5:
+        print("usage: ocr-overlay <x> <y> <badge> <textfile>", file=sys.stderr)
+        sys.exit(1)
+
+    gx, gy = int(float(sys.argv[1])), int(float(sys.argv[2]))
+    badge_text = sys.argv[3]
+    textfile = sys.argv[4]
+
+    with open(textfile, encoding="utf-8", errors="replace") as fh:
+        text = fh.read()
+
+    display = Gdk.Display.get_default()
+    monitor, mon_x, mon_y = find_monitor(display, gx, gy)
+    geo = monitor.get_geometry()
+
+    state = {
+        "x": max(0, gx - mon_x),
+        "y": max(0, gy - mon_y),
+        "w": int(geo.width * DEFAULT_W_RATIO),
+        "h": int(geo.height * DEFAULT_H_RATIO),
+        "dragging": False, "drag_ox": 0, "drag_oy": 0, "drag_wx": 0, "drag_wy": 0,
+        "resizing": False, "resize_oy": 0, "resize_oh": 0,
+    }
+
+    win = Gtk.Window()
+    GtkLayerShell.init_for_window(win)
+    GtkLayerShell.set_namespace(win, "ocr-overlay")
+    GtkLayerShell.set_monitor(win, monitor)
+    GtkLayerShell.set_layer(win, GtkLayerShell.Layer.OVERLAY)
+    GtkLayerShell.set_anchor(win, GtkLayerShell.Edge.LEFT, True)
+    GtkLayerShell.set_anchor(win, GtkLayerShell.Edge.TOP, True)
+    GtkLayerShell.set_margin(win, GtkLayerShell.Edge.LEFT, state["x"])
+    GtkLayerShell.set_margin(win, GtkLayerShell.Edge.TOP, state["y"])
+    GtkLayerShell.set_keyboard_mode(win, GtkLayerShell.KeyboardMode.ON_DEMAND)
+    GtkLayerShell.set_exclusive_zone(win, -1)
+    win.set_size_request(state["w"], state["h"])
+
+    provider = Gtk.CssProvider()
+    provider.load_from_data(CSS)
+    Gtk.StyleContext.add_provider_for_screen(
+        Gdk.Screen.get_default(), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+    )
+
+    root = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+    win.add(root)
+
+    # ── Header (drag handle) ────────────────────────────
+    header = Gtk.EventBox()
+    header_inner = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+    header_inner.get_style_context().add_class("header")
+    header.add(header_inner)
+
+    badge = Gtk.Label(label=badge_text)
+    badge.get_style_context().add_class("badge")
+    header_inner.pack_start(badge, False, False, 0)
+
+    drag_hint = Gtk.Label(label="⠿ drag")
+    drag_hint.get_style_context().add_class("hint")
+    header_inner.pack_start(drag_hint, False, False, 4)
+
+    close_btn = Gtk.Button(label="✕")
+    close_btn.get_style_context().add_class("close-btn")
+    close_btn.connect("clicked", lambda *_: Gtk.main_quit())
+    header_inner.pack_end(close_btn, False, False, 0)
+    root.pack_start(header, False, False, 0)
+
+    # ── Text (editable: fix an OCR slip before pasting) ─
+    scroll = Gtk.ScrolledWindow()
+    scroll.get_style_context().add_class("text-scroll")
+    scroll.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+
+    tv = Gtk.TextView()
+    tv.set_editable(True)
+    tv.set_cursor_visible(True)
+    tv.set_wrap_mode(Gtk.WrapMode.WORD_CHAR)
+    tv.get_buffer().set_text(text)
+    scroll.add(tv)
+    root.pack_start(scroll, True, True, 0)
+
+    # ── Footer ──────────────────────────────────────────
+    footer = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+    footer.get_style_context().add_class("footer")
+
+    status = Gtk.Label(label="")
+    status.get_style_context().add_class("ok")
+
+    def current_text():
+        buf = tv.get_buffer()
+        if buf.get_has_selection():
+            s, e = buf.get_selection_bounds()
+            return buf.get_text(s, e, False)
+        return buf.get_text(buf.get_start_iter(), buf.get_end_iter(), False)
+
+    def flash(msg):
+        status.set_text(msg)
+        GLib.timeout_add(1500, lambda: status.set_text("") or False)
+
+    def on_copy(*_):
+        copy_to_clipboard(current_text())
+        flash("Copied ✓")
+
+    def rerun(*args):
+        """Re-OCR the cached crop — no new region selection."""
+        if not os.path.exists(LAST_IMG):
+            flash("no cached image")
+            return
+        subprocess.Popen(["ocr", "--rerun", *args],
+                         start_new_session=True,
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        Gtk.main_quit()
+
+    def mk(label, cb):
+        b = Gtk.Button(label=label)
+        b.get_style_context().add_class("act-btn")
+        b.connect("clicked", cb)
+        footer.pack_start(b, False, False, 0)
+        return b
+
+    mk("⎘  Copy", on_copy)
+
+    # Re-run menu: same crop, different engine / language / formatting.
+    menu = Gtk.Menu()
+    for label, args in (
+        ("Claude vision", ["--engine", "ai"]),
+        ("Local (tesseract)", ["--engine", "tess"]),
+        ("Japanese", ["--engine", "tess", "--lang", "jpn+jpn_vert"]),
+        ("English + Japanese", ["--engine", "tess", "--lang", "eng+jpn"]),
+        ("Unwrap paragraphs", ["--unwrap"]),
+        ("Table → markdown", ["--action", "table"]),
+        ("Math → LaTeX", ["--action", "latex"]),
+        ("Code block", ["--action", "code"]),
+    ):
+        item = Gtk.MenuItem(label=label)
+        item.connect("activate", lambda _w, a=args: rerun(*a))
+        menu.append(item)
+    menu.show_all()
+
+    rerun_btn = Gtk.MenuButton(label="↻  Re-run")
+    rerun_btn.get_style_context().add_class("act-btn")
+    rerun_btn.set_popup(menu)
+    footer.pack_start(rerun_btn, False, False, 0)
+
+    mk("🌐  Translate", lambda *_: rerun("--action", "translate"))
+
+    def on_save(*_):
+        dlg = Gtk.FileChooserDialog(
+            title="Save OCR text", action=Gtk.FileChooserAction.SAVE)
+        dlg.add_buttons(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                        Gtk.STOCK_SAVE, Gtk.ResponseType.OK)
+        dlg.set_current_name("ocr.txt")
+        if dlg.run() == Gtk.ResponseType.OK:
+            with open(dlg.get_filename(), "w", encoding="utf-8") as fh:
+                fh.write(current_text())
+            flash("Saved ✓")
+        dlg.destroy()
+
+    mk("💾  Save", on_save)
+
+    footer.pack_start(status, False, False, 4)
+    hint = Gtk.Label(label="Esc close · Ctrl+Enter copy & close")
+    hint.get_style_context().add_class("hint")
+    footer.pack_end(hint, False, False, 0)
+    root.pack_start(footer, False, False, 0)
+
+    # ── Resize handle ───────────────────────────────────
+    resize_area = Gtk.EventBox()
+    resize_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+    resize_box.get_style_context().add_class("resize-handle")
+    grip = Gtk.Label(label="")
+    grip.get_style_context().add_class("resize-grip")
+    resize_box.pack_start(grip, False, False, 0)
+    resize_area.add(resize_box)
+    root.pack_start(resize_area, False, False, 0)
+
+    def apply_pos():
+        GtkLayerShell.set_margin(win, GtkLayerShell.Edge.LEFT, max(0, state["x"]))
+        GtkLayerShell.set_margin(win, GtkLayerShell.Edge.TOP, max(0, state["y"]))
+
+    def apply_size():
+        win.set_size_request(state["w"], state["h"])
+        scroll.set_size_request(-1, max(60, state["h"] - CHROME_H))
+
+    # ── Drag ────────────────────────────────────────────
+    header.add_events(Gdk.EventMask.BUTTON_PRESS_MASK |
+                      Gdk.EventMask.BUTTON_RELEASE_MASK |
+                      Gdk.EventMask.POINTER_MOTION_MASK)
+
+    def on_header_press(w, e):
+        if e.button == 1:
+            state.update(dragging=True, drag_ox=e.x_root, drag_oy=e.y_root,
+                         drag_wx=state["x"], drag_wy=state["y"])
+            w.grab_add()
+
+    def on_header_release(w, e):
+        if e.button == 1 and state["dragging"]:
+            state["dragging"] = False
+            w.grab_remove()
+
+    def on_header_motion(w, e):
+        if state["dragging"]:
+            state["x"] = state["drag_wx"] + int(e.x_root - state["drag_ox"])
+            state["y"] = state["drag_wy"] + int(e.y_root - state["drag_oy"])
+            apply_pos()
+
+    header.connect("button-press-event", on_header_press)
+    header.connect("button-release-event", on_header_release)
+    header.connect("motion-notify-event", on_header_motion)
+
+    # ── Resize ──────────────────────────────────────────
+    resize_area.add_events(Gdk.EventMask.BUTTON_PRESS_MASK |
+                           Gdk.EventMask.BUTTON_RELEASE_MASK |
+                           Gdk.EventMask.POINTER_MOTION_MASK)
+
+    def on_resize_press(w, e):
+        if e.button == 1:
+            state.update(resizing=True, resize_oy=e.y_root, resize_oh=state["h"])
+            w.grab_add()
+
+    def on_resize_release(w, e):
+        if e.button == 1 and state["resizing"]:
+            state["resizing"] = False
+            w.grab_remove()
+
+    def on_resize_motion(w, e):
+        if state["resizing"]:
+            state["h"] = max(160, state["resize_oh"] + int(e.y_root - state["resize_oy"]))
+            apply_size()
+
+    resize_area.connect("button-press-event", on_resize_press)
+    resize_area.connect("button-release-event", on_resize_release)
+    resize_area.connect("motion-notify-event", on_resize_motion)
+
+    # ── Keys ────────────────────────────────────────────
+    def on_key(_w, e):
+        ctrl = e.state & Gdk.ModifierType.CONTROL_MASK
+        if e.keyval == Gdk.KEY_Escape:
+            Gtk.main_quit()
+            return True
+        if ctrl and e.keyval in (Gdk.KEY_Return, Gdk.KEY_KP_Enter):
+            copy_to_clipboard(current_text())
+            Gtk.main_quit()
+            return True
+        if ctrl and e.keyval in (Gdk.KEY_r, Gdk.KEY_R):
+            rerun("--engine", "ai")
+            return True
+        return False
+
+    win.connect("destroy", Gtk.main_quit)
+    win.connect("key-press-event", on_key)
+
+    win.show_all()
+    apply_size()
+
+    header.get_window().set_cursor(Gdk.Cursor.new_from_name(display, "grab"))
+    resize_area.get_window().set_cursor(Gdk.Cursor.new_from_name(display, "s-resize"))
+
+    Gtk.main()
+
+
+if __name__ == "__main__":
+    main()

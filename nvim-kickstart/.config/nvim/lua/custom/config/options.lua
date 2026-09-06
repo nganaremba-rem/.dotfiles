@@ -120,8 +120,15 @@ vim.o.confirm = true
 -- Don't wrap long lines (toggle per-buffer in prose files via autocmd)
 vim.o.wrap = false
 
--- Keep context lines visible around folds
+-- Treesitter-based folding. `foldexpr` falls back to 0 (no fold) for buffers
+-- without a parser, so this is safe to set globally.
+vim.o.foldmethod = 'expr'
+vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+
+-- Start with everything unfolded; fold on demand with `zc`/`zM`.
 vim.o.foldlevel = 99
+vim.o.foldlevelstart = 99
+vim.o.foldenable = true
 
 -- Stop syntax/treesitter highlighting past this column — huge win on long lines
 -- (anything past 300 chars is rarely visible anyway)

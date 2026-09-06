@@ -59,6 +59,12 @@ window-rule {
 // }
 
 
+window-rule {
+    match app-id="librewolf"
+    open-fullscreen false
+}
+
+
 
 // window-rule {
 //     match app-id="^chrome*$"

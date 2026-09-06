@@ -141,19 +141,38 @@ return {
         vim.opt_local.signcolumn = 'no'
         vim.opt_local.spell = false
 
+        local snacks_term = vim.b[ev.buf].snacks_terminal
+        local cmd = snacks_term and snacks_term.cmd
+        local cmd_str = type(cmd) == 'table' and table.concat(cmd, ' ') or cmd
+        local is_lazygit = type(cmd_str) == 'string' and cmd_str:match 'lazygit'
+
         -- Move out of a terminal without leaving terminal mode first. These
         -- shadow the global TmuxNavigate maps, which are normal-mode only.
-        local nav = { h = 'h', j = 'j', k = 'k', l = 'l' }
-        for key, dir in pairs(nav) do
-          vim.keymap.set('t', '<C-' .. key .. '>', function() vim.cmd.wincmd(dir) end, {
-            buffer = ev.buf,
-            desc = 'Move focus ' .. dir .. ' (from terminal)',
-          })
+        -- Skip this for lazygit: it's a FLOAT, not a split, so `wincmd j/k/h/l`
+        -- jumps to whatever real split sits behind it in the layout, leaving
+        -- the float open but unfocused (visually "stuck behind the code").
+        if not is_lazygit then
+          local nav = { h = 'h', j = 'j', k = 'k', l = 'l' }
+          for key, dir in pairs(nav) do
+            vim.keymap.set('t', '<C-' .. key .. '>', function() vim.cmd.wincmd(dir) end, {
+              buffer = ev.buf,
+              desc = 'Move focus ' .. dir .. ' (from terminal)',
+            })
+          end
         end
 
-        -- `q` records macros everywhere else in this config; inside lazygit's
-        -- terminal it would be swallowed by lazygit anyway, so leave it alone.
         vim.opt_local.buflisted = false
+
+        -- Lazygit-only: `q` already quits lazygit while the terminal is in
+        -- terminal-mode (it goes straight to the lazygit process, which binds
+        -- q itself). But drop to terminal-normal mode (<Esc><Esc>, or focus
+        -- recovery after a which-key popup) and normal-mode `q` reverts to
+        -- Neovim's own macro-record — swallowing the keypress with nothing
+        -- visibly happening. Buffer-local only, so `q` still records macros
+        -- everywhere else in this config.
+        if is_lazygit then
+          vim.keymap.set('n', 'q', '<cmd>bdelete!<cr>', { buffer = ev.buf, silent = true, desc = 'Quit lazygit' })
+        end
       end,
     })
   end,

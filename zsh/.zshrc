@@ -19,13 +19,11 @@ export EDITOR=nvim VISUAL=nvim SUDO_EDITOR=/usr/bin/nvim
 [[ -z "$TERM" || "$TERM" == "dumb" ]] && export TERM=xterm-256color
 export CHROME_DEVEL_SANDBOX=/usr/local/bin/chrome-sandbox
 export CHROME_EXECUTABLE=chromium
+export PNPM_HOME="$HOME/.local/share/pnpm"
+export BUN_INSTALL="$HOME/.bun"
 export ANDROID_HOME="$HOME/Android/Sdk"
 export ANDROID_SDK_ROOT="$HOME/Android/Sdk"
 export ANDROID_AVD_HOME="$HOME/.config/.android/avd"
-export PNPM_HOME="$HOME/.local/share/pnpm"
-export BUN_INSTALL="$HOME/.bun"
-export PYENV_ROOT="$HOME/.pyenv"
-export SDKMAN_DIR="$HOME/.sdkman"
 export GDK_SCALE=1
 export LIBVIRT_DEFAULT_URI=qemu:///system
 export FLUTTER_ENGINE_SWITCH_1=--enable-vulkan
@@ -38,8 +36,6 @@ export SUDO_ASKPASS=~/.local/bin/askpass-zenity
 # dotfile. Put `export ANTHROPIC_API_KEY=sk-ant-...` (for avante.nvim) there.
 [[ -f ~/.config/zsh/secrets.zsh ]] && source ~/.config/zsh/secrets.zsh
 
-[[ -d "$SDKMAN_DIR/candidates/java/current" ]] && export JAVA_HOME="$SDKMAN_DIR/candidates/java/current"
-
 # ── PATH ─────────────────────────────────────────────────────────────────────
 typeset -U path PATH
 path=(
@@ -51,17 +47,13 @@ path=(
   "$HOME/.local/lib/simutil"
   "$HOME/.console-ninja/.bin"
   "$HOME/.opencode/bin"
-  "/usr/local/go/bin"
   "$HOME/go/bin"
   "$HOME/.pub-cache/bin"
   "$HOME/.bun/bin"
   "$PNPM_HOME"
-  "$PYENV_ROOT/bin"
-  "$PYENV_ROOT/shims"
   "$ANDROID_HOME/platform-tools"
-  "$ANDROID_HOME/emulator"
+  # "$ANDROID_HOME/emulator"
   "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
-  "$HOME/develop/flutter/bin"
   "$HOME/bin/thunderbird"
   "$HOME/bin/Postman/app"
   "$HOME/bin/idea-IC-252.25557.131/bin"
@@ -128,19 +120,9 @@ zinit lucid wait for \
   zsh-users/zsh-autosuggestions \
   Aloxaf/fzf-tab
 
-# pyenv — shims already in PATH handle python/pip; this adds shell integration
-pyenv() {
-  unset -f pyenv
-  eval "$(command pyenv init -)"
-  pyenv "$@"
-}
-
-# sdkman
-sdk() {
-  unset -f sdk
-  source "$SDKMAN_DIR/bin/sdkman-init.sh" 2>/dev/null
-  sdk "$@"
-}
+# pyenv / sdkman / fnm removed 2026-08-28 — mise owns node, python, java, go,
+# bun, deno, pnpm now (see ~/.config/mise/config.toml). Old installs still on
+# disk as rollback; ~/.zshrc.pre-mise is the previous version of this file.
 
 # ── Cache slow evals (regenerate only when binary changes) ───────────────────
 _eval_cache() {
@@ -156,6 +138,7 @@ _eval_cache() {
 }
 
 _eval_cache starship starship init zsh
+_eval_cache mise mise activate zsh
 _eval_cache direnv direnv hook zsh
 # zoxide is initialized at the very end of this file — it wants to be last
 # (otherwise `zoxide`'s self-check prints a configuration warning).
@@ -264,14 +247,14 @@ alias fb='flutter build'
 alias fp='flutter pub get'
 
 # Nvim config shortcuts
-alias nvc='nv ~/.config/nvim'
-alias nrc='nv ~/.config/niri/config.kdl'
-alias nwc='nv ~/.config/waybar'
-alias nswc='nv ~/.config/swaync'
-alias nhc='nv ~/.config/hypr'
-alias noc='nv ~/.local/share/omarchy'
-alias nss='nv ~/.config/starship.toml'
-alias nzc='nv ~/.zshrc'
+alias nvc='n ~/.config/nvim'
+alias nrc='n ~/.config/niri/config.kdl'
+alias nwc='n ~/.config/waybar'
+alias nswc='n ~/.config/swaync'
+alias nhc='n ~/.config/hypr'
+alias noc='n ~/.local/share/omarchy'
+alias nss='n ~/.config/starship.toml'
+alias nzc='n ~/.zshrc'
 
 # Shell
 alias reload='exec zsh'
@@ -284,7 +267,7 @@ alias swapgg='mv ~/.config/nvim ~/.config/nvim-mine && mv ~/.config/nvim-gg ~/.c
 
 # ── Functions ────────────────────────────────────────────────────────────────
 # nv: smart nvim wrapper — cd + open
-nv() {
+n() {
   command -v nvim >/dev/null || {
     echo 'nv: nvim not found in PATH' >&2
     return 1
@@ -336,21 +319,12 @@ x() {
 
 # zmodload zsh/zprof  # uncomment paired with the top line to see profiling
 
-# pnpm — PNPM_HOME is exported in the Environment section and added to PATH in the
-# PATH section above. pnpm installs global binaries directly into $PNPM_HOME (not
-# $PNPM_HOME/bin), so no extra path entry is needed. (Removed a duplicate,
-# inconsistent `$PNPM_HOME/bin` block that the pnpm installer had appended.)
-
+# pnpm binary comes from mise; `pnpm add -g` still installs CLIs directly into
+# $PNPM_HOME (not $PNPM_HOME/bin), which is on PATH *behind* mise so mise's own
+# pnpm/node win.
 
 # nub
 export PATH="$HOME/.nub/bin:$PATH"
-
-# fnm
-FNM_PATH="/home/rem/.local/share/fnm"
-if [ -d "$FNM_PATH" ]; then
-  export PATH="$FNM_PATH:$PATH"
-  eval "$(fnm env --shell zsh)"
-fi
 
 # Adguard auto completion
 # [ -s "/opt/adguardvpn_cli/bash-completion.sh" ] && \. "/opt/adguardvpn_cli/bash-completion.sh"

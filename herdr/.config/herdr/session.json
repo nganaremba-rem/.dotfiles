@@ -2,28 +2,37 @@
   "version": 3,
   "workspaces": [
     {
-      "id": "w12",
+      "id": "w14",
       "custom_name": null,
-      "identity_cwd": "/home/rem/coding/rust/w3school",
+      "identity_cwd": "/home/rem/work/DPS/KRT_DPS",
       "public_pane_numbers": {
+        "2": 2,
         "1": 1,
-        "2": 2
+        "3": 3
       },
-      "next_public_pane_number": 7,
+      "next_public_pane_number": 27,
       "public_tab_numbers": [
         1,
-        2
+        2,
+        3
       ],
-      "next_public_tab_number": 3,
+      "next_public_tab_number": 4,
       "tabs": [
         {
-          "custom_name": null,
+          "custom_name": "neovim",
           "layout": {
             "Pane": 1
           },
           "panes": {
             "1": {
-              "cwd": "/home/rem/coding/rust/w3school"
+              "cwd": "/home/rem/work/DPS/KRT_DPS",
+              "label": "neovim",
+              "agent_session": {
+                "source": "herdr:claude",
+                "agent": "claude",
+                "kind": "id",
+                "value": "b6a04bde-a5f0-4215-b5a9-175539c4f1f5"
+              }
             }
           },
           "zoomed": false,
@@ -31,18 +40,209 @@
           "root_pane": 1
         },
         {
-          "custom_name": null,
+          "custom_name": "claude-code",
           "layout": {
             "Pane": 2
           },
           "panes": {
             "2": {
-              "cwd": "/home/rem/coding/rust/w3school"
+              "cwd": "/home/rem/work/DPS/KRT_DPS",
+              "agent_session": {
+                "source": "herdr:claude",
+                "agent": "claude",
+                "kind": "id",
+                "value": "16e0c0e0-03de-4aa5-991e-1638e34ec341"
+              }
             }
           },
           "zoomed": false,
           "focused": 2,
           "root_pane": 2
+        },
+        {
+          "custom_name": "cli",
+          "layout": {
+            "Pane": 3
+          },
+          "panes": {
+            "3": {
+              "cwd": "/home/rem/work/DPS/KRT_DPS"
+            }
+          },
+          "zoomed": false,
+          "focused": 3,
+          "root_pane": 3
+        }
+      ],
+      "active_tab": 0
+    },
+    {
+      "id": "w15",
+      "custom_name": null,
+      "identity_cwd": "/home/rem/work/facial-recognition/may21/face-authentication-v2",
+      "public_pane_numbers": {
+        "4": 1,
+        "5": 3
+      },
+      "next_public_pane_number": 32,
+      "public_tab_numbers": [
+        1,
+        2
+      ],
+      "next_public_tab_number": 7,
+      "tabs": [
+        {
+          "custom_name": "neovim",
+          "layout": {
+            "Pane": 4
+          },
+          "panes": {
+            "4": {
+              "cwd": "/home/rem/work/facial-recognition/may21/face-authentication-v2"
+            }
+          },
+          "zoomed": false,
+          "focused": 4,
+          "root_pane": 4
+        },
+        {
+          "custom_name": "claude",
+          "layout": {
+            "Pane": 5
+          },
+          "panes": {
+            "5": {
+              "cwd": "/home/rem/work/facial-recognition/may21/face-authentication-v2",
+              "agent_session": {
+                "source": "herdr:claude",
+                "agent": "claude",
+                "kind": "id",
+                "value": "f94cf901-9b0f-4457-85e0-04ecc2b6b152"
+              }
+            }
+          },
+          "zoomed": false,
+          "focused": 5,
+          "root_pane": 5
+        }
+      ],
+      "active_tab": 0
+    },
+    {
+      "id": "w1A",
+      "custom_name": "CDN",
+      "identity_cwd": "/home/rem/coding/cdn-lab",
+      "public_pane_numbers": {
+        "9": 3,
+        "10": 4,
+        "8": 5,
+        "7": 1
+      },
+      "next_public_pane_number": 7,
+      "public_tab_numbers": [
+        1
+      ],
+      "next_public_tab_number": 3,
+      "tabs": [
+        {
+          "custom_name": null,
+          "layout": {
+            "Split": {
+              "direction": "Horizontal",
+              "ratio": 0.5,
+              "first": {
+                "Split": {
+                  "direction": "Vertical",
+                  "ratio": 0.5,
+                  "first": {
+                    "Pane": 7
+                  },
+                  "second": {
+                    "Pane": 8
+                  }
+                }
+              },
+              "second": {
+                "Split": {
+                  "direction": "Vertical",
+                  "ratio": 0.5,
+                  "first": {
+                    "Pane": 9
+                  },
+                  "second": {
+                    "Pane": 10
+                  }
+                }
+              }
+            }
+          },
+          "panes": {
+            "8": {
+              "cwd": "/home/rem/coding/cdn-lab"
+            },
+            "10": {
+              "cwd": "/home/rem/coding/cdn-lab"
+            },
+            "7": {
+              "cwd": "/home/rem/coding/cdn-lab"
+            },
+            "9": {
+              "cwd": "/home/rem/coding/cdn-lab"
+            }
+          },
+          "zoomed": false,
+          "focused": 10,
+          "root_pane": 7
+        }
+      ],
+      "active_tab": 0
+    },
+    {
+      "id": "w1C",
+      "custom_name": "chores",
+      "identity_cwd": "/home/rem/.dotfiles/nvim-kickstart/.config/nvim",
+      "public_pane_numbers": {
+        "21": 8,
+        "13": 1
+      },
+      "next_public_pane_number": 9,
+      "public_tab_numbers": [
+        1
+      ],
+      "next_public_tab_number": 3,
+      "tabs": [
+        {
+          "custom_name": null,
+          "layout": {
+            "Split": {
+              "direction": "Horizontal",
+              "ratio": 0.5,
+              "first": {
+                "Pane": 13
+              },
+              "second": {
+                "Pane": 21
+              }
+            }
+          },
+          "panes": {
+            "21": {
+              "cwd": "/home/rem/.dotfiles/nvim-kickstart/.config/nvim"
+            },
+            "13": {
+              "cwd": "/home/rem/.dotfiles/nvim-kickstart/.config/nvim",
+              "label": "herdr config",
+              "agent_session": {
+                "source": "herdr:claude",
+                "agent": "claude",
+                "kind": "id",
+                "value": "2f4391a0-a0ad-4270-aaed-bfacae3bd1d2"
+              }
+            }
+          },
+          "zoomed": true,
+          "focused": 21,
+          "root_pane": 13
         }
       ],
       "active_tab": 0

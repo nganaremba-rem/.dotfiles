@@ -42,6 +42,47 @@ local EXCLUDE = {
 -- `.fdignore` files stop applying too. `exclude` below is what keeps the noise out.
 local FIND = { hidden = true, ignored = true, exclude = EXCLUDE }
 
+-- ── Startup side effects ────────────────────────────────────────────────────
+--
+-- These live at spec-file scope, NOT in an `init = function()`. `custom/plugins/
+-- terminal.lua` declares a SECOND spec for folke/snacks.nvim, and lazy.nvim
+-- merges duplicate specs field-by-field: `opts` deep-merges and `keys` concat,
+-- but `init` and `config` are single-valued — the last spec imported wins and
+-- the other is dropped with no warning. terminal.lua sorts after snacks.lua, so
+-- an `init` here was silently discarded and every LSP keymap below (including
+-- `gd`) was never registered.
+--
+-- Spec files are executed at import time, before any FileType/LspAttach fires,
+-- so registering here is also strictly earlier than the old `User VeryLazy`
+-- wrapper — a file opened straight from the shell no longer races the mapping.
+-- `Snacks.*` is only dereferenced inside callbacks, and snacks is `lazy = false`,
+-- so nothing is touched before the plugin loads.
+
+-- Debug helpers on the global, as upstream recommends.
+_G.dd = function(...) Snacks.debug.inspect(...) end
+_G.bt = function() Snacks.debug.backtrace() end
+vim.print = _G.dd
+
+-- LSP pickers, buffer-local on attach. These replace the identical block
+-- that used to live in custom/plugins/telescope.lua — same lhs, same desc.
+vim.api.nvim_create_autocmd('LspAttach', {
+  group = vim.api.nvim_create_augroup('snacks-lsp-attach', { clear = true }),
+  callback = function(event)
+    local map = function(keys, fn, desc)
+      vim.keymap.set('n', keys, fn, { buffer = event.buf, desc = desc })
+    end
+    map('grr', function() Snacks.picker.lsp_references() end, '[G]oto [R]eferences')
+    map('gri', function() Snacks.picker.lsp_implementations() end, '[G]oto [I]mplementation')
+    map('grd', function() Snacks.picker.lsp_definitions() end, '[G]oto [D]efinition')
+    map('grt', function() Snacks.picker.lsp_type_definitions() end, '[G]oto [T]ype Definition')
+    map('gO', function() Snacks.picker.lsp_symbols() end, 'Open Document Symbols')
+    map('gW', function() Snacks.picker.lsp_workspace_symbols() end, 'Open Workspace Symbols')
+
+    -- `gd` kept from the lspsaga era, now backed by the picker (previewed).
+    map('gd', function() Snacks.picker.lsp_definitions() end, '[G]oto [D]efinition')
+  end,
+})
+
 return {
   'folke/snacks.nvim',
   priority = 1000,
@@ -141,36 +182,4 @@ return {
     { ']]', function() Snacks.words.jump(vim.v.count1) end, desc = 'Next reference' },
     { '[[', function() Snacks.words.jump(-vim.v.count1) end, desc = 'Prev reference' },
   },
-
-  init = function()
-    vim.api.nvim_create_autocmd('User', {
-      pattern = 'VeryLazy',
-      callback = function()
-        -- Debug helpers on the global, as upstream recommends.
-        _G.dd = function(...) Snacks.debug.inspect(...) end
-        _G.bt = function() Snacks.debug.backtrace() end
-        vim.print = _G.dd
-
-        -- LSP pickers, buffer-local on attach. These replace the identical block
-        -- that used to live in custom/plugins/telescope.lua — same lhs, same desc.
-        vim.api.nvim_create_autocmd('LspAttach', {
-          group = vim.api.nvim_create_augroup('snacks-lsp-attach', { clear = true }),
-          callback = function(event)
-            local map = function(keys, fn, desc)
-              vim.keymap.set('n', keys, fn, { buffer = event.buf, desc = desc })
-            end
-            map('grr', function() Snacks.picker.lsp_references() end, '[G]oto [R]eferences')
-            map('gri', function() Snacks.picker.lsp_implementations() end, '[G]oto [I]mplementation')
-            map('grd', function() Snacks.picker.lsp_definitions() end, '[G]oto [D]efinition')
-            map('grt', function() Snacks.picker.lsp_type_definitions() end, '[G]oto [T]ype Definition')
-            map('gO', function() Snacks.picker.lsp_symbols() end, 'Open Document Symbols')
-            map('gW', function() Snacks.picker.lsp_workspace_symbols() end, 'Open Workspace Symbols')
-
-            -- `gd` kept from the lspsaga era, now backed by the picker (previewed).
-            map('gd', function() Snacks.picker.lsp_definitions() end, '[G]oto [D]efinition')
-          end,
-        })
-      end,
-    })
-  end,
 }

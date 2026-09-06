@@ -60,7 +60,7 @@ manifest_check = true
 # Named punctuation such as minus, comma, ampersand, plus, and backtick is also accepted.
 # Most reliable direct bindings are ctrl+letter, function keys, and explicit modified chords.
 # alt+..., cmd/super, and punctuation-with-modifiers may depend on your terminal/tmux setup.
-prefix = "ctrl+q"
+prefix = "ctrl+k"
 
 # Prefix-mode actions
 # help = "prefix+?"
@@ -107,8 +107,8 @@ resize_mode = "prefix+r"
 
 # Navigate-mode movement. These local shortcuts win while navigate mode is open.
 # They are independent from focus_pane_*. Do not include prefix+, esc, enter, tab, or 1..9 here.
-# navigate_workspace_up = "up"
-# navigate_workspace_down = "down"
+navigate_workspace_up = "shift+k"
+navigate_workspace_down = "shift+j"
 # navigate_pane_left = "h"      # left arrow always focuses the pane to the left
 # navigate_pane_down = "j"
 # navigate_pane_up = "k"
@@ -189,6 +189,7 @@ sidebar_max_width = 16
 
 # Background notification popup delivery
 agent_panel_sort = "priority"
+show_agent_labels_on_pane_borders = true
 [ui.toast]
 # off = disable pop-up notifications
 # herdr = show in-app toasts
@@ -197,6 +198,7 @@ agent_panel_sort = "priority"
 # delivery = "off"
 # delay_seconds = 1
 
+delivery = "system"
 [ui.toast.herdr]
 # position = "bottom-right"
 

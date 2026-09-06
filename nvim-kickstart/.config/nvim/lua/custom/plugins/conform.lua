@@ -34,6 +34,14 @@ return { -- Autoformat
       },
       -- Formatters per filetype come straight from the language registry.
       formatters_by_ft = lang.formatters_by_ft(),
+      -- biome ignores .prettierrc/.editorconfig and formats with its own defaults
+      -- (double quotes, semicolons, tabs). It sits first in the web/css/html/json
+      -- formatter lists with stop_after_first, so it would silently outrank prettier
+      -- in every prettier project. require_cwd makes it unavailable unless a
+      -- biome.json/biome.jsonc root exists -> conform falls through to prettierd.
+      formatters = {
+        biome = { require_cwd = true },
+      },
     }
   end,
 }

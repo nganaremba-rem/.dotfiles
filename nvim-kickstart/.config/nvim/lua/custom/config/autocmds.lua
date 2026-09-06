@@ -57,11 +57,54 @@ autocmd('BufWritePre', {
 
 -- Make `autoread` reliable: check for external changes when refocusing nvim
 -- or entering a buffer, so files reload instead of going stale.
-autocmd({ 'FocusGained', 'BufEnter', 'TermClose', 'TermLeave' }, {
+-- CursorHold covers the case the focus events miss: an agent (Claude Code,
+-- a formatter, git) rewrites the file while the cursor just sits in it.
+local function checktime()
+  -- The command-line window blocks almost every command; never touch it.
+  if vim.fn.getcmdwintype() ~= '' then return end
+  -- Check every loaded file buffer, not just the current one: the cursor is
+  -- often parked in a terminal or picker while an agent rewrites a file.
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    if
+      vim.api.nvim_buf_is_loaded(buf)
+      and vim.bo[buf].buftype == ''
+      and vim.api.nvim_buf_get_name(buf) ~= ''
+      -- checktime on a modified buffer pops a blocking prompt; skip those.
+      and not vim.bo[buf].modified
+    then
+      vim.cmd(('checktime %d'):format(buf))
+    end
+  end
+end
+
+autocmd({
+  'FocusGained',
+  'BufEnter',
+  'WinEnter',
+  'CursorHold',
+  'CursorHoldI',
+  'TermClose',
+  'TermLeave',
+}, {
   desc = 'Reload files changed outside nvim',
   group = augroup('auto-checktime', { clear = true }),
-  callback = function()
-    if vim.fn.getcmdwintype() == '' then vim.cmd 'checktime' end
+  callback = checktime,
+})
+
+-- Belt and braces: poll every 2s so even a completely idle nvim (no cursor
+-- movement, no focus change) picks up external writes.
+local checktime_timer = vim.uv.new_timer()
+checktime_timer:start(2000, 2000, function() vim.schedule(checktime) end)
+
+-- `autoread` reloads silently, which is confusing mid-edit. Say what happened.
+autocmd('FileChangedShellPost', {
+  desc = 'Report buffers reloaded from disk',
+  group = augroup('checktime-notify', { clear = true }),
+  callback = function(ev)
+    vim.notify(
+      ('Reloaded from disk: %s'):format(vim.fn.fnamemodify(ev.file, ':t')),
+      vim.log.levels.INFO
+    )
   end,
 })
 

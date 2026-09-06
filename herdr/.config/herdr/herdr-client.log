@@ -108,3 +108,98 @@
 2026-08-23T07:22:08.239908Z  INFO herdr::client: connecting to server path=/home/rem/.config/herdr/herdr-client.sock
 2026-08-23T07:22:08.483400Z  INFO herdr::client: handshake succeeded version=14 encoding=SemanticFrame
 2026-08-23T07:25:04.607854Z  INFO herdr::logging: herdr exiting event="app.shutdown" subsystem="client" outcome="completed" pid=719387
+2026-08-27T10:14:16.952284Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=607486
+2026-08-27T10:14:16.952454Z  INFO herdr::client: connecting to server path=/home/rem/.config/herdr/herdr-client.sock
+2026-08-27T10:14:16.964047Z  INFO herdr::client: handshake succeeded version=14 encoding=SemanticFrame
+2026-08-28T06:07:18.774996Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=1279691
+2026-08-28T06:07:18.775103Z  INFO herdr::client: connecting to server path=/home/rem/.config/herdr/herdr-client.sock
+2026-08-28T06:07:18.823373Z  INFO herdr::client: handshake succeeded version=14 encoding=SemanticFrame
+2026-08-30T04:42:34.836830Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=92612
+2026-08-30T04:42:34.836869Z  INFO herdr::client: connecting to server path=/home/rem/.config/herdr/herdr-client.sock
+2026-08-30T04:42:34.848446Z  INFO herdr::client: handshake succeeded version=14 encoding=SemanticFrame
+2026-08-30T05:13:21.535631Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=128876
+2026-08-30T05:13:21.535657Z  INFO herdr::client: connecting to server path=/home/rem/.config/herdr/herdr-client.sock
+2026-08-30T05:13:21.734950Z  INFO herdr::client: handshake succeeded version=14 encoding=SemanticFrame
+2026-08-31T10:21:26.279316Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=659173
+2026-08-31T10:21:26.279464Z  INFO herdr::client: connecting to server path=/home/rem/.config/herdr/herdr-client.sock
+2026-08-31T10:21:26.346175Z  INFO herdr::client: handshake succeeded version=14 encoding=SemanticFrame
+2026-08-31T15:46:24.733878Z  INFO herdr::logging: herdr exiting event="app.shutdown" subsystem="client" outcome="completed" pid=659173
+2026-08-31T15:46:27.036089Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=910592
+2026-08-31T15:46:27.036122Z  INFO herdr::client: connecting to server path=/home/rem/.config/herdr/herdr-client.sock
+2026-08-31T15:46:27.217759Z  INFO herdr::client: handshake succeeded version=14 encoding=SemanticFrame
+2026-09-01T05:34:19.497796Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=1605506
+2026-09-01T05:34:19.497990Z  INFO herdr::client: connecting to server path=/home/rem/.config/herdr/herdr-client.sock
+2026-09-01T05:34:19.664592Z  INFO herdr::client: handshake succeeded version=14 encoding=SemanticFrame
+2026-09-01T13:03:40.130581Z  INFO herdr::logging: herdr exiting event="app.shutdown" subsystem="client" outcome="completed" pid=1605506
+2026-09-01T13:03:42.255054Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=2078234
+2026-09-01T13:03:42.255084Z  INFO herdr::client: connecting to server path=/home/rem/.config/herdr/herdr-client.sock
+2026-09-01T13:03:42.291649Z  INFO herdr::client: handshake succeeded version=14 encoding=SemanticFrame
+2026-09-02T04:06:03.821820Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=191033
+2026-09-02T04:06:03.822089Z  INFO herdr::client: connecting to server path=/home/rem/.config/herdr/herdr-client.sock
+2026-09-02T04:06:03.823483Z  INFO herdr::client: handshake succeeded version=14 encoding=SemanticFrame
+2026-09-02T06:17:30.494639Z  INFO herdr::logging: herdr exiting event="app.shutdown" subsystem="client" outcome="completed" pid=191033
+2026-09-02T06:17:32.298792Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=347866
+2026-09-02T06:17:32.298814Z  INFO herdr::client: connecting to server path=/home/rem/.config/herdr/herdr-client.sock
+2026-09-02T06:17:32.506974Z  INFO herdr::client: handshake succeeded version=14 encoding=SemanticFrame
+2026-09-02T10:02:07.777769Z  INFO herdr::logging: herdr exiting event="app.shutdown" subsystem="client" outcome="completed" pid=347866
+2026-09-02T10:02:09.453823Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=544497
+2026-09-02T10:02:09.453860Z  INFO herdr::client: connecting to server path=/home/rem/.config/herdr/herdr-client.sock
+2026-09-02T10:02:09.541367Z  INFO herdr::client: handshake succeeded version=14 encoding=SemanticFrame
+2026-09-02T11:46:40.064099Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=644615
+2026-09-02T11:46:40.064405Z  INFO herdr::client: connecting to server path=/home/rem/.config/herdr/herdr-client.sock
+2026-09-02T11:46:40.226830Z  INFO herdr::client: handshake succeeded version=14 encoding=SemanticFrame
+2026-09-02T11:46:47.348320Z  INFO herdr::logging: herdr exiting event="app.shutdown" subsystem="client" outcome="completed" pid=644615
+2026-09-02T15:02:59.830780Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=819534
+2026-09-02T15:02:59.831285Z  INFO herdr::client: connecting to server path=/home/rem/.config/herdr/herdr-client.sock
+2026-09-02T15:02:59.834034Z  INFO herdr::client: handshake succeeded version=14 encoding=SemanticFrame
+2026-09-03T04:27:55.704382Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=1417547
+2026-09-03T04:27:55.704561Z  INFO herdr::client: connecting to server path=/home/rem/.config/herdr/herdr-client.sock
+2026-09-03T04:27:55.901148Z  INFO herdr::client: handshake succeeded version=14 encoding=SemanticFrame
+2026-09-03T11:04:43.904209Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=1474499
+2026-09-03T11:04:43.904371Z  INFO herdr::client: connecting to server path=/home/rem/.config/herdr/herdr-client.sock
+2026-09-03T11:04:43.948161Z  INFO herdr::client: handshake succeeded version=14 encoding=SemanticFrame
+2026-09-05T15:12:33.137174Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=2872227
+2026-09-05T15:12:33.137456Z  INFO herdr::client: connecting to server path=/home/rem/.config/herdr/herdr-client.sock
+2026-09-05T15:12:33.180712Z  INFO herdr::client: handshake succeeded version=14 encoding=SemanticFrame
+2026-09-06T04:20:16.937866Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=3059421
+2026-09-06T04:20:16.938249Z  INFO herdr::client: connecting to server path=/home/rem/.config/herdr/herdr-client.sock
+2026-09-06T04:20:17.012580Z  INFO herdr::client: handshake succeeded version=14 encoding=SemanticFrame
+2026-09-06T04:38:01.380204Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=3079721
+2026-09-06T04:38:01.380939Z  INFO herdr::client: connecting to server path=/home/rem/.config/herdr/herdr-client.sock
+2026-09-06T04:38:01.396175Z  INFO herdr::client: handshake succeeded version=14 encoding=SemanticFrame
+2026-09-06T04:41:23.460079Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=3086198
+2026-09-06T04:41:23.460114Z  INFO herdr::client: connecting to server path=/home/rem/.config/herdr/herdr-client.sock
+2026-09-06T04:41:23.709285Z  INFO herdr::client: handshake succeeded version=14 encoding=SemanticFrame
+2026-09-06T04:43:50.015858Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=3089610
+2026-09-06T04:43:50.015890Z  INFO herdr::client: connecting to server path=/home/rem/.config/herdr/herdr-client.sock
+2026-09-06T04:43:50.173586Z  INFO herdr::client: handshake succeeded version=14 encoding=SemanticFrame
+2026-09-06T04:44:59.668369Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=3090923
+2026-09-06T04:44:59.668409Z  INFO herdr::client: connecting to server path=/home/rem/.config/herdr/herdr-client.sock
+2026-09-06T04:44:59.719536Z  INFO herdr::client: handshake succeeded version=14 encoding=SemanticFrame
+2026-09-06T05:14:29.578286Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=3123605
+2026-09-06T05:14:29.578570Z  INFO herdr::client: connecting to server path=/home/rem/.config/herdr/herdr-client.sock
+2026-09-06T05:14:29.597379Z  INFO herdr::client: handshake succeeded version=14 encoding=SemanticFrame
+2026-09-06T05:30:43.889529Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=3143911
+2026-09-06T05:30:43.889568Z  INFO herdr::client: connecting to server path=/home/rem/.config/herdr/herdr-client.sock
+2026-09-06T05:30:44.031602Z  INFO herdr::client: handshake succeeded version=14 encoding=SemanticFrame
+2026-09-06T06:42:06.665199Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=3243504
+2026-09-06T06:42:06.665223Z  INFO herdr::client: connecting to server path=/home/rem/.config/herdr/herdr-client.sock
+2026-09-06T06:42:06.670258Z  INFO herdr::client: handshake succeeded version=14 encoding=SemanticFrame
+2026-09-06T06:42:07.465455Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=3243814
+2026-09-06T06:42:07.465477Z  INFO herdr::client: connecting to server path=/home/rem/.config/herdr/herdr-client.sock
+2026-09-06T06:42:07.471841Z  INFO herdr::client: handshake succeeded version=14 encoding=SemanticFrame
+2026-09-06T06:42:07.596263Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=3243971
+2026-09-06T06:42:07.596307Z  INFO herdr::client: connecting to server path=/home/rem/.config/herdr/herdr-client.sock
+2026-09-06T06:42:07.601216Z  INFO herdr::client: handshake succeeded version=14 encoding=SemanticFrame
+2026-09-06T06:42:07.772699Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=3244004
+2026-09-06T06:42:07.772728Z  INFO herdr::client: connecting to server path=/home/rem/.config/herdr/herdr-client.sock
+2026-09-06T06:42:07.775260Z  INFO herdr::client: handshake succeeded version=14 encoding=SemanticFrame
+2026-09-06T06:42:14.766115Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=3245218
+2026-09-06T06:42:14.766156Z  INFO herdr::client: connecting to server path=/home/rem/.config/herdr/herdr-client.sock
+2026-09-06T06:42:14.797369Z  INFO herdr::client: handshake succeeded version=14 encoding=SemanticFrame
+2026-09-06T06:50:07.853840Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=3263412
+2026-09-06T06:50:07.853872Z  INFO herdr::client: connecting to server path=/home/rem/.config/herdr/herdr-client.sock
+2026-09-06T06:50:07.905289Z  INFO herdr::client: handshake succeeded version=14 encoding=SemanticFrame
+2026-09-06T07:10:37.036767Z  INFO herdr::logging: herdr starting event="app.startup" subsystem="client" outcome="started" pid=3295422
+2026-09-06T07:10:37.036806Z  INFO herdr::client: connecting to server path=/home/rem/.config/herdr/herdr-client.sock
+2026-09-06T07:10:37.136904Z  INFO herdr::client: handshake succeeded version=14 encoding=SemanticFrame

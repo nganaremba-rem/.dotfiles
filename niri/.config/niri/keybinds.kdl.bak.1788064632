@@ -7,6 +7,8 @@ binds {
       spawn "dms" "ipc" "call" "settings" "focusOrToggle";
   }
 
+
+
   Mod+Alt+T hotkey-overlay-title="Screen Translate (OCR)" {spawn "screen-translate";}
 
   Mod+Apostrophe hotkey-overlay-title="Scratchpad terminal" {
@@ -14,14 +16,14 @@ binds {
   }
   Mod+Shift+Return hotkey-overlay-title="Rofi in drun mode" {spawn-sh "rofi -show drun";}
   Mod+E hotkey-overlay-title="Open File Manager" {spawn "nautilus";}
-  Mod+B hotkey-overlay-title="Browser" {spawn "helium-browser" "--new-window";}
-  Mod+A hotkey-overlay-title="ChatGPT" {spawn "helium-browser" "--app=https://chatgpt.com";}
-  Mod+Alt+P hotkey-overlay-title="Perplexity" {spawn "helium-browser" "--app=https://perplexity.ai/";}
-  Mod+Shift+E hotkey-overlay-title="Email" {spawn "helium-browser" "--app=https://mail.google.com/mail/u/nganaremba@gmail.com";}
-  Mod+Y hotkey-overlay-title="YouTube" {spawn "helium-browser" "--app=https://youtube.com";}
-  Mod+Shift+G hotkey-overlay-title="WhatsApp" {spawn "helium-browser" "--app=https://web.whatsapp.com";}
-  Mod+Alt+N hotkey-overlay-title="Netflix" {spawn "helium-browser" "--app=https://netflix.com";}
-  Mod+Alt+H hotkey-overlay-title="Hotstar" {spawn "helium-browser" "--app=https://hotstar.com";}
+  Mod+B hotkey-overlay-title="Browser" {spawn "google-chrome-stable" "--new-window";}
+  Mod+A hotkey-overlay-title="ChatGPT" {spawn "google-chrome-stable" "--app=https://chatgpt.com";}
+  Mod+Alt+P hotkey-overlay-title="Perplexity" {spawn "google-chrome-stable" "--app=https://perplexity.ai/";}
+  Mod+Shift+E hotkey-overlay-title="Email" {spawn "google-chrome-stable" "--app=https://mail.google.com/mail/u/nganaremba@gmail.com";}
+  Mod+Y hotkey-overlay-title="YouTube" {spawn "google-chrome-stable" "--app=https://youtube.com";}
+  Mod+Shift+G hotkey-overlay-title="WhatsApp" {spawn "google-chrome-stable" "--app=https://web.whatsapp.com";}
+  Mod+Alt+N hotkey-overlay-title="Netflix" {spawn "google-chrome-stable" "--app=https://netflix.com";}
+  Mod+Alt+H hotkey-overlay-title="Hotstar" {spawn "google-chrome-stable" "--app=https://hotstar.com";}
   Mod+Ctrl+N hotkey-overlay-title="Night light" {spawn "~/bin/arch/toggle-gammastep";}
   Mod+Delete hotkey-overlay-title="Power Menu" {spawn "wlogout";}
   Mod+Alt+L hotkey-overlay-title="Lock screen (hyprlock)" {spawn-sh "pgrep -x hyprlock >/dev/null || hyprlock";}
@@ -55,10 +57,10 @@ binds {
   Mod+Ctrl+Alt+F hotkey-overlay-title="Restart foot server (apply config — closes windows)" {spawn-sh "systemctl --user restart foot-server.service";}
   Mod+Ctrl+W hotkey-overlay-title="Toggle waybar" {spawn "toggle-waybar";}
   Mod+Ctrl+Alt+A hotkey-overlay-title="Animation curve picker" {spawn "niri-curve-pick";}
-  Mod+Ctrl+X hotkey-overlay-title="Voxtype Record Toggle" {spawn-sh "voxtype record toggle";}
+  // Mod+Ctrl+X hotkey-overlay-title="Voxtype Record Toggle" {spawn "voxtype-record-toggle";}
   Mod+Ctrl+Apostrophe hotkey-overlay-title="Toggle between Floating and Tiling" { switch-focus-between-floating-and-tiling; }
-  Mod+Alt+C hotkey-overlay-title="Claude AI" {spawn "helium-browser" "--app=https://claude.ai/chat";}
-  Mod+X hotkey-overlay-title="X" {spawn "helium-browser" "--app=https://x.com";}
+  Mod+Alt+C hotkey-overlay-title="Claude AI" {spawn "google-chrome-stable" "--app=https://claude.ai/chat";}
+  Mod+X hotkey-overlay-title="X" {spawn "google-chrome-stable" "--app=https://x.com";}
   Mod+Alt+K hotkey-overlay-title="REMTUI" {spawn "~/.local/bin/remtui";}
 
   // Mod+Alt+Ctrl+C hotkey-overlay-title="Control Center" {spawn-sh "qs -c noctalia-shell ipc call controlCenter toggle";}
@@ -84,7 +86,6 @@ binds {
     // Mod+Return hotkey-overlay-title="Open a Terminal: " { spawn-sh "/usr/sbin/foot --working-directory=$(cat /tmp/niri-shell-pwd-rem 2>/dev/null || $HOME) tmux new-session -A -s main"; }
     Mod+Return hotkey-overlay-title="Open a Terminal: " { spawn-sh "footclient"; }
     Mod+Alt+Return hotkey-overlay-title="Open a Terminal with tmux: " { spawn-sh "footclient -e tmux"; }
-    Mod+Ctrl+Return hotkey-overlay-title="Open a termianl with herdr: " { spawn-sh "footclient -e herdr"; }
     // Mod+Space hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
 
     // Use spawn-sh to run a shell command. Do this if you need pipes, multiple commands, etc.
@@ -326,23 +327,6 @@ binds {
     }
     Mod+Shift+A hotkey-overlay-title="Screenshot (area) → annotate → clipboard" {
       spawn-sh "grim -g \"$(slurp)\" - | satty --filename - --copy-command wl-copy --early-exit";
-    }
-
-    // OCR: screen text → clipboard + result panel. See `ocr --help`.
-    Mod+Shift+O hotkey-overlay-title="OCR region → clipboard" {
-      spawn "ocr";
-    }
-    Mod+Alt+O hotkey-overlay-title="OCR region (Claude vision)" {
-      spawn "ocr" "--engine" "ai";
-    }
-    Mod+Ctrl+O hotkey-overlay-title="OCR focused window" {
-      spawn "ocr" "--window";
-    }
-    Mod+Ctrl+Shift+O hotkey-overlay-title="OCR clipboard image" {
-      spawn "ocr" "--clip";
-    }
-    Mod+Shift+Alt+O hotkey-overlay-title="OCR region → pick action" {
-      spawn "ocr" "--menu";
     }
 
     // Applications such as remote-desktop clients and software KVM switches may

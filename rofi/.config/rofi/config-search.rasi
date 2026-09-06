@@ -54,7 +54,7 @@ prompt {
 entry {
     background-color: transparent;
     text-color:       @fg;
-    placeholder:      "Search the web — \"g \" Google · \"yt \" YouTube · \"gh \" GitHub · \"wiki \" ArchWiki";
+    placeholder:      "\"g \" Google · \"yt \" YouTube · \"gh \" GitHub · \"wiki \" ArchWiki";
     placeholder-color: @fg-muted;
     cursor:           text;
     vertical-align:   0.5;

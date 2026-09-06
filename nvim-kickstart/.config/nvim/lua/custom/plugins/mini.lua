@@ -33,6 +33,10 @@ return { -- Collection of various small independent plugins/modules
     -- - sr)'  - [S]urround [R]eplace [)] [']
     require('mini.surround').setup()
 
+    -- Toggle a single-line argument list to multi-line and back with `gS`.
+    -- Part of mini.nvim already — no separate plugin needed.
+    require('mini.splitjoin').setup()
+
     -- mini.statusline intentionally NOT set up here — lualine is used instead.
     -- Check out: https://github.com/nvim-mini/mini.nvim
   end,
