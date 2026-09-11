@@ -1,0 +1,12 @@
+
+workspace "terminal" {
+  open-on-output "DP-2"
+}
+
+workspace "browser" {
+  open-on-output "DP-3"
+}
+
+workspace "mail" {
+  open-on-output "eDP-1"
+}

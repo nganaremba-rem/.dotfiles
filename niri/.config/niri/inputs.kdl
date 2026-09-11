@@ -13,6 +13,11 @@ input {
             // localectl set-x11-keymap.
         }
 
+
+        // This is my sweet spot
+        // repeat-delay 200
+        // repeat-rate 50
+
         repeat-delay 200
         repeat-rate 50
         // repeat-delay 400

@@ -24,7 +24,7 @@ binds {
   Mod+Alt+H hotkey-overlay-title="Hotstar" {spawn "helium-browser" "--app=https://hotstar.com";}
   Mod+Ctrl+N hotkey-overlay-title="Night light" {spawn "~/bin/arch/toggle-gammastep";}
   Mod+Delete hotkey-overlay-title="Power Menu" {spawn "wlogout";}
-  Mod+Alt+L hotkey-overlay-title="Lock screen (hyprlock)" {spawn-sh "pgrep -x hyprlock >/dev/null || hyprlock";}
+  Alt+L hotkey-overlay-title="Lock screen (hyprlock)" {spawn-sh "pgrep -x hyprlock >/dev/null || hyprlock";}
   // Mod+Space hotkey-overlay-title="Launcher" {spawn "fuzzel";}
   // Mod+Space hotkey-overlay-title="Noctalia launcher" {spawn-sh "qs -c noctalia-shell ipc call launcher toggle";}
   // Mod+Space hotkey-overlay-title="Rofi launcher" {spawn-sh "rofi -show drun";}
@@ -36,7 +36,7 @@ binds {
   Ctrl+Mod+Alt+L hotkey-overlay-title="Suspend" {spawn "systemctl" "suspend";}
   Mod+Shift+T hotkey-overlay-title="Btop" {spawn "footclient" "--app-id=btop" "--" "btop";}
   Mod+Ctrl+Alt+V hotkey-overlay-title="Sound" {spawn "footclient" "-e" "wiremix";}
-  Mod+V hotkey-overlay-title="Clipboard History" {spawn-sh "footclient ~/.config/cliphist/cliphist";}
+  Mod+V hotkey-overlay-title="Clipboard History" {spawn "dms" "ipc" "call" "clipboard" "toggle";}
   // Mod+Ctrl+E hotkey-overlay-title="Emoji picker" {spawn "~/.local/bin/emoji-picker";}
   // Mod+Ctrl+E hotkey-overlay-title="Emoji picker" {spawn-sh "qs -c noctalia-shell ipc call launcher emoji";}
   Mod+Ctrl+E hotkey-overlay-title="Emoji picker" {spawn-sh "rofi -show emoji";}
@@ -58,8 +58,11 @@ binds {
   Mod+Ctrl+X hotkey-overlay-title="Voxtype Record Toggle" {spawn-sh "voxtype record toggle";}
   Mod+Ctrl+Apostrophe hotkey-overlay-title="Toggle between Floating and Tiling" { switch-focus-between-floating-and-tiling; }
   Mod+Alt+C hotkey-overlay-title="Claude AI" {spawn "helium-browser" "--app=https://claude.ai/chat";}
+  Mod+Ctrl+Alt+Return hotkey-overlay-title="Claude AI" {spawn-sh "footclient -e claude --dangerously-skip-permissions";}
   Mod+X hotkey-overlay-title="X" {spawn "helium-browser" "--app=https://x.com";}
-  Mod+Alt+K hotkey-overlay-title="REMTUI" {spawn "~/.local/bin/remtui";}
+  Mod+Alt+I hotkey-overlay-title="REMTUI" {spawn "~/.local/bin/remtui";}
+  Mod+N hotkey-overlay-title="Neovim" {spawn "footclient" "-e" "nvim";}
+  // Mod+N hotkey-overlay-title="Neovim" {spawn "footclient" "-e" "nvim";}
 
   // Mod+Alt+Ctrl+C hotkey-overlay-title="Control Center" {spawn-sh "qs -c noctalia-shell ipc call controlCenter toggle";}
   // Mod+Alt+Ctrl+I hotkey-overlay-title="Settings" {spawn-sh "qs -c noctalia-shell ipc call settings toggle";}
@@ -231,24 +234,24 @@ binds {
     //
     // For example, with 2 workspaces + 1 empty, indices 3, 4, 5 and so on
     // will all refer to the 3rd workspace.
-    Mod+1 { focus-workspace 1; }
-    Mod+2 { focus-workspace 2; }
-    Mod+3 { focus-workspace 3; }
-    Mod+4 { focus-workspace 4; }
-    Mod+5 { focus-workspace 5; }
-    Mod+6 { focus-workspace 6; }
-    Mod+7 { focus-workspace 7; }
-    Mod+8 { focus-workspace 8; }
-    Mod+9 { focus-workspace 9; }
-    Mod+Ctrl+1 { move-column-to-workspace 1; }
-    Mod+Ctrl+2 { move-column-to-workspace 2; }
-    Mod+Ctrl+3 { move-column-to-workspace 3; }
-    Mod+Ctrl+4 { move-column-to-workspace 4; }
-    Mod+Ctrl+5 { move-column-to-workspace 5; }
-    Mod+Ctrl+6 { move-column-to-workspace 6; }
-    Mod+Ctrl+7 { move-column-to-workspace 7; }
-    Mod+Ctrl+8 { move-column-to-workspace 8; }
-    Mod+Ctrl+9 { move-column-to-workspace 9; }
+    Mod+Alt+J { focus-workspace 1; }
+    Mod+Alt+K { focus-workspace 2; }
+    Mod+Alt+L { focus-workspace 3; }
+    Mod+Alt+Semicolon { focus-workspace 4; }
+    Mod+Alt+5 { focus-workspace 5; }
+    Mod+Alt+6 { focus-workspace 6; }
+    Mod+Alt+7 { focus-workspace 7; }
+    Mod+Alt+8 { focus-workspace 8; }
+    Mod+Alt+9 { focus-workspace 9; }
+    Mod+Alt+Shift+J { move-column-to-workspace 1; }
+    Mod+Alt+Shift+K { move-column-to-workspace 2; }
+    Mod+Alt+Shift+L { move-column-to-workspace 3; }
+    Mod+Alt+Shift+Semicolon { move-column-to-workspace 4; }
+    Mod+Alt+Shift+5 { move-column-to-workspace 5; }
+    Mod+Alt+Shift+6 { move-column-to-workspace 6; }
+    Mod+Alt+Shift+7 { move-column-to-workspace 7; }
+    Mod+Alt+Shift+8 { move-column-to-workspace 8; }
+    Mod+Alt+Shift+9 { move-column-to-workspace 9; }
 
     // Alternatively, there are commands to move just a single window:
     // Mod+Ctrl+1 { move-window-to-workspace 1; }

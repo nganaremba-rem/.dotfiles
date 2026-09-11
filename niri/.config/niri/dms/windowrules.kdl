@@ -4,24 +4,19 @@
 // @id=dms_rule_0 @name=
 window-rule {
     match app-id="^foot(client)?$"
-    background-effect {
-        blur true
-    }
-}
-
-// @id=dms_rule_1 @name=
-window-rule {
     match app-id="^kitty$"
+    match app-id="^neovide$"
+    open-on-workspace "terminal"
     background-effect {
         blur true
     }
 }
-
 
 // @id=dms_rule_2 @name=
 window-rule {
     match app-id="^btop$"
     open-maximized true
+    open-on-workspace "terminal"
 }
 
 // @id=dms-floating-windows @name=DMS Floating Windows
@@ -30,22 +25,23 @@ window-rule {
     open-floating true
 }
 
-
-
+// @id=dms_rule_3 @name=
 window-rule {
-  match app-id=r#"^scratchpad$"#
-  open-floating true
-  default-column-width { fixed 1200; }
-  default-window-height { fixed 800; }
-  // open-centered true
-}
-
-
-
-layer-rule {
-    match namespace="wlogout"
+    match app-id="^scratchpad$"
+    open-floating true
+    default-column-width { fixed 1200; }
+    default-window-height { fixed 800; }
     background-effect {
         blur true
-        xray false
     }
+}
+
+// @id=dms_rule_4 @name=
+window-rule {
+    match app-id="helium"
+    match app-id="google-chrome"
+    match app-id="zen"
+    match app-id="librewolf"
+    match app-id="chrome-*"
+    open-on-workspace "browser"
 }

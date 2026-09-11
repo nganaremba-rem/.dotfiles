@@ -148,6 +148,16 @@ animations {
         spring damping-ratio=0.85 stiffness=800 epsilon=0.0001
     }
 }
+
+// Named workspaces (with open-on-output) live in workspaces.kdl.
+// Do NOT re-declare them bare here: a later bare `workspace "name"` overrides
+// the included block and silently drops its open-on-output.
+// include "workspaces.kdl"
+workspace "terminal"
+workspace "browser"
+workspace "mail"
+
+
 // Window rules let you adjust behavior for individual windows.
 // Find more information on the wiki:
 // https://github.com/YaLTeR/niri/wiki/Configuration:-Window-Rules
@@ -200,6 +210,17 @@ window-rule {
     // match app-id="zoom"
     open-floating true
 }
+
+window-rule {
+    match app-id=r#"^org\.mozilla\.Thunderbird$"#
+    match app-id=r#"^thunderbird$"#
+    match app-id=r#"^Thunderbird$"#
+    open-on-workspace "mail"
+    open-focused false
+}
+
+
+
 debug {
     honor-xdg-activation-with-invalid-serial
 }
