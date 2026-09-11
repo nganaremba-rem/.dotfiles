@@ -2,29 +2,32 @@ onboarding = false
 # herdr configuration
 # Place this file at ~/.config/herdr/config.toml
 
-# Show first-run notification setup on startup.
-# Missing also shows onboarding; set false after you've chosen.
-# onboarding = true
-
 [theme]
 # Built-in themes: catppuccin, terminal, tokyo-night, dracula, nord,
-#                  gruvbox, one-dark, solarized, kanagawa, rose-pine,
-#                  vesper
+#                  gruvbox, one-dark, solarized, kanagawa, rose-pine, vesper
 name = "catppuccin"
 
-# Follow host terminal light/dark appearance and switch Herdr UI themes.
-# Existing manual behavior is unchanged unless this is true.
-# auto_switch = false
-# dark_name = "catppuccin"
-# light_name = "catppuccin-latte"
-
-# Override individual color tokens on top of the base theme.
-# Accepts: hex (#rrggbb), named colors, rgb(r,g,b), or panel_bg = "reset"
-# [theme.custom]
-# panel_bg = "reset"
-# accent = "#f5c2e7"
-# red = "#ff6188"
-# green = "#a6e3a1"
+# Catppuccin Mocha, but background-free: every surface is "reset" so the
+# terminal's own background (and its transparency/blur) shows through.
+# Hierarchy is carried by border color, weight, and text dimming instead.
+[theme.custom]
+sidebar_bg    = "reset"
+panel_bg      = "#1e1e2e"  # tab bar + prefix bar strip, and the dark text
+                           # inside inverted chips (PREFIX, active tab)
+active_row_bg = "#1e1e2e"  # sampled from the herdr.dev shot's focused row
+surface_dim   = "reset"
+selection_bg  = "#45475a"  # only real fill left: text selection
+surface0      = "#313244"
+surface1      = "#45475a"
+overlay0      = "#7f849c"  # prefix-bar hint labels + unfocused borders
+overlay1      = "#6c7086"
+subtext0      = "#a6adc8"  # secondary text rows
+accent        = "#cba6f7"  # catppuccin mauve, sampled from the herdr.dev shot
+mauve         = "#cba6f7"
+green         = "#a6e3a1"
+yellow        = "#f9e2af"
+peach         = "#fab387"
+red           = "#f38ba8"
 
 [terminal]
 # Executable used for new interactive panes.
@@ -133,92 +136,75 @@ navigate_workspace_down = "shift+j"
 # directory = "~/.herdr/worktrees"
 
 [ui]
-# Sidebar width (auto-scaled based on workspace names, this sets the default)
-sidebar_width = 10
+# Sidebar: wider so the multi-line rows never truncate mid-word.
+sidebar_width = 28
+sidebar_min_width = 24
+sidebar_max_width = 44
+sidebar_collapsed_mode = "compact"
 
-# Minimum sidebar width when expanded (columns)
-sidebar_min_width = 5
-
-# Maximum sidebar width when expanded (columns)
-sidebar_max_width = 16
-
-# Terminal width at or below which Herdr uses the mobile single-column layout.
-# Increase this for foldables, tablets, or wide phone terminals.
-# mobile_width_threshold = 64
-
-# Capture mouse input for Herdr's mouse UI.
-# Set false to let the terminal handle normal clicks, such as Cmd-clicking URLs.
-# Pane apps like lazygit and btop can still receive mouse when they request it.
-# mouse_capture = true
-
-# Optional modifier that forwards right-click hold/drag gestures to pane apps instead of opening Herdr's pane menu.
-# Empty/off disables this. Shift is intentionally unsupported because terminals commonly reserve Shift+mouse.
-# right_click_passthrough_modifier = ""
-
-# Force a full redraw when the outer terminal regains focus.
-# Set false to reduce visible flashing when switching back to Herdr.
-# Trade-off: rare host terminal surface corruption may persist until the next full redraw.
-# redraw_on_focus_gained = true
-
-# Pane scrollback lines to scroll per mouse wheel notch.
-# mouse_scroll_lines = 3
-
-# Ask for confirmation before closing a workspace
-# confirm_close = true
-
-# Ask for a tab name before creating a new tab.
-# Set false to create tabs immediately with generated names.
-# prompt_new_tab_name = true
-
-# Draw borders around split panes.
-# pane_borders = true
-
-# Keep split panes visually separated instead of sharing divider borders.
-# pane_gaps = true
-
-# Show detected/reported agent labels in split pane borders when no manual pane name is set.
-# show_agent_labels_on_pane_borders = false
-
-# Agent panel ordering: "spaces" (grouped by space) or "priority" (attention queue).
-# "workspaces" is accepted as an alias for "spaces".
-# agent_panel_sort = "spaces"
-
-# Accent color for highlights, borders, and navigation UI.
-# Accepts: hex (#89b4fa), named colors (cyan, blue, magenta), or rgb(r,g,b)
-# accent = "cyan"
-
-# Background notification popup delivery
-agent_panel_sort = "priority"
+# Borders everywhere: with no background fills, the frame is what separates
+# panes from each other and from the terminal behind them.
+pane_borders = "always"
+pane_outer_borders = true
+pane_gaps = true
+pane_scrollbars = true
 show_agent_labels_on_pane_borders = true
-[ui.toast]
-# off = disable pop-up notifications
-# herdr = show in-app toasts
-# terminal = ask the outer terminal to show a desktop notification
-# system = ask the OS notification service directly
-# delivery = "off"
-# delay_seconds = 1
+hide_tab_bar_when_single_tab = true
+tab_bar_position = "top"
 
+# Distinct glyphs per agent state instead of same-shape colored dots:
+# readable at a glance and still legible without color.
+status_indicators = "dots"
+agent_panel_sort = "priority"
+
+accent = "#cba6f7"
+
+# Right side of the tab bar: zoom state, then a quiet clock.
+tab_bar_right = [
+  { type = "zoom" },
+  { type = "datetime", format = "%H:%M" },
+]
+tab_bar_right_separator = "  ·  "
+
+window_title = "{workspace} · {tab}"
+
+# Agent rows: three tiers of type. Line 1 = identity (bright), line 2 = what it
+# is actually doing (dim), line 3 = which agent (mauve, dim).
+[ui.sidebar.agents]
+# row_gap is the only spacing knob; its blanks sit between entries and are never
+# painted by the focus highlight. Kept at 0 for the tight herdr.dev layout.
+row_gap = 1
+rows = [
+  ["state_icon", "workspace"],
+  ["state_text", "agent"],
+]
+
+# Space rows: name on top, git context underneath in cooler, quieter color.
+[ui.sidebar.spaces]
+row_gap = 1
+rows = [
+  ["state_icon", "workspace"],
+  ["branch", "git_status"],
+]
+
+[ui.toast]
+# Desktop notifications fire only for agents in BACKGROUND workspaces, when the
+# state changes to "needs attention". delay_seconds is a HOLD, measured: the
+# agent must stay in that state this long or nothing is sent (verified: flipping
+# back after 2s with delay 8 sent nothing). Raise it only if detection flicker
+# starts spamming - it delays genuine approval prompts by the same amount.
 delivery = "system"
+delay_seconds = 1
+
 [ui.toast.herdr]
-# position = "bottom-right"
+position = "bottom-right"
 
 [ui.toast.clipboard]
-# enabled = true
-# position = "bottom-center"
+enabled = true
+position = "bottom-center"
 
-# Play sounds when agents change state in background workspaces
 [ui.sound]
-# enabled = true
-# Optional custom mp3 sound files. Relative paths are resolved from this config file's directory.
-# path = "sounds/notification.mp3"   # one mp3 file for all sound notifications
-# done_path = "sounds/done.mp3"      # overrides only finished notifications
-# request_path = "sounds/request.mp3" # overrides only needs-attention notifications
-
-# Per-agent overrides: default | on | off
-# By default, droid is muted.
-# [ui.sound.agents]
-# droid = "off"
-
+enabled = true
 [session]
 # Resume supported AI-agent panes into their native conversation sessions after
 # a Herdr server restart. Requires official integrations that report session refs.

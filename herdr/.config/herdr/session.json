@@ -6,11 +6,11 @@
       "custom_name": null,
       "identity_cwd": "/home/rem/work/DPS/KRT_DPS",
       "public_pane_numbers": {
-        "2": 2,
         "1": 1,
+        "2": 2,
         "3": 3
       },
-      "next_public_pane_number": 27,
+      "next_public_pane_number": 31,
       "public_tab_numbers": [
         1,
         2,
@@ -26,13 +26,7 @@
           "panes": {
             "1": {
               "cwd": "/home/rem/work/DPS/KRT_DPS",
-              "label": "neovim",
-              "agent_session": {
-                "source": "herdr:claude",
-                "agent": "claude",
-                "kind": "id",
-                "value": "b6a04bde-a5f0-4215-b5a9-175539c4f1f5"
-              }
+              "label": "neovim"
             }
           },
           "zoomed": false,
@@ -51,7 +45,7 @@
                 "source": "herdr:claude",
                 "agent": "claude",
                 "kind": "id",
-                "value": "16e0c0e0-03de-4aa5-991e-1638e34ec341"
+                "value": "7613da3e-76f3-4f04-8668-805fb5160a85"
               }
             }
           },
@@ -117,7 +111,7 @@
                 "source": "herdr:claude",
                 "agent": "claude",
                 "kind": "id",
-                "value": "f94cf901-9b0f-4457-85e0-04ecc2b6b152"
+                "value": "07a22c5d-5944-4952-accd-b65d734543af"
               }
             }
           },
@@ -133,10 +127,10 @@
       "custom_name": "CDN",
       "identity_cwd": "/home/rem/coding/cdn-lab",
       "public_pane_numbers": {
-        "9": 3,
-        "10": 4,
-        "8": 5,
-        "7": 1
+        "8": 3,
+        "9": 4,
+        "6": 1,
+        "7": 5
       },
       "next_public_pane_number": 7,
       "public_tab_numbers": [
@@ -155,10 +149,10 @@
                   "direction": "Vertical",
                   "ratio": 0.5,
                   "first": {
-                    "Pane": 7
+                    "Pane": 6
                   },
                   "second": {
-                    "Pane": 8
+                    "Pane": 7
                   }
                 }
               },
@@ -167,90 +161,244 @@
                   "direction": "Vertical",
                   "ratio": 0.5,
                   "first": {
-                    "Pane": 9
+                    "Pane": 8
                   },
                   "second": {
-                    "Pane": 10
+                    "Pane": 9
                   }
                 }
               }
             }
           },
           "panes": {
-            "8": {
+            "9": {
               "cwd": "/home/rem/coding/cdn-lab"
             },
-            "10": {
+            "6": {
               "cwd": "/home/rem/coding/cdn-lab"
             },
             "7": {
               "cwd": "/home/rem/coding/cdn-lab"
             },
-            "9": {
+            "8": {
               "cwd": "/home/rem/coding/cdn-lab"
             }
           },
           "zoomed": false,
-          "focused": 10,
-          "root_pane": 7
+          "focused": 7,
+          "root_pane": 6
         }
       ],
       "active_tab": 0
     },
     {
-      "id": "w1C",
-      "custom_name": "chores",
-      "identity_cwd": "/home/rem/.dotfiles/nvim-kickstart/.config/nvim",
+      "id": "w1F",
+      "custom_name": "Chores",
+      "identity_cwd": "/home/rem",
       "public_pane_numbers": {
-        "21": 8,
-        "13": 1
+        "10": 1
       },
-      "next_public_pane_number": 9,
+      "next_public_pane_number": 5,
       "public_tab_numbers": [
         1
       ],
-      "next_public_tab_number": 3,
+      "next_public_tab_number": 4,
+      "tabs": [
+        {
+          "custom_name": "Do everything here",
+          "layout": {
+            "Pane": 10
+          },
+          "panes": {
+            "10": {
+              "cwd": "/home/rem",
+              "label": "Do everything here"
+            }
+          },
+          "zoomed": false,
+          "focused": 10,
+          "root_pane": 10
+        }
+      ],
+      "active_tab": 0
+    },
+    {
+      "id": "w1H",
+      "custom_name": "MCP Learning",
+      "identity_cwd": "/home/rem/coding/mcp-learning",
+      "public_pane_numbers": {
+        "22": 9,
+        "13": 1,
+        "14": 2,
+        "16": 3,
+        "25": 12
+      },
+      "next_public_pane_number": 14,
+      "public_tab_numbers": [
+        1,
+        5,
+        8
+      ],
+      "next_public_tab_number": 9,
       "tabs": [
         {
           "custom_name": null,
           "layout": {
             "Split": {
               "direction": "Horizontal",
-              "ratio": 0.5,
+              "ratio": 0.29999995,
               "first": {
                 "Pane": 13
               },
               "second": {
-                "Pane": 21
+                "Split": {
+                  "direction": "Horizontal",
+                  "ratio": 0.29999995,
+                  "first": {
+                    "Pane": 14
+                  },
+                  "second": {
+                    "Pane": 16
+                  }
+                }
               }
             }
           },
           "panes": {
-            "21": {
-              "cwd": "/home/rem/.dotfiles/nvim-kickstart/.config/nvim"
+            "14": {
+              "cwd": "/home/rem/coding/mcp-learning"
             },
             "13": {
-              "cwd": "/home/rem/.dotfiles/nvim-kickstart/.config/nvim",
-              "label": "herdr config",
+              "cwd": "/home/rem/coding/mcp-learning"
+            },
+            "16": {
+              "cwd": "/home/rem/coding/mcp-learning",
               "agent_session": {
                 "source": "herdr:claude",
                 "agent": "claude",
                 "kind": "id",
-                "value": "2f4391a0-a0ad-4270-aaed-bfacae3bd1d2"
+                "value": "e9b3f998-bb83-4d83-b966-ecfb0f525bc9"
               }
             }
           },
           "zoomed": true,
-          "focused": 21,
+          "focused": 13,
           "root_pane": 13
+        },
+        {
+          "custom_name": null,
+          "layout": {
+            "Pane": 22
+          },
+          "panes": {
+            "22": {
+              "cwd": "/home/rem/coding/mcp-learning",
+              "agent_session": {
+                "source": "herdr:claude",
+                "agent": "claude",
+                "kind": "id",
+                "value": "2c11c485-0c44-475d-abe4-cc96f8a769c4"
+              }
+            }
+          },
+          "zoomed": false,
+          "focused": 22,
+          "root_pane": 22
+        },
+        {
+          "custom_name": null,
+          "layout": {
+            "Pane": 25
+          },
+          "panes": {
+            "25": {
+              "cwd": "/home/rem/coding/mcp-learning"
+            }
+          },
+          "zoomed": false,
+          "focused": 25,
+          "root_pane": 25
+        }
+      ],
+      "active_tab": 0
+    },
+    {
+      "id": "w1J",
+      "custom_name": null,
+      "identity_cwd": "/home/rem/coding/test-tsconfig",
+      "public_pane_numbers": {
+        "28": 2,
+        "27": 1
+      },
+      "next_public_pane_number": 3,
+      "public_tab_numbers": [
+        1
+      ],
+      "next_public_tab_number": 2,
+      "tabs": [
+        {
+          "custom_name": null,
+          "layout": {
+            "Split": {
+              "direction": "Horizontal",
+              "ratio": 0.45,
+              "first": {
+                "Pane": 27
+              },
+              "second": {
+                "Pane": 28
+              }
+            }
+          },
+          "panes": {
+            "28": {
+              "cwd": "/home/rem/coding/test-tsconfig"
+            },
+            "27": {
+              "cwd": "/home/rem/coding/test-tsconfig"
+            }
+          },
+          "zoomed": false,
+          "focused": 28,
+          "root_pane": 27
+        }
+      ],
+      "active_tab": 0
+    },
+    {
+      "id": "w1K",
+      "custom_name": "neovide configuration",
+      "identity_cwd": "/home/rem",
+      "public_pane_numbers": {
+        "29": 1
+      },
+      "next_public_pane_number": 2,
+      "public_tab_numbers": [
+        1
+      ],
+      "next_public_tab_number": 2,
+      "tabs": [
+        {
+          "custom_name": null,
+          "layout": {
+            "Pane": 29
+          },
+          "panes": {
+            "29": {
+              "cwd": "/home/rem"
+            }
+          },
+          "zoomed": false,
+          "focused": 29,
+          "root_pane": 29
         }
       ],
       "active_tab": 0
     }
   ],
-  "active": 0,
-  "selected": 0,
-  "sidebar_width": 16,
-  "sidebar_section_split": 0.5,
+  "active": 6,
+  "selected": 6,
+  "sidebar_width": null,
+  "sidebar_section_split": null,
   "collapsed_space_keys": []
 }
