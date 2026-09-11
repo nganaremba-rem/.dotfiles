@@ -1,6 +1,8 @@
 return { -- Autocompletion
   'saghen/blink.cmp',
-  event = 'InsertEnter',
+  -- CmdlineEnter is required for the `:` / `/` completion menu below:
+  -- without it blink stays unloaded until the first insert-mode keystroke.
+  event = { 'InsertEnter', 'CmdlineEnter' },
   version = '1.*',
   dependencies = {
     -- Snippet Engine
@@ -114,5 +116,28 @@ return { -- Autocompletion
 
     -- Shows a signature help window while you type arguments for a function
     signature = { enabled = true },
+
+    -- Command-line completion: `:h mul`, `:e src/`, `:set numb` pop a menu as
+    -- you type, instead of waiting for <Tab>. Blink reads the same candidates
+    -- Vim's wildmenu does (getcompletion()), so it knows about help tags,
+    -- commands, options, files and user commands with no extra sources.
+    cmdline = {
+      enabled = true,
+      -- Explicit: the top-level 'super-tab' preset is insert-mode shaped and
+      -- would otherwise be inherited here, where <Tab> must mean "next item".
+      keymap = { preset = 'cmdline' },
+      completion = {
+        menu = { auto_show = true },
+        list = {
+          selection = {
+            -- Nothing preselected, so <CR> runs what you actually typed;
+            -- auto_insert previews the highlighted item on the cmdline.
+            preselect = false,
+            auto_insert = true,
+          },
+        },
+        ghost_text = { enabled = true },
+      },
+    },
   },
 }
