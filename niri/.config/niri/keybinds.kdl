@@ -35,6 +35,7 @@ binds {
   Alt+W hotkey-overlay-title="Show open windows" {spawn-sh "rofi -show window";}
   Ctrl+Mod+Alt+L hotkey-overlay-title="Suspend" {spawn "systemctl" "suspend";}
   Mod+Shift+T hotkey-overlay-title="Btop" {spawn "footclient" "--app-id=btop" "--" "btop";}
+  Mod+Ctrl+T hotkey-overlay-title="RemTop" {spawn "footclient" "remtop";}
   Mod+Ctrl+Alt+V hotkey-overlay-title="Sound" {spawn "footclient" "-e" "wiremix";}
   Mod+V hotkey-overlay-title="Clipboard History" {spawn "dms" "ipc" "call" "clipboard" "toggle";}
   // Mod+Ctrl+E hotkey-overlay-title="Emoji picker" {spawn "~/.local/bin/emoji-picker";}

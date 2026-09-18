@@ -154,7 +154,7 @@ tab_bar_position = "top"
 
 # Distinct glyphs per agent state instead of same-shape colored dots:
 # readable at a glance and still legible without color.
-status_indicators = "dots"
+status_indicators = "symbols"
 agent_panel_sort = "priority"
 
 accent = "#cba6f7"

@@ -31,6 +31,7 @@ export ATAC_KEY_BINDINGS="$HOME/.config/atac/vim_key_bindings.toml"
 export FZF_DEFAULT_COMMAND="fd --hidden --follow --exclude .git"
 export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border --info=inline --bind=ctrl-k:up,ctrl-j:down"
 export SUDO_ASKPASS=~/.local/bin/askpass-zenity
+export _ZO_DOCTOR=0
 
 # Secrets (API keys, tokens) live in a gitignored, 0600 file — never in this
 # dotfile. Put `export ANTHROPIC_API_KEY=sk-ant-...` (for avante.nvim) there.

@@ -68,9 +68,7 @@ return {
           client.server_capabilities.documentFormattingProvider = false
           if client.workspace_folders then
             local path = client.workspace_folders[1].name
-            if path ~= vim.fn.stdpath 'config' and (vim.uv.fs_stat(path .. '/.luarc.json') or vim.uv.fs_stat(path .. '/.luarc.jsonc')) then
-              return
-            end
+            if path ~= vim.fn.stdpath 'config' and (vim.uv.fs_stat(path .. '/.luarc.json') or vim.uv.fs_stat(path .. '/.luarc.jsonc')) then return end
           end
           client.config.settings.Lua = vim.tbl_deep_extend('force', client.config.settings.Lua, {
             runtime = {
@@ -103,8 +101,9 @@ return {
 
   python = {
     filetypes = { 'python' },
-    lsp = { pyright = {} },
-    formatters = { 'ruff_format', 'isort', 'black', stop_after_first = true },
+    lsp = { ruff = {}, pyright = {} },
+    -- formatters = { 'ruff_format', 'isort', 'black', stop_after_first = true },
+    formatters = { 'ruff_format', stop_after_first = true },
     treesitter = { 'python' },
     tasks = {
       run = 'python3 $FILE',

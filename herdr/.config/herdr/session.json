@@ -6,11 +6,11 @@
       "custom_name": null,
       "identity_cwd": "/home/rem/work/DPS/KRT_DPS",
       "public_pane_numbers": {
-        "1": 1,
         "2": 2,
-        "3": 3
+        "3": 3,
+        "1": 1
       },
-      "next_public_pane_number": 31,
+      "next_public_pane_number": 33,
       "public_tab_numbers": [
         1,
         2,
@@ -40,13 +40,7 @@
           },
           "panes": {
             "2": {
-              "cwd": "/home/rem/work/DPS/KRT_DPS",
-              "agent_session": {
-                "source": "herdr:claude",
-                "agent": "claude",
-                "kind": "id",
-                "value": "7613da3e-76f3-4f04-8668-805fb5160a85"
-              }
+              "cwd": "/home/rem/work/DPS/KRT_DPS"
             }
           },
           "zoomed": false,
@@ -75,15 +69,17 @@
       "custom_name": null,
       "identity_cwd": "/home/rem/work/facial-recognition/may21/face-authentication-v2",
       "public_pane_numbers": {
-        "4": 1,
+        "4": 32,
+        "6": 34,
         "5": 3
       },
-      "next_public_pane_number": 32,
+      "next_public_pane_number": 40,
       "public_tab_numbers": [
         1,
-        2
+        2,
+        8
       ],
-      "next_public_tab_number": 7,
+      "next_public_tab_number": 12,
       "tabs": [
         {
           "custom_name": "neovim",
@@ -106,31 +102,39 @@
           },
           "panes": {
             "5": {
-              "cwd": "/home/rem/work/facial-recognition/may21/face-authentication-v2",
-              "agent_session": {
-                "source": "herdr:claude",
-                "agent": "claude",
-                "kind": "id",
-                "value": "07a22c5d-5944-4952-accd-b65d734543af"
-              }
+              "cwd": "/home/rem/work/facial-recognition/may21/face-authentication-v2"
             }
           },
           "zoomed": false,
           "focused": 5,
           "root_pane": 5
+        },
+        {
+          "custom_name": "terminal stuff",
+          "layout": {
+            "Pane": 6
+          },
+          "panes": {
+            "6": {
+              "cwd": "/home/rem/work/facial-recognition/may21/face-authentication-v2/docs/repository-guide"
+            }
+          },
+          "zoomed": false,
+          "focused": 6,
+          "root_pane": 6
         }
       ],
-      "active_tab": 0
+      "active_tab": 1
     },
     {
       "id": "w1A",
       "custom_name": "CDN",
       "identity_cwd": "/home/rem/coding/cdn-lab",
       "public_pane_numbers": {
-        "8": 3,
-        "9": 4,
-        "6": 1,
-        "7": 5
+        "7": 1,
+        "9": 3,
+        "8": 5,
+        "10": 4
       },
       "next_public_pane_number": 7,
       "public_tab_numbers": [
@@ -149,10 +153,10 @@
                   "direction": "Vertical",
                   "ratio": 0.5,
                   "first": {
-                    "Pane": 6
+                    "Pane": 7
                   },
                   "second": {
-                    "Pane": 7
+                    "Pane": 8
                   }
                 }
               },
@@ -161,32 +165,32 @@
                   "direction": "Vertical",
                   "ratio": 0.5,
                   "first": {
-                    "Pane": 8
+                    "Pane": 9
                   },
                   "second": {
-                    "Pane": 9
+                    "Pane": 10
                   }
                 }
               }
             }
           },
           "panes": {
-            "9": {
-              "cwd": "/home/rem/coding/cdn-lab"
-            },
-            "6": {
+            "8": {
               "cwd": "/home/rem/coding/cdn-lab"
             },
             "7": {
               "cwd": "/home/rem/coding/cdn-lab"
             },
-            "8": {
+            "10": {
+              "cwd": "/home/rem/coding/cdn-lab"
+            },
+            "9": {
               "cwd": "/home/rem/coding/cdn-lab"
             }
           },
           "zoomed": false,
-          "focused": 7,
-          "root_pane": 6
+          "focused": 8,
+          "root_pane": 7
         }
       ],
       "active_tab": 0
@@ -196,7 +200,7 @@
       "custom_name": "Chores",
       "identity_cwd": "/home/rem",
       "public_pane_numbers": {
-        "10": 1
+        "11": 1
       },
       "next_public_pane_number": 5,
       "public_tab_numbers": [
@@ -207,17 +211,17 @@
         {
           "custom_name": "Do everything here",
           "layout": {
-            "Pane": 10
+            "Pane": 11
           },
           "panes": {
-            "10": {
+            "11": {
               "cwd": "/home/rem",
               "label": "Do everything here"
             }
           },
           "zoomed": false,
-          "focused": 10,
-          "root_pane": 10
+          "focused": 11,
+          "root_pane": 11
         }
       ],
       "active_tab": 0
@@ -227,11 +231,11 @@
       "custom_name": "MCP Learning",
       "identity_cwd": "/home/rem/coding/mcp-learning",
       "public_pane_numbers": {
-        "22": 9,
-        "13": 1,
-        "14": 2,
-        "16": 3,
-        "25": 12
+        "12": 1,
+        "13": 2,
+        "14": 3,
+        "16": 12,
+        "15": 9
       },
       "next_public_pane_number": 14,
       "public_tab_numbers": [
@@ -248,129 +252,74 @@
               "direction": "Horizontal",
               "ratio": 0.29999995,
               "first": {
-                "Pane": 13
+                "Pane": 12
               },
               "second": {
                 "Split": {
                   "direction": "Horizontal",
                   "ratio": 0.29999995,
                   "first": {
-                    "Pane": 14
+                    "Pane": 13
                   },
                   "second": {
-                    "Pane": 16
+                    "Pane": 14
                   }
                 }
               }
             }
           },
           "panes": {
-            "14": {
+            "12": {
               "cwd": "/home/rem/coding/mcp-learning"
             },
             "13": {
               "cwd": "/home/rem/coding/mcp-learning"
             },
-            "16": {
-              "cwd": "/home/rem/coding/mcp-learning",
-              "agent_session": {
-                "source": "herdr:claude",
-                "agent": "claude",
-                "kind": "id",
-                "value": "e9b3f998-bb83-4d83-b966-ecfb0f525bc9"
-              }
+            "14": {
+              "cwd": "/home/rem/coding/mcp-learning"
             }
           },
           "zoomed": true,
-          "focused": 13,
-          "root_pane": 13
+          "focused": 12,
+          "root_pane": 12
         },
         {
           "custom_name": null,
           "layout": {
-            "Pane": 22
+            "Pane": 15
           },
           "panes": {
-            "22": {
-              "cwd": "/home/rem/coding/mcp-learning",
-              "agent_session": {
-                "source": "herdr:claude",
-                "agent": "claude",
-                "kind": "id",
-                "value": "2c11c485-0c44-475d-abe4-cc96f8a769c4"
-              }
-            }
-          },
-          "zoomed": false,
-          "focused": 22,
-          "root_pane": 22
-        },
-        {
-          "custom_name": null,
-          "layout": {
-            "Pane": 25
-          },
-          "panes": {
-            "25": {
+            "15": {
               "cwd": "/home/rem/coding/mcp-learning"
             }
           },
           "zoomed": false,
-          "focused": 25,
-          "root_pane": 25
-        }
-      ],
-      "active_tab": 0
-    },
-    {
-      "id": "w1J",
-      "custom_name": null,
-      "identity_cwd": "/home/rem/coding/test-tsconfig",
-      "public_pane_numbers": {
-        "28": 2,
-        "27": 1
-      },
-      "next_public_pane_number": 3,
-      "public_tab_numbers": [
-        1
-      ],
-      "next_public_tab_number": 2,
-      "tabs": [
+          "focused": 15,
+          "root_pane": 15
+        },
         {
           "custom_name": null,
           "layout": {
-            "Split": {
-              "direction": "Horizontal",
-              "ratio": 0.45,
-              "first": {
-                "Pane": 27
-              },
-              "second": {
-                "Pane": 28
-              }
-            }
+            "Pane": 16
           },
           "panes": {
-            "28": {
-              "cwd": "/home/rem/coding/test-tsconfig"
-            },
-            "27": {
-              "cwd": "/home/rem/coding/test-tsconfig"
+            "16": {
+              "cwd": "/home/rem/coding/mcp-learning"
             }
           },
           "zoomed": false,
-          "focused": 28,
-          "root_pane": 27
+          "focused": 16,
+          "root_pane": 16
         }
       ],
       "active_tab": 0
     },
     {
-      "id": "w1K",
-      "custom_name": "neovide configuration",
+      "id": "w1M",
+      "custom_name": "git",
       "identity_cwd": "/home/rem",
       "public_pane_numbers": {
-        "29": 1
+        "17": 1
       },
       "next_public_pane_number": 2,
       "public_tab_numbers": [
@@ -381,23 +330,99 @@
         {
           "custom_name": null,
           "layout": {
-            "Pane": 29
+            "Pane": 17
           },
           "panes": {
-            "29": {
+            "17": {
               "cwd": "/home/rem"
             }
           },
           "zoomed": false,
-          "focused": 29,
-          "root_pane": 29
+          "focused": 17,
+          "root_pane": 17
         }
       ],
       "active_tab": 0
+    },
+    {
+      "id": "w1R",
+      "custom_name": "RemTop",
+      "identity_cwd": "/home/rem/coding/rust/remtop",
+      "public_pane_numbers": {
+        "20": 6
+      },
+      "next_public_pane_number": 7,
+      "public_tab_numbers": [
+        2
+      ],
+      "next_public_tab_number": 3,
+      "tabs": [
+        {
+          "custom_name": "claude",
+          "layout": {
+            "Pane": 20
+          },
+          "panes": {
+            "20": {
+              "cwd": "/home/rem/coding/rust/remtop"
+            }
+          },
+          "zoomed": false,
+          "focused": 20,
+          "root_pane": 20
+        }
+      ],
+      "active_tab": 0
+    },
+    {
+      "id": "w1T",
+      "custom_name": "daily",
+      "identity_cwd": "/home/rem/coding/rust/remtop",
+      "public_pane_numbers": {
+        "25": 2,
+        "24": 1
+      },
+      "next_public_pane_number": 5,
+      "public_tab_numbers": [
+        1,
+        2
+      ],
+      "next_public_tab_number": 3,
+      "tabs": [
+        {
+          "custom_name": null,
+          "layout": {
+            "Pane": 24
+          },
+          "panes": {
+            "24": {
+              "cwd": "/home/rem/coding/rust/remtop"
+            }
+          },
+          "zoomed": false,
+          "focused": 24,
+          "root_pane": 24
+        },
+        {
+          "custom_name": "stuff",
+          "layout": {
+            "Pane": 25
+          },
+          "panes": {
+            "25": {
+              "cwd": "/home/rem/coding/rust/remtop"
+            }
+          },
+          "zoomed": false,
+          "focused": 25,
+          "root_pane": 25
+        }
+      ],
+      "active_tab": 1
     }
   ],
-  "active": 6,
-  "selected": 6,
+  "active": 7,
+  "selected": 7,
   "sidebar_width": null,
   "sidebar_section_split": null,
   "collapsed_space_keys": []
