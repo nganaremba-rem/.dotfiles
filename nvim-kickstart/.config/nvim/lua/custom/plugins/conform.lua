@@ -41,6 +41,8 @@ return { -- Autoformat
       -- biome.json/biome.jsonc root exists -> conform falls through to prettierd.
       formatters = {
         biome = { require_cwd = true },
+        -- /usr/bin/qmlformat is Qt5 and chokes on Qt6 QML; use the Qt6 binary.
+        qmlformat = { command = '/usr/lib/qt6/bin/qmlformat' },
       },
     }
   end,

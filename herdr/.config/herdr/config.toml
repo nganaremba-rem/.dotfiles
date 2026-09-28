@@ -125,6 +125,15 @@ navigate_workspace_down = "shift+j"
 # type = "pane"
 # command = "lazygit"
 
+# Sessions: prefix+shift+s opens the picker (prefix+q detaches, as built in).
+[[keys.command]]
+key = "prefix+shift+s"
+type = "popup"
+command = "~/.config/herdr/session-picker.sh"
+width = "60%"
+height = "50%"
+description = "sessions: open/new/stop/delete"
+
 # Legacy indexed shortcut config is still parsed for compatibility.
 # Prefer switch_tab, switch_workspace, and focus_agent for new configs.
 # [keys.indexed]
@@ -140,7 +149,7 @@ navigate_workspace_down = "shift+j"
 sidebar_width = 28
 sidebar_min_width = 24
 sidebar_max_width = 44
-sidebar_collapsed_mode = "compact"
+sidebar_collapsed_mode = "hidden"
 
 # Borders everywhere: with no background fills, the frame is what separates
 # panes from each other and from the terminal behind them.

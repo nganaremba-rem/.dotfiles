@@ -170,6 +170,15 @@ window-rule {
     match app-id=r#"^org\.wezfurlong\.wezterm$"#
     default-column-width {}
 }
+// herdr windows use app-id "herdr.<session>" (herdr session picker finds them by it);
+// mirror the dms foot rule, whose ^foot(client)?$ match no longer covers them.
+window-rule {
+    match app-id=r#"^herdr\."#
+    open-on-workspace "terminal"
+    background-effect {
+        blur true
+    }
+}
 window-rule {
     match app-id=r#"^org\.gnome\."#
     draw-border-with-background false

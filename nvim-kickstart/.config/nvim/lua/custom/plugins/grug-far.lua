@@ -16,6 +16,11 @@ return {
         function() require('grug-far').open { prefills = { search = vim.fn.expand '<cword>' } } end,
         desc = 'Find and replace current [w]ord',
       },
+      {
+        '<leader>fa',
+        function() require('grug-far').open { engine = 'astgrep' } end,
+        desc = 'Find and replace by code shape ([a]st-grep)',
+      },
     },
     config = function()
       -- optional setup call to override plugin options

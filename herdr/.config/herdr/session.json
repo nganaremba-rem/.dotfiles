@@ -6,8 +6,8 @@
       "custom_name": null,
       "identity_cwd": "/home/rem/work/DPS/KRT_DPS",
       "public_pane_numbers": {
-        "2": 2,
         "3": 3,
+        "2": 2,
         "1": 1
       },
       "next_public_pane_number": 33,
@@ -69,8 +69,8 @@
       "custom_name": null,
       "identity_cwd": "/home/rem/work/facial-recognition/may21/face-authentication-v2",
       "public_pane_numbers": {
-        "4": 32,
         "6": 34,
+        "4": 32,
         "5": 3
       },
       "next_public_pane_number": 40,
@@ -102,7 +102,13 @@
           },
           "panes": {
             "5": {
-              "cwd": "/home/rem/work/facial-recognition/may21/face-authentication-v2"
+              "cwd": "/home/rem/work/facial-recognition/may21/face-authentication-v2",
+              "agent_session": {
+                "source": "herdr:claude",
+                "agent": "claude",
+                "kind": "id",
+                "value": "bb9b92f2-754d-4117-8189-c1f111594255"
+              }
             }
           },
           "zoomed": false,
@@ -124,17 +130,17 @@
           "root_pane": 6
         }
       ],
-      "active_tab": 1
+      "active_tab": 0
     },
     {
       "id": "w1A",
       "custom_name": "CDN",
       "identity_cwd": "/home/rem/coding/cdn-lab",
       "public_pane_numbers": {
-        "7": 1,
         "9": 3,
+        "10": 4,
         "8": 5,
-        "10": 4
+        "7": 1
       },
       "next_public_pane_number": 7,
       "public_tab_numbers": [
@@ -175,16 +181,16 @@
             }
           },
           "panes": {
-            "8": {
+            "7": {
               "cwd": "/home/rem/coding/cdn-lab"
             },
-            "7": {
+            "9": {
               "cwd": "/home/rem/coding/cdn-lab"
             },
             "10": {
               "cwd": "/home/rem/coding/cdn-lab"
             },
-            "9": {
+            "8": {
               "cwd": "/home/rem/coding/cdn-lab"
             }
           },
@@ -196,46 +202,15 @@
       "active_tab": 0
     },
     {
-      "id": "w1F",
-      "custom_name": "Chores",
-      "identity_cwd": "/home/rem",
-      "public_pane_numbers": {
-        "11": 1
-      },
-      "next_public_pane_number": 5,
-      "public_tab_numbers": [
-        1
-      ],
-      "next_public_tab_number": 4,
-      "tabs": [
-        {
-          "custom_name": "Do everything here",
-          "layout": {
-            "Pane": 11
-          },
-          "panes": {
-            "11": {
-              "cwd": "/home/rem",
-              "label": "Do everything here"
-            }
-          },
-          "zoomed": false,
-          "focused": 11,
-          "root_pane": 11
-        }
-      ],
-      "active_tab": 0
-    },
-    {
       "id": "w1H",
       "custom_name": "MCP Learning",
       "identity_cwd": "/home/rem/coding/mcp-learning",
       "public_pane_numbers": {
-        "12": 1,
+        "15": 9,
         "13": 2,
-        "14": 3,
+        "12": 1,
         "16": 12,
-        "15": 9
+        "14": 3
       },
       "next_public_pane_number": 14,
       "public_tab_numbers": [
@@ -269,13 +244,13 @@
             }
           },
           "panes": {
-            "12": {
-              "cwd": "/home/rem/coding/mcp-learning"
-            },
             "13": {
               "cwd": "/home/rem/coding/mcp-learning"
             },
             "14": {
+              "cwd": "/home/rem/coding/mcp-learning"
+            },
+            "12": {
               "cwd": "/home/rem/coding/mcp-learning"
             }
           },
@@ -349,40 +324,152 @@
       "custom_name": "RemTop",
       "identity_cwd": "/home/rem/coding/rust/remtop",
       "public_pane_numbers": {
-        "20": 6
+        "19": 8,
+        "18": 7
       },
-      "next_public_pane_number": 7,
+      "next_public_pane_number": 9,
       "public_tab_numbers": [
-        2
+        3,
+        4
       ],
-      "next_public_tab_number": 3,
+      "next_public_tab_number": 5,
       "tabs": [
         {
-          "custom_name": "claude",
+          "custom_name": "claude-remtop",
           "layout": {
-            "Pane": 20
+            "Pane": 18
           },
           "panes": {
-            "20": {
-              "cwd": "/home/rem/coding/rust/remtop"
+            "18": {
+              "cwd": "/home/rem/coding/rust/remtop",
+              "agent_session": {
+                "source": "herdr:claude",
+                "agent": "claude",
+                "kind": "id",
+                "value": "b3bf31c0-17af-488d-8ab5-09303de8a31d"
+              }
             }
           },
           "zoomed": false,
-          "focused": 20,
-          "root_pane": 20
+          "focused": 18,
+          "root_pane": 18
+        },
+        {
+          "custom_name": null,
+          "layout": {
+            "Pane": 19
+          },
+          "panes": {
+            "19": {
+              "cwd": "/home/rem"
+            }
+          },
+          "zoomed": false,
+          "focused": 19,
+          "root_pane": 19
         }
       ],
       "active_tab": 0
     },
     {
-      "id": "w1T",
-      "custom_name": "daily",
-      "identity_cwd": "/home/rem/coding/rust/remtop",
+      "id": "w1V",
+      "custom_name": "ollama",
+      "identity_cwd": "/home/rem",
       "public_pane_numbers": {
-        "25": 2,
-        "24": 1
+        "22": 1
+      },
+      "next_public_pane_number": 2,
+      "public_tab_numbers": [
+        1
+      ],
+      "next_public_tab_number": 2,
+      "tabs": [
+        {
+          "custom_name": null,
+          "layout": {
+            "Pane": 22
+          },
+          "panes": {
+            "22": {
+              "cwd": "/home/rem"
+            }
+          },
+          "zoomed": false,
+          "focused": 22,
+          "root_pane": 22
+        }
+      ],
+      "active_tab": 0
+    },
+    {
+      "id": "w1W",
+      "custom_name": "AI Learning",
+      "identity_cwd": "/home/rem/coding/learning-ai",
+      "public_pane_numbers": {
+        "23": 1
       },
       "next_public_pane_number": 5,
+      "public_tab_numbers": [
+        1
+      ],
+      "next_public_tab_number": 4,
+      "tabs": [
+        {
+          "custom_name": null,
+          "layout": {
+            "Pane": 23
+          },
+          "panes": {
+            "23": {
+              "cwd": "/home/rem/coding/learning-ai"
+            }
+          },
+          "zoomed": false,
+          "focused": 23,
+          "root_pane": 23
+        }
+      ],
+      "active_tab": 0
+    },
+    {
+      "id": "w1X",
+      "custom_name": "my-site",
+      "identity_cwd": "/home/rem",
+      "public_pane_numbers": {
+        "24": 1
+      },
+      "next_public_pane_number": 2,
+      "public_tab_numbers": [
+        1
+      ],
+      "next_public_tab_number": 2,
+      "tabs": [
+        {
+          "custom_name": null,
+          "layout": {
+            "Pane": 24
+          },
+          "panes": {
+            "24": {
+              "cwd": "/home/rem"
+            }
+          },
+          "zoomed": false,
+          "focused": 24,
+          "root_pane": 24
+        }
+      ],
+      "active_tab": 0
+    },
+    {
+      "id": "w23",
+      "custom_name": null,
+      "identity_cwd": "/home/rem/work/collaboration_and_dev_architecture",
+      "public_pane_numbers": {
+        "26": 1,
+        "27": 2
+      },
+      "next_public_pane_number": 3,
       "public_tab_numbers": [
         1,
         2
@@ -392,37 +479,73 @@
         {
           "custom_name": null,
           "layout": {
-            "Pane": 24
+            "Pane": 26
           },
           "panes": {
-            "24": {
-              "cwd": "/home/rem/coding/rust/remtop"
+            "26": {
+              "cwd": "/home/rem/work/collaboration_and_dev_architecture",
+              "agent_session": {
+                "source": "herdr:claude",
+                "agent": "claude",
+                "kind": "id",
+                "value": "69bfe642-a779-4fa6-9a0a-0994430f207d"
+              }
             }
           },
           "zoomed": false,
-          "focused": 24,
-          "root_pane": 24
+          "focused": 26,
+          "root_pane": 26
         },
         {
-          "custom_name": "stuff",
+          "custom_name": null,
           "layout": {
-            "Pane": 25
+            "Pane": 27
           },
           "panes": {
-            "25": {
-              "cwd": "/home/rem/coding/rust/remtop"
+            "27": {
+              "cwd": "/home/rem/work/collaboration_and_dev_architecture"
             }
           },
           "zoomed": false,
-          "focused": 25,
-          "root_pane": 25
+          "focused": 27,
+          "root_pane": 27
         }
       ],
-      "active_tab": 1
+      "active_tab": 0
+    },
+    {
+      "id": "w25",
+      "custom_name": "trashy",
+      "identity_cwd": "/home/rem",
+      "public_pane_numbers": {
+        "29": 1
+      },
+      "next_public_pane_number": 4,
+      "public_tab_numbers": [
+        1
+      ],
+      "next_public_tab_number": 2,
+      "tabs": [
+        {
+          "custom_name": null,
+          "layout": {
+            "Pane": 29
+          },
+          "panes": {
+            "29": {
+              "cwd": "/home/rem"
+            }
+          },
+          "zoomed": false,
+          "focused": 29,
+          "root_pane": 29
+        }
+      ],
+      "active_tab": 0
     }
   ],
-  "active": 7,
-  "selected": 7,
+  "active": 10,
+  "selected": 10,
   "sidebar_width": null,
   "sidebar_section_split": null,
   "collapsed_space_keys": []

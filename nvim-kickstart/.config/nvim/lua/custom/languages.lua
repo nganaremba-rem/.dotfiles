@@ -278,4 +278,27 @@ return {
     lsp = { dockerls = {} },
     treesitter = { 'dockerfile' },
   },
+
+  -- QML / Quickshell. qmlls + qmlformat ship with qt6-declarative in
+  -- /usr/lib/qt6/bin — pinned by full path: /usr/bin/qmlformat is the Qt5 one
+  -- (rejects Qt6 syntax), and Mason's qmlls is a prebuilt that needs libodbc and
+  -- a Qt that doesn't match the one Quickshell is built against.
+  -- qmlls finds Quickshell's types through the `.qmlls.ini` that `qs` writes into
+  -- the config dir when that file exists (`touch .qmlls.ini`, then run the shell).
+  -- qmlformat's path override lives in custom/plugins/conform.lua.
+  qml = {
+    filetypes = { 'qml' },
+    lsp = {
+      qmlls = {
+        cmd = { '/usr/lib/qt6/bin/qmlls' },
+        root_markers = { '.qmlls.ini', 'shell.qml', '.git' },
+      },
+    },
+    mason_exclude = { 'qmlls' },
+    formatters = { 'qmlformat' },
+    treesitter = { 'qmljs' },
+    tasks = {
+      file = 'qs -p $FILE', -- on shell.qml this runs the whole config
+    },
+  },
 }

@@ -33,6 +33,11 @@ export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border --info=inline --
 export SUDO_ASKPASS=~/.local/bin/askpass-zenity
 export _ZO_DOCTOR=0
 
+# Floci env
+export AWS_ENDPOINT_URL=http://localhost:4566
+# export AWS_ACCESS_KEY_ID=test
+# export AWS_SECRET_ACCESS_KEY=test
+export AWS_DEFAULT_REGION=us-east-1
 # Secrets (API keys, tokens) live in a gitignored, 0600 file — never in this
 # dotfile. Put `export ANTHROPIC_API_KEY=sk-ant-...` (for avante.nvim) there.
 [[ -f ~/.config/zsh/secrets.zsh ]] && source ~/.config/zsh/secrets.zsh
@@ -345,3 +350,6 @@ export PATH="$HOME/.nub/bin:$PATH"
 [[ -o interactive ]] || export _ZO_DOCTOR=0
 
 _eval_cache zoxide zoxide init zsh --cmd cd
+
+fpath+=('/home/rem/.local/share/zsh/site-functions')
+autoload -Uz compinit && compinit

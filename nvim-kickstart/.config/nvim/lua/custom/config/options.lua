@@ -54,7 +54,8 @@ vim.o.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 -- vim.o.mouse = 'a'
-vim.o.mouse = ''
+-- vim.o.mouse = ''
+vim.o.mouse = 'a'
 
 -- Don't show the mode, since it's already in the status line
 vim.o.showmode = false
@@ -123,7 +124,7 @@ vim.o.wrap = false
 -- Treesitter-based folding. `foldexpr` falls back to 0 (no fold) for buffers
 -- without a parser, so this is safe to set globally.
 vim.o.foldmethod = 'expr'
-vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+vim.o.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
 
 -- Start with everything unfolded; fold on demand with `zc`/`zM`.
 vim.o.foldlevel = 99

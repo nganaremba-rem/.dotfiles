@@ -54,7 +54,7 @@ binds {
   // Server reads foot.ini only at startup, so applying config edits = restart.
   // This CLOSES all footclient windows (standalone `foot` windows are unaffected).
   Mod+Ctrl+Alt+F hotkey-overlay-title="Restart foot server (apply config — closes windows)" {spawn-sh "systemctl --user restart foot-server.service";}
-  Mod+Ctrl+W hotkey-overlay-title="Toggle waybar" {spawn "toggle-waybar";}
+  Mod+Ctrl+W hotkey-overlay-title="Toggle bar" {spawn "dms" "ipc" "call" "bar" "toggle" "index" "0";}
   Mod+Ctrl+Alt+A hotkey-overlay-title="Animation curve picker" {spawn "niri-curve-pick";}
   Mod+Ctrl+X hotkey-overlay-title="Voxtype Record Toggle" {spawn-sh "voxtype record toggle";}
   Mod+Ctrl+Apostrophe hotkey-overlay-title="Toggle between Floating and Tiling" { switch-focus-between-floating-and-tiling; }
@@ -88,7 +88,7 @@ binds {
     // Mod+Return hotkey-overlay-title="Open a Terminal: " { spawn-sh "/usr/sbin/foot --working-directory=$(cat /tmp/niri-shell-pwd-rem 2>/dev/null || $HOME) tmux new-session -A -s main"; }
     Mod+Return hotkey-overlay-title="Open a Terminal: " { spawn-sh "footclient"; }
     Mod+Alt+Return hotkey-overlay-title="Open a Terminal with tmux: " { spawn-sh "footclient -e tmux"; }
-    Mod+Ctrl+Return hotkey-overlay-title="Open a termianl with herdr: " { spawn-sh "footclient -e herdr"; }
+    Mod+Ctrl+Return hotkey-overlay-title="Open a termianl with herdr: " { spawn-sh "~/.config/herdr/session-picker.sh open default"; }
     // Mod+Space hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
 
     // Use spawn-sh to run a shell command. Do this if you need pipes, multiple commands, etc.

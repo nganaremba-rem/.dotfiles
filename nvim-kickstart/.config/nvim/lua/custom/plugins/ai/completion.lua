@@ -19,15 +19,14 @@ local PROVIDER = 'supermaven'
 local providers = {
   supermaven = {
     'supermaven-inc/supermaven-nvim',
+    enabled = false,
     event = 'InsertEnter',
     -- Toggle inline ghost text on/off. <leader>a… is avante's namespace and <leader>t
     -- is the terminal group, so the AI-suggestion toggle lives under <leader>u (UI).
     keys = {
       {
         '<leader>ua',
-        function()
-          require('supermaven-nvim.api').toggle()
-        end,
+        function() require('supermaven-nvim.api').toggle() end,
         desc = 'Toggle [a]I suggestions (ghost text)',
       },
     },
@@ -70,12 +69,8 @@ local providers = {
       require('codeium').setup {
         enable_chat = false,
       }
-      vim.keymap.set('i', '<C-j>', function()
-        return vim.fn['codeium#Accept']()
-      end, { expr = true, silent = true, desc = 'Codeium accept' })
-      vim.keymap.set('i', '<C-]>', function()
-        return vim.fn['codeium#Clear']()
-      end, { expr = true, silent = true, desc = 'Codeium clear' })
+      vim.keymap.set('i', '<C-j>', function() return vim.fn['codeium#Accept']() end, { expr = true, silent = true, desc = 'Codeium accept' })
+      vim.keymap.set('i', '<C-]>', function() return vim.fn['codeium#Clear']() end, { expr = true, silent = true, desc = 'Codeium clear' })
       -- Run `:Codeium Auth` once after install.
     end,
   },
