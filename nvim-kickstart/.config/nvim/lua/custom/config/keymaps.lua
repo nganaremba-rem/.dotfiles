@@ -74,6 +74,9 @@ map('v', '<', '<gv', { desc = 'Indent left' })
 vim.keymap.set('n', 'vag', 'ggVG', { desc = 'Select all' })
 vim.keymap.set('n', 'dag', 'ggdG', { desc = 'Delete all' })
 
+map('n', '<leader>q', '<cmd>qa<CR>', { desc = '[Q]uit all' })
+map('n', '<leader>Q', '<cmd>wqa<CR>', { desc = 'Save all + [Q]uit' })
+
 vim.keymap.set('n', '<leader>uh', function()
   local bufnr = vim.api.nvim_get_current_buf()
   local enabled = vim.lsp.inlay_hint.is_enabled { bufnr = bufnr }
