@@ -13,7 +13,7 @@ binds {
     Mod+N                hotkey-overlay-title="📝 Neovim"                     { spawn-sh "$NIRI_TERMINAL_RUN $NIRI_EDITOR"; }
     Mod+B                hotkey-overlay-title="🌐 Browser"                    { spawn-sh "$NIRI_BROWSER --new-window"; }
     Mod+E                hotkey-overlay-title="📁 File manager"               { spawn-sh "$NIRI_FILE_MANAGER"; }
-    Mod+Alt+B          hotkey-overlay-title="🌐 Vimb"                       { spawn-sh "vimb"; }
+    Mod+Alt+B            hotkey-overlay-title="⌨️ Vim browser (vimb)"        { spawn-sh "$NIRI_VIM_BROWSER"; }
 
     // ── 🔎 Launchers & pickers ───────────────────────────────────────────────
     Mod+Space            hotkey-overlay-title="🔎 App launcher (DMS)"        { spawn-sh "$NIRI_LAUNCHER"; }

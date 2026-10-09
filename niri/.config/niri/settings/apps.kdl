@@ -11,6 +11,7 @@ environment {
     NIRI_TERMINAL_RUN  "footclient -e"                  // 💻 run a TUI app inside the terminal
     NIRI_EDITOR        "nvim"                           // 📝 text editor (runs in the terminal)
     NIRI_BROWSER       "helium-browser"                 // 🌐 browser, also hosts web apps (--app=URL)
+    NIRI_VIM_BROWSER   "vimb"                           // ⌨️ keyboard-driven browser (Mod+Alt+B)
     NIRI_FILE_MANAGER  "nautilus"                       // 📁 file manager
     NIRI_LAUNCHER      "dms ipc call spotlight toggle"  // 🔎 app launcher (Mod+Space)
 }

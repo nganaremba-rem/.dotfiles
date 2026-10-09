@@ -39,6 +39,7 @@ Edit **one line** in `settings/apps.kdl`; every keybind follows on save:
 | `NIRI_TERMINAL_RUN` | anything run *inside* a terminal (`-e`): tmux, nvim, todo, wiremix, Wi-Fi, Claude Code |
 | `NIRI_EDITOR` | Mod+N, Mod+Shift+N (edit this config) |
 | `NIRI_BROWSER` | Mod+B and every web app in `binds/web-apps.kdl` |
+| `NIRI_VIM_BROWSER` | Mod+Alt+B |
 | `NIRI_FILE_MANAGER` | Mod+E |
 | `NIRI_LAUNCHER` | Mod+Space |
 
