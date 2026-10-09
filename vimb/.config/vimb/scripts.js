@@ -45,11 +45,18 @@
     blur: () => t.blur(),
   });
 
-  let cur = null;
+  // vimb sets this only when *entering* input mode, so after moving to another field
+  // while already in input mode it would still point at the first one. Resolve the
+  // focused field on every read instead (Ctrl-T reads it first, then reuses that
+  // wrapper for the write-back); fall back to what vimb last stored.
+  let last = null;
   Object.defineProperty(window, 'vimb_input_mode_element', {
     configurable: true,
-    get: () => cur,
-    set: (el) => { const t = deep(el); cur = editable(t) ? wrap(t) : el; },
+    get: () => {
+      const t = deep(document.activeElement);
+      return editable(t) ? (last = wrap(t)) : last;
+    },
+    set: (el) => { const t = deep(el); last = editable(t) ? wrap(t) : el; },
   });
 
   // vimb's focus tracker sees the retargeted shadow host, not the inner field,

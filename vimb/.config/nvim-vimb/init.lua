@@ -6,8 +6,8 @@
 --
 --   VIMB_POPUP=cmdline  vimb command line (vimb-cmdedit): starts in insert,
 --                       <CR> runs it, <Esc><Esc> or q cancels
---   VIMB_POPUP=field    form-field text (vimb editor-command): opens at the end of
---                       the text, <C-s> saves back to the page, q cancels
+--   VIMB_POPUP=field    form-field text (vimb editor-command): starts in insert at the
+--                       end of the text, <C-s> saves back to the page, q cancels
 local kind = vim.env.VIMB_POPUP == 'cmdline' and 'cmdline' or 'field'
 
 -- 🎨 Same look as the main nvim: tokyonight-night, transparent over niri's blur.
@@ -50,5 +50,10 @@ if kind == 'cmdline' then
 else
   o.winbar = '%#Title# 󰏫 vimb ❯ %#Normal#edit field   %#Comment#<C-s> save · q cancel'
   map({ 'n', 'i' }, '<C-s>', save, { desc = 'Save back to the page' })
-  vim.api.nvim_create_autocmd('VimEnter', { command = 'normal! G$' })
+  vim.api.nvim_create_autocmd('VimEnter', {
+    callback = function()  -- two calls: `:normal!` would swallow a `| startinsert!` as keys
+      vim.cmd 'normal! G'
+      vim.cmd 'startinsert!'
+    end,
+  })
 end
