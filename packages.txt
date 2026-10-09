@@ -17,6 +17,7 @@ niri
 nvim-kickstart
 ocr
 omarchy
+qt
 rofi
 session
 starship
