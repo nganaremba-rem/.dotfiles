@@ -42,6 +42,11 @@ local EXCLUDE = {
 -- `.fdignore` files stop applying too. `exclude` below is what keeps the noise out.
 local FIND = { hidden = true, ignored = true, exclude = EXCLUDE }
 
+-- File pickers also show build output (dist/build/target/.next); grep keeps
+-- skipping it so minified bundles don't flood results. Deps + caches stay out.
+-- cmd pinned to fd (snacks auto-detect would silently fall back to `find`).
+local FILES = { cmd = 'fd', hidden = true, ignored = true, exclude = { '.git', 'node_modules', '.venv', '__pycache__' } }
+
 -- ── Startup side effects ────────────────────────────────────────────────────
 --
 -- These live at spec-file scope, NOT in an `init = function()`. `custom/plugins/
@@ -129,11 +134,11 @@ return {
     picker = {
       ui_select = true, -- vim.ui.select goes through the picker (replaces dressing)
       sources = {
-        files = FIND,
+        files = FILES,
         grep = FIND,
         grep_word = FIND,
         grep_buffers = { hidden = true, ignored = true },
-        smart = FIND,
+        smart = FILES,
       },
     },
   },

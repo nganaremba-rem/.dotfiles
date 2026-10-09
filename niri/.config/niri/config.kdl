@@ -4,7 +4,7 @@
 // The nwg-displays include is deliberately disabled: two generators writing
 // duplicate `output` blocks meant the greeter ran 60 Hz while the session ran
 // 100.087 Hz, forcing a modeset (visible blink) at every handoff.
-// Re-enabling it will bring that back. Backup: monitor.kdl.backup-20260803-192207
+// Re-enabling it will bring that back. Backup: monitor.kdl.backup-20260803-192207 in git history
 /-include "monitor.kdl"
 
 // This config is in the KDL format: https://kdl.dev
@@ -153,9 +153,9 @@ animations {
 // Do NOT re-declare them bare here: a later bare `workspace "name"` overrides
 // the included block and silently drops its open-on-output.
 // include "workspaces.kdl"
-workspace "terminal"
-workspace "browser"
-workspace "mail"
+// workspace "terminal"
+// workspace "browser"
+// workspace "mail"
 
 
 // Window rules let you adjust behavior for individual windows.
@@ -174,7 +174,7 @@ window-rule {
 // mirror the dms foot rule, whose ^foot(client)?$ match no longer covers them.
 window-rule {
     match app-id=r#"^herdr\."#
-    open-on-workspace "terminal"
+    // open-on-workspace "terminal"
     background-effect {
         blur true
     }
@@ -225,7 +225,7 @@ window-rule {
     match app-id=r#"^org\.mozilla\.Thunderbird$"#
     match app-id=r#"^thunderbird$"#
     match app-id=r#"^Thunderbird$"#
-    open-on-workspace "mail"
+    // open-on-workspace "mail"
     open-focused false
 }
 
@@ -255,6 +255,6 @@ include optional=true "dms/layout.kdl"
 include optional=true "dms/alttab.kdl"
 // include optional=true "dms/binds.kdl"
 include optional=true "dms/outputs.kdl"
-include optional=true "dms/cursor.dl"
+include optional=true "dms/cursor.kdl"
 include optional=true "dms/windowrules.kdl"
 include "dms/binds.kdl"

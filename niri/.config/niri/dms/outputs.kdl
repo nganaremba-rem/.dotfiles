@@ -7,7 +7,7 @@ output "DP-2" {
 }
 
 output "eDP-1" {
-    mode "1920x1080@60.008"
+    mode "1366x768@60.059"
     scale 1
     position x=1008 y=1080
 }

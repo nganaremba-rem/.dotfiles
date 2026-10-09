@@ -158,7 +158,7 @@ pane_outer_borders = true
 pane_gaps = true
 pane_scrollbars = true
 show_agent_labels_on_pane_borders = true
-hide_tab_bar_when_single_tab = true
+hide_tab_bar_when_single_tab = false
 tab_bar_position = "top"
 
 # Distinct glyphs per agent state instead of same-shape colored dots:
@@ -170,6 +170,8 @@ accent = "#cba6f7"
 
 # Right side of the tab bar: zoom state, then a quiet clock.
 tab_bar_right = [
+  # Workspace name, so it's visible with the sidebar hidden (no built-in token; 1s poll lag).
+  { type = "command", command = '"$HERDR_BIN_PATH" workspace get "$HERDR_ACTIVE_WORKSPACE_ID" | jq -r .result.workspace.label', interval_seconds = 1, timeout_seconds = 1 },
   { type = "zoom" },
   { type = "datetime", format = "%H:%M" },
 ]

@@ -19,6 +19,7 @@ binds {
   Mod+Alt+P hotkey-overlay-title="Perplexity" {spawn "helium-browser" "--app=https://perplexity.ai/";}
   Mod+Shift+E hotkey-overlay-title="Email" {spawn "helium-browser" "--app=https://mail.google.com/mail/u/nganaremba@gmail.com";}
   Mod+Y hotkey-overlay-title="YouTube" {spawn "helium-browser" "--app=https://youtube.com";}
+  Mod+Alt+Y hotkey-overlay-title="remtube (YouTube in mpv)" {spawn "/home/rem/.local/bin/remtube";}
   Mod+Shift+G hotkey-overlay-title="WhatsApp" {spawn "helium-browser" "--app=https://web.whatsapp.com";}
   Mod+Alt+N hotkey-overlay-title="Netflix" {spawn "helium-browser" "--app=https://netflix.com";}
   Mod+Alt+H hotkey-overlay-title="Hotstar" {spawn "helium-browser" "--app=https://hotstar.com";}
@@ -102,6 +103,7 @@ binds {
     XF86AudioMute        allow-when-locked=true { spawn "swayosd-client" "--output-volume" "mute-toggle"; }
     XF86AudioMicMute     allow-when-locked=true { spawn "/home/rem/.local/bin/mic-toggle"; }
     XF86WebCam           allow-when-locked=true { spawn "/home/rem/.local/bin/camera-toggle"; }
+    Mod+Shift+C hotkey-overlay-title="Headset: music/call mode" { spawn "/home/rem/.local/bin/bt-callmode"; }
 
     // Example media keys mapping using playerctl.
     // This will work with any MPRIS-enabled media player.
@@ -367,6 +369,6 @@ binds {
     // moving the mouse or pressing any other key.
     Mod+Shift+P { power-off-monitors; }
 
-
+ Mod+Shift+N { spawn-sh "foot -e nvim ~/.config/niri/keybinds.kdl";}
 }
 
