@@ -79,11 +79,11 @@ window-rule {
         blur true
     }
 }
-// …sized for one command line…
+// …sized like noice's cmdline: title bar + a line or two…
 window-rule {
     match app-id=r#"^vimb-cmdedit$"#
     default-column-width { fixed 900; }
-    default-window-height { fixed 220; }
+    default-window-height { fixed 110; }
 }
 // …or a whole form field.
 window-rule {
