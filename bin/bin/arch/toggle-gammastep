@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+STATE="$HOME/.cache/gammastep.state"
+NIGHT_TEMP=4500
+DAY_TEMP=6500
+
+# make sure cache dir exists
+mkdir -p "$HOME/.cache"
+
+current="$(cat "$STATE" 2>/dev/null)"
+
+# always stop existing gammastep
+pkill gammastep 2>/dev/null
+
+if [ "$current" = "night" ]; then
+  # switch to day
+  gammastep -O "$DAY_TEMP" &
+  echo "day" > "$STATE"
+else
+  # switch to night
+  gammastep -O "$NIGHT_TEMP" &
+  echo "night" > "$STATE"
+fi
+

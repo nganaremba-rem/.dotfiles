@@ -1,0 +1,4 @@
+#!/bin/sh
+# GUI askpass helper for sudo (SUDO_ASKPASS) and ssh (SSH_ASKPASS).
+# Prompts for a password via a zenity dialog.
+exec zenity --password --title="${1:-Password required}" 2>/dev/null

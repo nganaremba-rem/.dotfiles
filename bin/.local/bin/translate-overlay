@@ -1,0 +1,323 @@
+#!/usr/bin/python3
+# Usage: translate-overlay x y w h "translation" "original"
+import sys
+import gi
+gi.require_version('Gtk', '3.0')
+gi.require_version('GtkLayerShell', '0.1')
+from gi.repository import Gtk, GtkLayerShell, Gdk, GLib
+
+DEFAULT_W_RATIO = 0.50
+DEFAULT_H_RATIO = 0.40
+CHROME_H = 110  # header + footer + resize handle + padding
+
+def find_monitor(display, gx, gy):
+    for i in range(display.get_n_monitors()):
+        mon = display.get_monitor(i)
+        geo = mon.get_geometry()
+        if geo.x <= gx < geo.x + geo.width and geo.y <= gy < geo.y + geo.height:
+            return mon, geo.x, geo.y
+    mon = display.get_primary_monitor() or display.get_monitor(0)
+    geo = mon.get_geometry()
+    return mon, geo.x, geo.y
+
+def copy_to_clipboard(text):
+    cb = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+    cb.set_text(text, -1)
+    cb.store()
+
+def main():
+    if len(sys.argv) < 6:
+        sys.exit(1)
+
+    gx, gy     = int(sys.argv[1]), int(sys.argv[2])
+    translation = sys.argv[5]
+    original    = sys.argv[6] if len(sys.argv) > 6 else ""
+
+    display = Gdk.Display.get_default()
+    monitor, mon_x, mon_y = find_monitor(display, gx, gy)
+    geo = monitor.get_geometry()
+
+    # Current window position in monitor-relative coords
+    state = {
+        "x": gx - mon_x,
+        "y": gy - mon_y,
+        "w": int(geo.width  * DEFAULT_W_RATIO),
+        "h": int(geo.height * DEFAULT_H_RATIO),
+        # drag state
+        "dragging": False,
+        "drag_ox": 0, "drag_oy": 0,   # root coords at drag start
+        "drag_wx": 0, "drag_wy": 0,   # window pos at drag start
+        # resize state
+        "resizing": False,
+        "resize_oy": 0,               # root y at resize start
+        "resize_oh": 0,               # window h at resize start
+    }
+
+    win = Gtk.Window()
+    GtkLayerShell.init_for_window(win)
+    GtkLayerShell.set_namespace(win, "translate-overlay")
+    GtkLayerShell.set_monitor(win, monitor)
+    GtkLayerShell.set_layer(win, GtkLayerShell.Layer.OVERLAY)
+    GtkLayerShell.set_anchor(win, GtkLayerShell.Edge.LEFT, True)
+    GtkLayerShell.set_anchor(win, GtkLayerShell.Edge.TOP,  True)
+    GtkLayerShell.set_margin(win, GtkLayerShell.Edge.LEFT, state["x"])
+    GtkLayerShell.set_margin(win, GtkLayerShell.Edge.TOP,  state["y"])
+    GtkLayerShell.set_keyboard_mode(win, GtkLayerShell.KeyboardMode.ON_DEMAND)
+    GtkLayerShell.set_exclusive_zone(win, -1)
+    win.set_size_request(state["w"], state["h"])
+
+    # ── CSS ─────────────────────────────────────────────
+    css = b"""
+    window {
+        background-color: #1e1e2e;
+        border: 1px solid #313244;
+        border-radius: 12px;
+    }
+    .header {
+        background-color: #181825;
+        border-radius: 12px 12px 0 0;
+        padding: 8px 14px;
+        border-bottom: 1px solid #313244;
+    }
+    .badge {
+        background-color: #313244;
+        border-radius: 6px;
+        padding: 2px 8px;
+        color: #cba6f7;
+        font-size: 11px;
+        font-weight: bold;
+    }
+    .close-btn {
+        background: none;
+        border: none;
+        color: #6c7086;
+        font-size: 16px;
+        padding: 0 4px;
+        min-width: 0;
+        min-height: 0;
+    }
+    .close-btn:hover { color: #f38ba8; }
+    .original-label {
+        color: #6c7086;
+        font-size: 11px;
+        font-style: italic;
+        padding: 10px 14px 4px 14px;
+    }
+    textview, textview text {
+        background-color: transparent;
+        color: #cdd6f4;
+        font-size: 15px;
+        padding: 4px;
+    }
+    .translation-scroll {
+        background-color: transparent;
+        padding: 4px 14px 4px 14px;
+    }
+    .footer {
+        background-color: #181825;
+        padding: 6px 14px;
+        border-top: 1px solid #313244;
+    }
+    .copy-btn {
+        background-color: #313244;
+        border: none;
+        border-radius: 6px;
+        color: #cdd6f4;
+        font-size: 12px;
+        padding: 4px 12px;
+    }
+    .copy-btn:hover { background-color: #45475a; }
+    .hint { color: #45475a; font-size: 11px; }
+    .resize-handle {
+        background-color: #181825;
+        border-radius: 0 0 12px 12px;
+        border-top: 1px solid #313244;
+        padding: 3px 0;
+    }
+    .resize-grip {
+        background-color: #45475a;
+        border-radius: 2px;
+        min-width: 40px;
+        min-height: 4px;
+        margin-top: 2px;
+        margin-bottom: 2px;
+    }
+    """
+    provider = Gtk.CssProvider()
+    provider.load_from_data(css)
+    Gtk.StyleContext.add_provider_for_screen(
+        Gdk.Screen.get_default(), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+    )
+
+    def apply_pos():
+        GtkLayerShell.set_margin(win, GtkLayerShell.Edge.LEFT, max(0, state["x"]))
+        GtkLayerShell.set_margin(win, GtkLayerShell.Edge.TOP,  max(0, state["y"]))
+
+    def apply_size():
+        win.set_size_request(state["w"], state["h"])
+        # Drive the scroll area to fill available height
+        scroll.set_size_request(-1, max(60, state["h"] - CHROME_H))
+
+    # ── Layout ──────────────────────────────────────────
+    root = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+    win.add(root)
+
+    # Header (drag handle)
+    header = Gtk.EventBox()
+    header_inner = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+    header_inner.get_style_context().add_class("header")
+    header.add(header_inner)
+
+    badge = Gtk.Label(label="JA → EN")
+    badge.get_style_context().add_class("badge")
+    header_inner.pack_start(badge, False, False, 0)
+
+    drag_hint = Gtk.Label(label="⠿ drag")
+    drag_hint.get_style_context().add_class("hint")
+    header_inner.pack_start(drag_hint, False, False, 4)
+
+    close_btn = Gtk.Button(label="✕")
+    close_btn.get_style_context().add_class("close-btn")
+    close_btn.connect("clicked", lambda *_: Gtk.main_quit())
+    header_inner.pack_end(close_btn, False, False, 0)
+
+    root.pack_start(header, False, False, 0)
+
+    # Original text
+    if original:
+        orig_label = Gtk.Label(label=original)
+        orig_label.get_style_context().add_class("original-label")
+        orig_label.set_line_wrap(True)
+        orig_label.set_xalign(0)
+        root.pack_start(orig_label, False, False, 0)
+        sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+        sep.set_margin_left(14)
+        sep.set_margin_right(14)
+        root.pack_start(sep, False, False, 0)
+
+    # Translation (scrollable + selectable)
+    scroll = Gtk.ScrolledWindow()
+    scroll.get_style_context().add_class("translation-scroll")
+    scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+
+    tv = Gtk.TextView()
+    tv.set_editable(False)
+    tv.set_cursor_visible(False)
+    tv.set_wrap_mode(Gtk.WrapMode.WORD_CHAR)
+    tv.get_buffer().set_text(translation)
+    scroll.add(tv)
+    root.pack_start(scroll, True, True, 0)
+
+    # Footer
+    footer = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+    footer.get_style_context().add_class("footer")
+
+    copy_btn = Gtk.Button(label="⎘  Copy")
+    copy_btn.get_style_context().add_class("copy-btn")
+    copied_label = Gtk.Label(label="")
+    copied_label.get_style_context().add_class("hint")
+
+    def on_copy(_):
+        buf = tv.get_buffer()
+        if buf.get_has_selection():
+            s, e = buf.get_selection_bounds()
+            text = buf.get_text(s, e, False)
+        else:
+            text = translation
+        copy_to_clipboard(text)
+        copied_label.set_text("Copied ✓")
+        GLib.timeout_add(1500, lambda: copied_label.set_text("") or False)
+
+    copy_btn.connect("clicked", on_copy)
+    footer.pack_start(copy_btn, False, False, 0)
+    footer.pack_start(copied_label, False, False, 4)
+    hint = Gtk.Label(label="Esc to close")
+    hint.get_style_context().add_class("hint")
+    footer.pack_end(hint, False, False, 0)
+    root.pack_start(footer, False, False, 0)
+
+    # Resize handle
+    resize_area = Gtk.EventBox()
+    resize_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+    resize_box.get_style_context().add_class("resize-handle")
+    grip = Gtk.Label(label="")
+    grip.get_style_context().add_class("resize-grip")
+    resize_box.pack_start(grip, False, False, 0)
+    resize_area.add(resize_box)
+    root.pack_start(resize_area, False, False, 0)
+
+    # ── Drag (header) ────────────────────────────────────
+    header.add_events(
+        Gdk.EventMask.BUTTON_PRESS_MASK |
+        Gdk.EventMask.BUTTON_RELEASE_MASK |
+        Gdk.EventMask.POINTER_MOTION_MASK
+    )
+
+    def on_header_press(w, e):
+        if e.button == 1:
+            state["dragging"]  = True
+            state["drag_ox"]   = e.x_root
+            state["drag_oy"]   = e.y_root
+            state["drag_wx"]   = state["x"]
+            state["drag_wy"]   = state["y"]
+            w.grab_add()
+
+    def on_header_release(w, e):
+        if e.button == 1 and state["dragging"]:
+            state["dragging"] = False
+            w.grab_remove()
+
+    def on_header_motion(w, e):
+        if state["dragging"]:
+            state["x"] = state["drag_wx"] + int(e.x_root - state["drag_ox"])
+            state["y"] = state["drag_wy"] + int(e.y_root - state["drag_oy"])
+            apply_pos()
+
+    header.connect("button-press-event",   on_header_press)
+    header.connect("button-release-event", on_header_release)
+    header.connect("motion-notify-event",  on_header_motion)
+
+    # ── Resize (bottom handle) ───────────────────────────
+    resize_area.add_events(
+        Gdk.EventMask.BUTTON_PRESS_MASK |
+        Gdk.EventMask.BUTTON_RELEASE_MASK |
+        Gdk.EventMask.POINTER_MOTION_MASK
+    )
+
+    def on_resize_press(w, e):
+        if e.button == 1:
+            state["resizing"]   = True
+            state["resize_oy"]  = e.y_root
+            state["resize_oh"]  = state["h"]
+            w.grab_add()
+
+    def on_resize_release(w, e):
+        if e.button == 1 and state["resizing"]:
+            state["resizing"] = False
+            w.grab_remove()
+
+    def on_resize_motion(w, e):
+        if state["resizing"]:
+            state["h"] = max(160, state["resize_oh"] + int(e.y_root - state["resize_oy"]))
+            apply_size()
+
+    resize_area.connect("button-press-event",   on_resize_press)
+    resize_area.connect("button-release-event", on_resize_release)
+    resize_area.connect("motion-notify-event",  on_resize_motion)
+
+    # ── Window events ────────────────────────────────────
+    win.connect("destroy", Gtk.main_quit)
+    win.connect("key-press-event",
+                lambda w, e: Gtk.main_quit() if e.keyval == Gdk.KEY_Escape else None)
+
+    win.show_all()
+    apply_size()  # set scroll height after widgets are realized
+
+    # Set cursors after windows are realized
+    header.get_window().set_cursor(Gdk.Cursor.new_from_name(display, "grab"))
+    resize_area.get_window().set_cursor(Gdk.Cursor.new_from_name(display, "s-resize"))
+
+    Gtk.main()
+
+if __name__ == "__main__":
+    main()

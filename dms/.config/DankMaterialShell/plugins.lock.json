@@ -1,0 +1,13 @@
+{
+  "lockfileVersion": 1,
+  "plugins": {
+    "quickCapture": {
+      "repo": "https://github.com/hthienloc/dms-quick-capture",
+      "commit": "fa0a212edb9794326d2606e447c42a0bb218c56c"
+    },
+    "wallpaperCarousel": {
+      "repo": "https://github.com/motor-dev/wallpaperCarousel",
+      "commit": "761ecd1b7f347beee9f17909f8334d987c935a1a"
+    }
+  }
+}

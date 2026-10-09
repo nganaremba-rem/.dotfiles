@@ -1,0 +1,28 @@
+#!/bin/bash
+# Toggle Bluetooth headset between music (A2DP) and call (HFP) mode.
+# WirePlumber autoswitch is off: WhatsApp in Helium drops the call when the profile flips mid-call.
+card=$(pactl list short cards | awk '/bluez_card/ {print $2; exit}')
+if [ -z "$card" ]; then
+    swayosd-client --custom-icon "bluetooth-disabled-symbolic" --custom-message "No BT headset"
+    exit 1
+fi
+if pactl list cards | grep -A40 "Name: $card" | grep -q 'Active Profile: headset-head-unit'; then
+    # Refuse to leave call mode while an app records from the headset: flipping mid-call drops WhatsApp
+    src_idx=$(pactl list short sources | awk '/bluez_input/ {print $1; exit}')
+    if pactl list short source-outputs | awk -v s="$src_idx" '$2==s {f=1} END {exit !f}'; then
+        swayosd-client --custom-icon "audio-headset-symbolic" --custom-message "Call active - staying in call mode"
+        exit 0
+    fi
+    pactl set-card-profile "$card" a2dp-sink
+    swayosd-client --custom-icon "audio-headphones-symbolic" --custom-message "Music mode"
+else
+    pactl set-card-profile "$card" headset-head-unit
+    # HFP mic node appears a moment after the profile change
+    for _ in {1..10}; do
+        src=$(pactl list short sources | awk '/bluez_input/ {print $2; exit}')
+        [ -n "$src" ] && break
+        sleep 0.3
+    done
+    [ -n "$src" ] && pactl set-default-source "$src"
+    swayosd-client --custom-icon "audio-headset-symbolic" --custom-message "Call mode"
+fi

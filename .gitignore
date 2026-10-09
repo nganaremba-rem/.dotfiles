@@ -3,3 +3,11 @@ zsh/.config/zsh/secrets.zsh
 herdr/.config/herdr/*.log
 *.bak*
 *-bak*
+__pycache__/
+# DankMaterialShell: whole dir is stowed (DMS rewrites its settings), track only these
+dms/.config/DankMaterialShell/*
+!dms/.config/DankMaterialShell/settings.json
+!dms/.config/DankMaterialShell/plugins.lock.json
+# atac: only keybindings are config; collections/logs stay local
+atac/.config/atac/*
+!atac/.config/atac/vim_key_bindings.toml

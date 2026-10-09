@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+
+LOG=/tmp/screen-translate.log
+echo "--- $(date) ---" >> "$LOG"
+
+TMPIMG=$(mktemp /tmp/ocr-XXXX.png)
+PROC=$(mktemp /tmp/ocr-proc-XXXX.png)
+TXTFILE=$(mktemp /tmp/ocr-text-XXXX.txt)
+trap 'rm -f "$TMPIMG" "$PROC" "$TXTFILE"' EXIT
+
+GEOM=$(slurp -d \
+    -b "#00000000" \
+    -c "#cba6f7ff" \
+    -s "#cba6f722" \
+    -w 2 2>>"$LOG")
+if [[ -z "$GEOM" ]]; then
+    echo "slurp cancelled" >> "$LOG"
+    exit 0
+fi
+echo "GEOM: $GEOM" >> "$LOG"
+
+X=$(echo "$GEOM" | cut -d',' -f1)
+Y=$(echo "$GEOM" | cut -d',' -f2 | cut -d' ' -f1)
+W=$(echo "$GEOM" | cut -d' ' -f2 | cut -d'x' -f1)
+H=$(echo "$GEOM" | cut -d'x' -f2)
+
+if ! grim -g "$GEOM" "$TMPIMG" 2>>"$LOG"; then
+    notify-send "screen-translate" "Screenshot failed" -i dialog-error -t 3000
+    exit 1
+fi
+
+# Upscale + enhance — helps accuracy on small/dense screen text
+magick "$TMPIMG" -resize 300% -sharpen 0x1 -colorspace gray -normalize "$PROC" 2>>"$LOG"
+
+# psm 3 = fully automatic page segmentation, handles multiple text blocks
+tesseract "$PROC" stdout -l jpn+jpn_vert --oem 1 --psm 3 2>>"$LOG" \
+    | grep -v '^[[:space:]]*$' \
+    | tr -d ' ' \
+    > "$TXTFILE"
+
+TEXT=$(cat "$TXTFILE")
+echo "TEXT: $TEXT" >> "$LOG"
+
+if [[ -z "$TEXT" ]]; then
+    notify-send "screen-translate" "No text detected" -i dialog-warning -t 3000
+    exit 1
+fi
+
+# Feed text via stdin to avoid shell argument length limits on large captures
+RESULT=$(trans -b :en < "$TXTFILE" 2>>"$LOG")
+echo "RESULT: $RESULT" >> "$LOG"
+
+if [[ -z "$RESULT" ]]; then
+    notify-send "screen-translate" "Translation failed (no network?)" -i dialog-error -t 4000
+    exit 1
+fi
+
+printf '%s' "$RESULT" | wl-copy
+
+translate-overlay "$X" "$Y" "$W" "$H" "$RESULT" "$TEXT" 2>>"$LOG" \
+    || notify-send "Translation" "$RESULT" -t 9000 &

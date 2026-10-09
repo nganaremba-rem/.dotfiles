@@ -1,0 +1,7 @@
+# ocr(1) defaults — plain shell assignments, sourced by ~/.local/bin/ocr
+LANGS="eng"          # tesseract languages, e.g. "eng+jpn"
+ENGINE="auto"        # tess | ai | auto  (auto = local, escalate to Claude on low confidence)
+MODEL="claude-sonnet-5"
+UPSCALE=300          # % upscale before local OCR; raise for very small text
+CONF_MIN=60          # mean tesseract confidence below which auto escalates to Claude
+AI_TIMEOUT=30        # seconds
