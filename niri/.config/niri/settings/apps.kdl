@@ -1,0 +1,16 @@
+// 🎯 Default apps — change an app HERE and every keybind follows.
+//
+// niri has no config variables, so these are environment variables: niri hands
+// them to everything it spawns, and binds read them via spawn-sh "$NIRI_…".
+// Prefixed NIRI_ on purpose: plain BROWSER/TERMINAL would also change how
+// xdg-open and other tools behave (and DMS already sets TERMINAL=ghostty).
+// Takes effect for new launches as soon as niri reloads (on save).
+
+environment {
+    NIRI_TERMINAL      "footclient"                     // 💻 terminal window
+    NIRI_TERMINAL_RUN  "footclient -e"                  // 💻 run a TUI app inside the terminal
+    NIRI_EDITOR        "nvim"                           // 📝 text editor (runs in the terminal)
+    NIRI_BROWSER       "helium-browser"                 // 🌐 browser, also hosts web apps (--app=URL)
+    NIRI_FILE_MANAGER  "nautilus"                       // 📁 file manager
+    NIRI_LAUNCHER      "dms ipc call spotlight toggle"  // 🔎 app launcher (Mod+Space)
+}

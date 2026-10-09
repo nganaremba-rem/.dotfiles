@@ -1,0 +1,45 @@
+// 📐 Layout — column widths, borders, shadows, overview.
+// Docs: https://niri-wm.github.io/niri/Configuration:-Layout
+// Gaps, focus-ring and colors come from dms/layout.kdl + dms/colors.kdl (included later, they win).
+
+layout {
+    background-color "transparent"
+
+    // Focusing an off-screen column keeps it at the screen edge (no auto-centering).
+    center-focused-column "never"
+
+    // ↔️ Widths Mod+R cycles through, and the width new windows open with.
+    preset-column-widths {
+        proportion 0.33333
+        proportion 0.5
+        proportion 0.66667
+    }
+    default-column-width { proportion 0.5; }
+
+    // 🔲 Border: off (DMS focus ring is used instead); colors kept for when it's turned on.
+    border {
+        off
+        width 4
+        active-color   "#707070"  // neutral gray
+        inactive-color "#d0d0d0"  // light gray
+        urgent-color   "#cc4444"  // soft red
+    }
+
+    // 🌫️ Soft drop shadow under windows.
+    shadow {
+        softness 30
+        spread 5
+        offset x=0 y=5
+        color "#0007"
+    }
+
+    struts {
+    }
+}
+
+// 🔭 Overview (Mod+O): no shadow under workspace previews.
+overview {
+    workspace-shadow {
+        off
+    }
+}

@@ -1,0 +1,101 @@
+// 🪟 Window rules — per-app size, floating, blur, focus.
+// Docs: https://niri-wm.github.io/niri/Configuration:-Window-Rules
+// ⚠️ Order matters: a later matching rule overrides an earlier one, and
+// dms/windowrules.kdl (generated, e.g. foot/kitty blur, btop maximized) comes after this file.
+// Find an app's id with: niri msg windows
+
+// 💻 WezTerm: empty default width works around its initial-configure bug.
+window-rule {
+    match app-id=r#"^org\.wezfurlong\.wezterm$"#
+    default-column-width {}
+}
+
+// 💻 herdr sessions (app-id "herdr.<session>"): blur like the dms foot rule,
+// whose ^foot(client)?$ match doesn't cover them.
+window-rule {
+    match app-id=r#"^herdr\."#
+    background-effect {
+        blur true
+    }
+}
+
+// 🧩 GNOME apps: rounded, clipped corners without the border-as-background.
+window-rule {
+    match app-id=r#"^org\.gnome\."#
+    draw-border-with-background false
+    geometry-corner-radius 12
+    clip-to-geometry true
+}
+
+// ⚙️ Settings panels: tile at half width (never float).
+window-rule {
+    match app-id=r#"^gnome-control-center$"#
+    match app-id=r#"^pavucontrol$"#
+    match app-id=r#"^nm-connection-editor$"#
+    default-column-width { proportion 0.5; }
+    open-floating false
+}
+
+// 🧮 Small utilities and dialogs: float.
+window-rule {
+    match app-id=r#"^org\.gnome\.Calculator$"#
+    match app-id=r#"^gnome-calculator$"#
+    match app-id=r#"^galculator$"#
+    match app-id=r#"^blueman-manager$"#
+    match app-id=r#"^warp-taskbar$"#
+    match app-id=r#"^xdg-desktop-portal$"#
+    open-floating true
+}
+
+// 🎮 Steam toasts: bottom-right corner, never steal focus.
+window-rule {
+    match app-id=r#"^steam$"# title=r#"^notificationtoasts_\d+_desktop$"#
+    default-floating-position x=10 y=10 relative-to="bottom-right"
+    open-focused false
+}
+
+// 💻 Terminals with their own transparency: no border painted behind them.
+window-rule {
+    match app-id=r#"^org\.wezfurlong\.wezterm$"#
+    match app-id="Alacritty"
+    match app-id="zen"
+    match app-id="com.mitchellh.ghostty"
+    match app-id="kitty"
+    draw-border-with-background false
+}
+
+// 📺 Firefox picture-in-picture: float.
+window-rule {
+    match app-id=r#"firefox$"# title="^Picture-in-Picture$"
+    open-floating true
+}
+
+// 📝 vimb's nvim popups — Ctrl-F command line (vimb-cmdedit) and Ctrl-T form
+// editor (vimb editor-command): float + blur like the other foot windows…
+window-rule {
+    match app-id=r#"^vimb-(cmdedit|editor)$"#
+    open-floating true
+    background-effect {
+        blur true
+    }
+}
+// …sized for one command line…
+window-rule {
+    match app-id=r#"^vimb-cmdedit$"#
+    default-column-width { fixed 900; }
+    default-window-height { fixed 220; }
+}
+// …or a whole form field.
+window-rule {
+    match app-id=r#"^vimb-editor$"#
+    default-column-width { fixed 1100; }
+    default-window-height { fixed 600; }
+}
+
+// 📧 Thunderbird: open in the background, don't steal focus.
+window-rule {
+    match app-id=r#"^org\.mozilla\.Thunderbird$"#
+    match app-id=r#"^thunderbird$"#
+    match app-id=r#"^Thunderbird$"#
+    open-focused false
+}

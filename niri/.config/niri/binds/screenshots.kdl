@@ -1,0 +1,23 @@
+// 📸 Screenshots & OCR. Plain screenshots save to screenshot-path (settings/misc.kdl).
+
+binds {
+    // ── 📸 niri built-in (interactive UI / whole screen / focused window) ────
+    Print      { screenshot; }
+    Ctrl+Print { screenshot-screen; }
+    Alt+Print  { screenshot-window; }
+
+    // ── ✏️ Annotate with satty, then copy ────────────────────────────────────
+    Mod+Shift+S hotkey-overlay-title="✏️ Screenshot (full) → annotate → clipboard" {
+        spawn-sh "grim - | satty --filename - --copy-command wl-copy --early-exit";
+    }
+    Mod+Shift+A hotkey-overlay-title="✏️ Screenshot (area) → annotate → clipboard" {
+        spawn-sh "grim -g \"$(slurp)\" - | satty --filename - --copy-command wl-copy --early-exit";
+    }
+
+    // ── 🔤 OCR: screen text → clipboard + result panel (see `ocr --help`) ────
+    Mod+Shift+O       hotkey-overlay-title="🔤 OCR region → clipboard"      { spawn "ocr"; }
+    Mod+Alt+O         hotkey-overlay-title="🔤 OCR region (Claude vision)"  { spawn "ocr" "--engine" "ai"; }
+    Mod+Ctrl+O        hotkey-overlay-title="🔤 OCR focused window"          { spawn "ocr" "--window"; }
+    Mod+Ctrl+Shift+O  hotkey-overlay-title="🔤 OCR clipboard image"         { spawn "ocr" "--clip"; }
+    Mod+Shift+Alt+O   hotkey-overlay-title="🔤 OCR region → pick action"    { spawn "ocr" "--menu"; }
+}

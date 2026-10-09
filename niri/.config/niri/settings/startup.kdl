@@ -1,0 +1,10 @@
+// 🚀 Startup — launched once when niri starts (top to bottom).
+// Bar, notifications, wallpaper, waybar etc. are systemd user services, not here.
+
+spawn-at-startup "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"  // 🔐 polkit password prompts
+spawn-at-startup "fcitx5" "-dr"                                              // 🈳 input method
+spawn-sh-at-startup "export $(gnome-keyring-daemon --start --components=pkcs11,secrets,ssh)"  // 🔑 keyring
+spawn-at-startup "wl-clip-persist"                                           // 📋 keep clipboard after apps close
+spawn-sh-at-startup "wl-paste --watch cliphist store"                        // 📋 clipboard history
+spawn-at-startup "~/.config/session/init.sh"                                 // 🧩 session extras (session package)
+spawn-sh-at-startup "sleep 3 && env > /tmp/niri-startup-env.txt"             // 🐞 debug: dump niri's env for troubleshooting

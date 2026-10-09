@@ -1,0 +1,19 @@
+// 🌐 Web apps — sites opened as their own app window in $NIRI_BROWSER (settings/apps.kdl).
+
+binds {
+    // ── 🤖 AI ────────────────────────────────────────────────────────────────
+    Mod+Alt+C    hotkey-overlay-title="🤖 Claude"       { spawn-sh "$NIRI_BROWSER --app=https://claude.ai/chat"; }
+    Mod+A        hotkey-overlay-title="🤖 ChatGPT"      { spawn-sh "$NIRI_BROWSER --app=https://chatgpt.com"; }
+    Mod+Alt+P    hotkey-overlay-title="🔍 Perplexity"   { spawn-sh "$NIRI_BROWSER --app=https://perplexity.ai/"; }
+
+    // ── 💬 Communication ─────────────────────────────────────────────────────
+    Mod+Shift+E  hotkey-overlay-title="📧 Gmail"        { spawn-sh "$NIRI_BROWSER --app=https://mail.google.com/mail/u/nganaremba@gmail.com"; }
+    Mod+Shift+G  hotkey-overlay-title="💬 WhatsApp"     { spawn-sh "$NIRI_BROWSER --app=https://web.whatsapp.com"; }
+    Mod+X        hotkey-overlay-title="🐦 X"            { spawn-sh "$NIRI_BROWSER --app=https://x.com"; }
+
+    // ── 🎬 Video ─────────────────────────────────────────────────────────────
+    Mod+Y        hotkey-overlay-title="▶️ YouTube"       { spawn-sh "$NIRI_BROWSER --app=https://youtube.com"; }
+    Mod+Alt+Y    hotkey-overlay-title="📺 remtube (YouTube in mpv)" { spawn "/home/rem/.local/bin/remtube"; }
+    Mod+Alt+N    hotkey-overlay-title="🎬 Netflix"      { spawn-sh "$NIRI_BROWSER --app=https://netflix.com"; }
+    Mod+Alt+H    hotkey-overlay-title="🎬 Hotstar"      { spawn-sh "$NIRI_BROWSER --app=https://hotstar.com"; }
+}

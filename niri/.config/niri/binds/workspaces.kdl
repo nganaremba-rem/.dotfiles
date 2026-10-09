@@ -1,0 +1,68 @@
+// 🗂️ Workspaces & monitors.
+// Workspaces are dynamic: an index past the last one means "the empty one at the bottom".
+
+binds {
+    // ── ⬆️⬇️ Previous / next workspace ───────────────────────────────────────
+    Mod+Page_Down      { focus-workspace-down; }
+    Mod+Page_Up        { focus-workspace-up; }
+    Mod+U              { focus-workspace-down; }
+    Mod+I              { focus-workspace-up; }
+    Mod+Ctrl+Page_Down { move-column-to-workspace-down; }
+    Mod+Ctrl+Page_Up   { move-column-to-workspace-up; }
+    Mod+Ctrl+U         { move-column-to-workspace-down; }
+    Mod+Ctrl+I         { move-column-to-workspace-up; }
+
+    // ── 🔀 Reorder workspaces ────────────────────────────────────────────────
+    Mod+Shift+Page_Down { move-workspace-down; }
+    Mod+Shift+Page_Up   { move-workspace-up; }
+    Mod+Shift+U         { move-workspace-down; }
+    Mod+Shift+I         { move-workspace-up; }
+
+    // ── 🔢 Jump to workspace N (home row J K L ; for 1–4) ────────────────────
+    Mod+Alt+J         { focus-workspace 1; }
+    Mod+Alt+K         { focus-workspace 2; }
+    Mod+Alt+L         { focus-workspace 3; }
+    Mod+Alt+Semicolon { focus-workspace 4; }
+    Mod+Alt+5         { focus-workspace 5; }
+    Mod+Alt+6         { focus-workspace 6; }
+    Mod+Alt+7         { focus-workspace 7; }
+    Mod+Alt+8         { focus-workspace 8; }
+    Mod+Alt+9         { focus-workspace 9; }
+
+    // ── 📦 Send column to workspace N ────────────────────────────────────────
+    Mod+Alt+Shift+J         { move-column-to-workspace 1; }
+    Mod+Alt+Shift+K         { move-column-to-workspace 2; }
+    Mod+Alt+Shift+L         { move-column-to-workspace 3; }
+    Mod+Alt+Shift+Semicolon { move-column-to-workspace 4; }
+    Mod+Alt+Shift+5         { move-column-to-workspace 5; }
+    Mod+Alt+Shift+6         { move-column-to-workspace 6; }
+    Mod+Alt+Shift+7         { move-column-to-workspace 7; }
+    Mod+Alt+Shift+8         { move-column-to-workspace 8; }
+    Mod+Alt+Shift+9         { move-column-to-workspace 9; }
+
+    // ── 🖱️ Mouse wheel (cooldown so one flick = one workspace) ───────────────
+    Mod+WheelScrollDown      cooldown-ms=150 { focus-workspace-down; }
+    Mod+WheelScrollUp        cooldown-ms=150 { focus-workspace-up; }
+    Mod+Ctrl+WheelScrollDown cooldown-ms=150 { move-column-to-workspace-down; }
+    Mod+Ctrl+WheelScrollUp   cooldown-ms=150 { move-column-to-workspace-up; }
+
+    // ── 🖥️ Monitors: focus ───────────────────────────────────────────────────
+    Mod+Shift+Left  { focus-monitor-left; }
+    Mod+Shift+Down  { focus-monitor-down; }
+    Mod+Shift+Up    { focus-monitor-up; }
+    Mod+Shift+Right { focus-monitor-right; }
+    Mod+Shift+H     { focus-monitor-left; }
+    Mod+Shift+J     { focus-monitor-down; }
+    Mod+Shift+K     { focus-monitor-up; }
+    Mod+Shift+L     { focus-monitor-right; }
+
+    // ── 🖥️ Monitors: send column ─────────────────────────────────────────────
+    Mod+Shift+Ctrl+Left  { move-column-to-monitor-left; }
+    Mod+Shift+Ctrl+Down  { move-column-to-monitor-down; }
+    Mod+Shift+Ctrl+Up    { move-column-to-monitor-up; }
+    Mod+Shift+Ctrl+Right { move-column-to-monitor-right; }
+    Mod+Shift+Ctrl+H     { move-column-to-monitor-left; }
+    Mod+Shift+Ctrl+J     { move-column-to-monitor-down; }
+    Mod+Shift+Ctrl+K     { move-column-to-monitor-up; }
+    Mod+Shift+Ctrl+L     { move-column-to-monitor-right; }
+}

@@ -1,0 +1,19 @@
+// 🧱 Layer rules — bars, launchers, overlays (layer-shell surfaces).
+// Docs: https://niri-wm.github.io/niri/Configuration:-Layer-Rules
+// Find a surface's namespace with: niri msg layers
+
+// 🎨 DMS (quickshell) wallpaper layer: keep it in the overview backdrop.
+layer-rule {
+    match namespace="^quickshell$"
+    place-within-backdrop true
+}
+
+// 🔎 fuzzel: blur behind its translucent background (fuzzel.ini bg alpha "cc"),
+// clipped to fuzzel's 10 px corners so the blur doesn't poke out.
+layer-rule {
+    match namespace="^launcher$"
+    geometry-corner-radius 10
+    background-effect {
+        blur true
+    }
+}

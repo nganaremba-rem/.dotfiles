@@ -1,0 +1,29 @@
+// 🔒 Session — lock, power, quit, escape hatches, config.
+
+binds {
+    // ── ❓ Help ──────────────────────────────────────────────────────────────
+    Mod+Shift+Slash { show-hotkey-overlay; }
+
+    // ── 🔒 Lock & power ──────────────────────────────────────────────────────
+    Alt+L           hotkey-overlay-title="🔒 Lock screen (hyprlock)" { spawn-sh "pgrep -x hyprlock >/dev/null || hyprlock"; }
+    Mod+Ctrl+Alt+L  hotkey-overlay-title="💤 Suspend"               { spawn "systemctl" "suspend"; }
+    Mod+Delete      hotkey-overlay-title="⏻ Power menu"             { spawn "wlogout"; }
+    Mod+Shift+P     { power-off-monitors; }  // 🌑 any input wakes them
+    Ctrl+Alt+Delete { quit; }                // 🚪 asks for confirmation
+
+    // ── ♿ Screen reader ─────────────────────────────────────────────────────
+    Super+Alt+S allow-when-locked=true hotkey-overlay-title=null { spawn-sh "pkill orca || exec orca"; }
+
+    // ── 🛟 Escape hatch: if an app (remote desktop, KVM) grabbed all shortcuts,
+    // this still toggles the inhibitor so it can't hold the session hostage.
+    Mod+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
+
+    // ── 🛠️ Config & services ─────────────────────────────────────────────────
+    // Standalone foot (not footclient) so the editor survives a foot-server restart.
+    Mod+Shift+N { spawn-sh "foot -e $NIRI_EDITOR ~/.config/niri"; }
+    // foot server reads foot.ini only at startup → restart to apply edits.
+    // This CLOSES all footclient windows (standalone foot windows survive).
+    Mod+Ctrl+Alt+F hotkey-overlay-title="🔄 Restart foot server (closes footclient windows)" {
+        spawn-sh "systemctl --user restart foot-server.service";
+    }
+}

@@ -1,0 +1,11 @@
+// 🔁 Alt+Tab window switcher (recent windows). Defining these binds replaces
+// niri's defaults, which is how Mod+Tab stays free.
+
+recent-windows {
+    binds {
+        Alt+Tab         { next-window scope="output"; }      // 🪟 windows on this monitor
+        Alt+Shift+Tab   { previous-window scope="output"; }
+        Alt+grave       { next-window filter="app-id"; }     // 🧬 windows of the same app
+        Alt+Shift+grave { previous-window filter="app-id"; }
+    }
+}

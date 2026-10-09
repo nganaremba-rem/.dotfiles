@@ -1,0 +1,35 @@
+// ⚙️ Misc — session-wide switches that don't belong anywhere else.
+// Docs: https://niri-wm.github.io/niri/Configuration:-Miscellaneous
+
+// 🏷️ Identify as niri to portals and apps.
+environment {
+    XDG_CURRENT_DESKTOP "niri"
+}
+
+// 🔕 Don't pop a notification when a config edit fails to parse (run `niri validate`).
+config-notification {
+    disable-failed
+}
+
+// 🚫 No hot corner (top-left) for the overview.
+gestures {
+    hot-corners {
+        off
+    }
+}
+
+// ❓ Don't show the hotkey overlay at login (Mod+Shift+/ still opens it).
+hotkey-overlay {
+    skip-at-startup
+}
+
+// 🪟 Ask apps to drop their own title bars.
+prefer-no-csd
+
+// 📸 Where Print / Ctrl+Print / Alt+Print save.
+screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
+
+// 🐞 Let apps that send stale activation tokens still raise themselves (focus-steal workaround).
+debug {
+    honor-xdg-activation-with-invalid-serial
+}

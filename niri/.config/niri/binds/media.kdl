@@ -1,0 +1,24 @@
+// 🔊 Media & hardware keys — work on the lock screen too (allow-when-locked).
+// swayosd-client changes the value AND shows the on-screen indicator.
+
+binds {
+    // ── 🔊 Volume ────────────────────────────────────────────────────────────
+    XF86AudioRaiseVolume allow-when-locked=true { spawn "swayosd-client" "--output-volume" "raise" "--max-volume" "100"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn "swayosd-client" "--output-volume" "lower"; }
+    XF86AudioMute        allow-when-locked=true { spawn "swayosd-client" "--output-volume" "mute-toggle"; }
+
+    // ── 🎙️ Mic, camera, headset ──────────────────────────────────────────────
+    XF86AudioMicMute     allow-when-locked=true { spawn "/home/rem/.local/bin/mic-toggle"; }
+    XF86WebCam           allow-when-locked=true { spawn "/home/rem/.local/bin/camera-toggle"; }
+    Mod+Shift+C hotkey-overlay-title="🎧 Headset: music ↔ call mode" { spawn "/home/rem/.local/bin/bt-callmode"; }
+
+    // ── ⏯️ Playback (any MPRIS player) ───────────────────────────────────────
+    XF86AudioPlay allow-when-locked=true { spawn-sh "playerctl play-pause"; }
+    XF86AudioStop allow-when-locked=true { spawn-sh "playerctl stop"; }
+    XF86AudioPrev allow-when-locked=true { spawn-sh "playerctl previous"; }
+    XF86AudioNext allow-when-locked=true { spawn-sh "playerctl next"; }
+
+    // ── 🔆 Brightness ────────────────────────────────────────────────────────
+    XF86MonBrightnessUp   allow-when-locked=true { spawn "swayosd-client" "--brightness" "raise"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn "swayosd-client" "--brightness" "lower"; }
+}

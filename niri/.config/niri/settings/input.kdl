@@ -1,0 +1,34 @@
+// ⌨️ Input — keyboard, touchpad, mouse, focus behaviour.
+// Docs: https://niri-wm.github.io/niri/Configuration:-Input
+// Note: dms/input.kdl exists but is NOT included — this file is the source of truth.
+
+input {
+    keyboard {
+        // Empty xkb = take the layout from `localectl set-x11-keymap`.
+        xkb {
+        }
+
+        // 🏎️ Key repeat sweet spot (tried 400/35 and 600/25: too sluggish).
+        repeat-delay 200
+        repeat-rate 50
+
+        numlock
+    }
+
+    // 🖐️ Touchpad: tap-to-click, disable-while-typing, natural scrolling.
+    touchpad {
+        tap
+        dwt
+        natural-scroll
+    }
+
+    // 🖱️ Mouse / trackpoint: libinput defaults.
+    mouse {
+    }
+    trackpoint {
+    }
+
+    // 👀 Focus follows the mouse, but only onto windows already fully on screen
+    // (max-scroll-amount="0%" stops it from scrolling the view).
+    focus-follows-mouse max-scroll-amount="0%"
+}
