@@ -1,21 +1,33 @@
 #!/usr/bin/python3
 """Edit vimb's command line in nvim — vim's command-line window (c_CTRL-F).
 
-vimb config:  cnoremap <C-F> <C-B>:shellex vimb-cmdedit <CR>
-<C-B> jumps behind the ':' prompt, so vimb runs `shellex vimb-cmdedit <typed line>`;
+vimb config:  cnoremap <C-T> <C-B>:shellex ~/.local/bin/vimb-cmdedit <C-E>__EOL__<CR>
+<C-B> jumps behind the ':' prompt, so vimb runs `shellex vimb-cmdedit <typed line>__EOL__`;
+the __EOL__ marker survives vimb's word-splitting and tells us whether the line ended
+with a space (`:open ` from `o`) — a separate word means it did.
 whatever this prints, vimb runs as ex commands (one per line).
-In nvim: <CR> in normal mode (or :wq) runs the edited line, :q / :q! cancels.
+In nvim: <CR> (insert or normal) runs the edited line, <Esc><Esc> or :q! cancels.
 """
 import os, subprocess, sys, tempfile
 
 # ponytail: vimb shell-splits the line first, so quotes and repeated spaces are lost
+EOL = '__EOL__'
+args = sys.argv[1:]
+if args and args[-1] == EOL:      # line ended with a space, e.g. ':open '
+    line = ' '.join(args[:-1]) + (' ' if len(args) > 1 else '')
+else:
+    if args and args[-1].endswith(EOL):
+        args[-1] = args[-1][:-len(EOL)]
+    line = ' '.join(args)
+
 fd, path = tempfile.mkstemp(suffix='.vimbcmd')
 with os.fdopen(fd, 'w') as f:
-    f.write(' '.join(sys.argv[1:]) + '\n')
+    f.write(line + '\n')
 before = os.stat(path).st_mtime_ns
 try:
-    subprocess.run(['foot', '--app-id', 'vimb-cmdedit', 'nvim', '-c', 'setlocal wrap linebreak', '-c', 'normal! $',
-                    '-c', 'nnoremap <buffer> <CR> <cmd>wq<CR>', path])
+    # Minimal noice-style nvim (~/.config/nvim-vimb): insert mode, <CR> runs, <Esc><Esc> cancels.
+    subprocess.run(['foot', '--app-id', 'vimb-cmdedit', 'nvim', path],
+                   env=os.environ | {'NVIM_APPNAME': 'nvim-vimb', 'VIMB_POPUP': 'cmdline'})
     if os.stat(path).st_mtime_ns != before:  # written = run it; :q without write = cancel
         with open(path) as f:
             print('\n'.join(l.strip() for l in f if l.strip()))

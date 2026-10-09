@@ -56,8 +56,10 @@ nnoremap <Space>sh :sh! foot man vimb<CR>
 nnoremap <Space>ba :bma<Space>
 
 # Command line: vim's cmdline-window (Ctrl-F) — edit the : line in nvim, <CR> runs it
-#: edit command line in nvim (<CR> runs, :q cancels)
-cnoremap <C-F> <C-B>:shellex ~/.local/bin/vimb-cmdedit <CR>
+#: edit command line in a noice-style nvim popup (<CR> runs, <Esc><Esc> cancels)
+cnoremap <C-T> <C-B>:shellex ~/.local/bin/vimb-cmdedit <C-E>__EOL__<CR>
+#: edit command line in nvim popup (vim's own c_CTRL-F key)
+cnoremap <C-F> <C-B>:shellex ~/.local/bin/vimb-cmdedit <C-E>__EOL__<CR>
 
 # Harpoon — persistent pins in ~/.local/share/vimb/harpoon
 #: harpoon: add page
@@ -90,6 +92,8 @@ nnoremap <Space>. :qpush<CR>
 nnoremap <Space>S :qpop<CR>
 
 # Misc
+#: toggle tab bar
+nnoremap <Space>ut :shellex ~/.local/bin/vimb-tabbar $VIMB_PID<CR>
 #: zen mode (status bar + fullscreen)
 nnoremap <Space>uz :set status-bar!|set fullscreen!<CR>
 #: quit all
@@ -127,7 +131,7 @@ au LoadStarting https://netflix.com/*,https://www.netflix.com/*,https://primevid
 augroup end
 
 # ── Behaviour ─────────────────────────────────────────────────
-set editor-command=foot --app-id vimb-editor nvim -c 'setlocal wrap linebreak' %s
+set editor-command=foot --app-id vimb-editor env NVIM_APPNAME=nvim-vimb VIMB_POPUP=field nvim %s
 set download-path=/home/rem/Downloads
 set scroll-step=60
 set incsearch=on

@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# Toggle vimb's tab bar (per window).
+#
+# vimb has no runtime setting for it (only compile-time FEATURE_NO_TABS), so this
+# rides on vimb's GTK stylesheet: its *-css settings are pasted unescaped into
+# "#completion > row:hover{%s}", so a value can close that rule and append ours.
+# The GTK theme (~/.config/gtk-4.0/gtk.css, USER priority) wins every property it
+# sets, so the tabs can't be shrunk; instead the header fades out and the page
+# slides up over it with a negative margin (a property the theme doesn't set).
+#
+# vimb config: nnoremap <Space>ut :shellex ~/.local/bin/vimb-tabbar $VIMB_PID<CR>
+# Prints the ex command for :shellex to run.
+set -eu
+
+HOVER='background-color:#313244;'  # keep in sync with completion-hover-css in the vimb config
+BAR_HEIGHT=42                      # px: tab bar height with the current GTK theme/font
+
+# ponytail: state keyed by vimb PID in the runtime dir; a recycled PID could start inverted
+state="${XDG_RUNTIME_DIR:-/tmp}/vimb-tabbar-hidden.${1:-0}"
+
+if [ -e "$state" ]; then
+  rm -f "$state"
+  echo "set completion-hover-css=$HOVER"
+else
+  : >"$state"
+  echo "set completion-hover-css=$HOVER} notebook > header {opacity:0;} notebook > stack {margin-top:-${BAR_HEIGHT}px;"
+fi

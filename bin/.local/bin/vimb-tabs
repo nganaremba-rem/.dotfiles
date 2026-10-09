@@ -7,13 +7,17 @@ responsive to answer the accessibility queries.
 
 Usage (vimb config):  nnoremap <Space><Space> :sh! vimb-tabs $VIMB_PID<CR>
 """
-import json, subprocess, sys, time
+import subprocess, sys
 import gi
 gi.require_version('Atspi', '2.0')
 from gi.repository import Atspi
 
+# Web pages expose their own ARIA tab lists in the same tree; never search inside them.
+WEB_CONTENT = {'document web', 'document frame', 'embedded'}
+
 
 def tab_list(pid):
+    """vimb's GtkNotebook tab list (not a tablist on the web page)."""
     desk = Atspi.get_desktop(0)
     for i in range(desk.get_child_count()):
         app = desk.get_child_at_index(i)
@@ -23,37 +27,25 @@ def tab_list(pid):
                 o = stack.pop()
                 if o.get_role_name() == 'page tab list':
                     return o
-                stack += [o.get_child_at_index(j) for j in range(o.get_child_count())]
+                stack += [c for j in range(o.get_child_count())
+                          if (c := o.get_child_at_index(j)) and c.get_role_name() not in WEB_CONTENT]
     sys.exit(f'vimb-tabs: no vimb tab list for pid {pid}')
 
 
-def window_title(pid):
-    out = subprocess.run(['niri', 'msg', '-j', 'windows'], capture_output=True, text=True).stdout
-    return next((w['title'] for w in json.loads(out or '[]') if w.get('pid') == pid), None)
-
-
 def main():
-    pid = int(sys.argv[1])
-    tl = tab_list(pid)
-    tabs = [tl.get_child_at_index(i) for i in range(tl.get_child_count())]
-    names = [t.get_name() or '(untitled)' for t in tabs]
-    cur = next((i for i, t in enumerate(tabs) if t.get_state_set().contains(Atspi.StateType.SELECTED)), -1)
+    tl = tab_list(int(sys.argv[1]))
+    # Children also include the "Previous tab"/"Next tab" scroll buttons; keep real tabs,
+    # remembering their child index — that's what the Selection interface counts.
+    tabs = [(j, c) for j in range(tl.get_child_count())
+            if (c := tl.get_child_at_index(j)) and c.get_role_name() == 'page tab']
+    cur = next((n for n, (_, t) in enumerate(tabs) if t.get_state_set().contains(Atspi.StateType.SELECTED)), -1)
 
-    lines = '\n'.join(f"{i + 1}  {'●' if i == cur else ' '} {n}" for i, n in enumerate(names))
-    pick = subprocess.run(['fuzzel', '--dmenu', '--index', '--prompt', 'tabs ❯ ', '--lines', str(min(len(names), 15))],
+    lines = '\n'.join(f"{n + 1}  {'●' if n == cur else ' '} {t.get_name() or '(untitled)'}"
+                      for n, (_, t) in enumerate(tabs))
+    pick = subprocess.run(['fuzzel', '--dmenu', '--index', '--prompt', 'tabs ❯ ', '--lines', str(min(len(tabs), 15))],
                           input=lines, capture_output=True, text=True)
-    if pick.returncode or not pick.stdout.strip():
-        return
-    target = int(pick.stdout)
-
-    # GTK4 notebook a11y selection is off by one: select_child(i) shows tab i-1.
-    # Confirm through the window title (vimb mirrors the active tab), else try the plain index.
-    n, sel = len(tabs), tl.get_selection_iface()
-    for idx in ((target + 1) % n, target):
-        sel.select_child(idx)
-        time.sleep(0.15)
-        if window_title(pid) == names[target]:
-            return
+    if pick.returncode == 0 and pick.stdout.strip():
+        tl.get_selection_iface().select_child(tabs[int(pick.stdout)][0])
 
 
 if __name__ == '__main__':
