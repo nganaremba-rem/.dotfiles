@@ -220,6 +220,33 @@ window-rule {
     // match app-id="zoom"
     open-floating true
 }
+// vimb nvim popups: Ctrl-F command line (~/.local/bin/vimb-cmdedit) and
+// Ctrl-T form-field editor (vimb editor-command) — float, blur like other foot windows
+window-rule {
+    match app-id=r#"^vimb-(cmdedit|editor)$"#
+    open-floating true
+    background-effect {
+        blur true
+    }
+}
+window-rule {
+    match app-id=r#"^vimb-cmdedit$"#
+    default-column-width { fixed 900; }
+    default-window-height { fixed 220; }
+}
+window-rule {
+    match app-id=r#"^vimb-editor$"#
+    default-column-width { fixed 1100; }
+    default-window-height { fixed 600; }
+}
+// fuzzel: blur behind its semi-transparent background; clip blur to fuzzel's 10px corners
+layer-rule {
+    match namespace="^launcher$"
+    geometry-corner-radius 10
+    background-effect {
+        blur true
+    }
+}
 
 window-rule {
     match app-id=r#"^org\.mozilla\.Thunderbird$"#
