@@ -1,0 +1,24 @@
+/* Catppuccin Mocha hint labels (overrides vimb's white/yellow defaults) */
+span[vimbhint^='label'] {
+  background-color: #1e1e2e !important;
+  color: #f9e2af !important;
+  border: 1px solid #f9e2af !important;
+  border-radius: 3px !important;
+  font: bold 12px "CaskaydiaMono Nerd Font Mono", monospace !important;
+  text-transform: uppercase !important;
+  opacity: .95 !important;
+  padding: 0 3px !important;
+}
+span[vimbhint='label focus'] {
+  background-color: #f9e2af !important;
+  color: #1e1e2e !important;
+}
+*[vimbhint^='hint'] {
+  background-color: #313244 !important;
+  color: #cdd6f4 !important;
+  outline: 1px solid #f9e2af !important;
+}
+*[vimbhint='hint focus'] {
+  background-color: #45475a !important;
+  outline: 2px solid #a6e3a1 !important;
+}

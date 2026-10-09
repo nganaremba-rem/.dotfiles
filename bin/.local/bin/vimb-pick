@@ -1,0 +1,229 @@
+#!/usr/bin/python3
+"""fuzzel pickers for vimb — snacks-style workflows.
+
+Pickers print ex commands on stdout, so vimb runs them via `:shellex`:
+  vimb-pick history | bookmarks | pins | keys | jump N
+Pin commands run async via `:sh!` and read $VIMB_URI / $VIMB_TITLE:
+  vimb-pick pin N | pin add
+"""
+import os, re, subprocess, sys
+from pathlib import Path
+
+DATA = Path(os.environ.get('XDG_DATA_HOME', Path.home() / '.local/share')) / 'vimb'
+CONFIG = Path(os.environ.get('XDG_CONFIG_HOME', Path.home() / '.config')) / 'vimb/config'
+PINS = DATA / 'harpoon'
+
+# All vimb built-ins (from `man vimb`): "mode | keys | desc".
+# mode n = runnable via :normal!; ref = normal mode but needs a count/register/
+# char first (reference only); hint/cmdline/input/pass = keys inside that mode.
+BUILTINS = [tuple(f.strip() for f in l.split('|')) for l in """
+n | : | command line
+n | gi | focus first input (input mode)
+n | i | focus last-focused input (input mode)
+n | <C-Z> | pass-through mode (site gets keys)
+n | gf | view page source in editor
+n | gF | web inspector
+n | <C-V> | pass next key to GTK
+n | <C-Q> | quit (unless downloads running)
+n | gt | next tab
+n | gT | previous tab
+n | g0 | first tab
+n | g$ | last tab
+n | o | :open
+n | O | :open with current URL
+n | t | :tabopen
+n | T | :tabopen with current URL
+n | gh | open home page
+n | gH | open home page in new tab
+n | u | reopen last closed page
+n | U | reopen last closed page in new tab
+n | <C-P> | read later: open oldest queued
+n | p | open URL from clipboard
+n | P | open clipboard URL in new tab
+ref | "xp / "xP | open URL from register x (new tab with P)
+n | <C-O> | back
+n | <C-I> | forward
+n | gu | go up one URL directory
+n | gU | go to domain root
+n | r | reload
+n | R | reload, no cache
+n | <C-C> | stop loading
+n | <C-F> | page down
+n | <C-B> | page up
+n | <C-D> | half page down
+n | <C-U> | half page up
+n | gg | top of page
+n | G | bottom of page
+ref | [N]gg / [N]G | jump to N% of page
+n | 0 | scroll far left (also ^)
+n | $ | scroll far right
+n | h | scroll left
+n | l | scroll right
+n | j | scroll down
+n | k | scroll up
+ref | m{a-z} | set page mark
+ref | m{A-Z} | set global mark (any page, this window)
+ref | '{a-z} | jump to page mark
+ref | '{A-Z} | jump to global mark
+n | '' | jump back to position before last jump
+n | f | hint: open link
+n | F | hint: open in new tab
+n | ;o | hint: open link
+n | ;t | hint: open in new tab
+n | ;s | hint: save link target
+n | ;O | hint: :open prompt with link
+n | ;T | hint: :tabopen prompt with link
+n | ;e | hint: edit form field in editor
+n | ;i | hint: open image
+n | ;I | hint: open image in new tab
+n | ;k | hint: remove element from page
+n | ;p | hint: read later (queue end)
+n | ;P | hint: read later (queue front)
+n | ;x | hint: run x-hint-command (mpv)
+n | ;y | hint: yank link
+n | ;Y | hint: yank link text
+ref | g;{mode} | extended hints: stay open (modes I o p P s t y Y)
+n | / | search forward
+n | ? | search backward
+n | * | search selection/clipboard forward
+n | # | search selection/clipboard backward
+n | n | next match
+n | N | previous match
+ref | <CR> | click element of current search match
+n | zi | zoom text in
+n | zo | zoom text out
+n | zI | zoom full page in
+n | zO | zoom full page out
+n | zz | reset zoom
+n | y | yank page URL
+n | Y | yank selection
+hint | <Tab> / <C-I> | next hint
+hint | <S-Tab> / <C-O> | previous hint
+hint | <CR> | fire current hint
+hint | <Esc> / <C-C> | leave hint mode
+hint | <C-F> <C-B> <C-D> <C-U> <C-J> <C-K> | scroll while hinting
+cmdline | <Esc> / <C-C> | cancel
+cmdline | <CR> | run command
+cmdline | <C-H> | delete char back
+cmdline | <C-W> | delete word back
+cmdline | <C-U> | delete to prompt
+cmdline | <C-B> / <C-E> | cursor to start / end
+cmdline | <C-V> | pass next key to GTK
+cmdline | <C-R>{reg} | insert register (% URL, ; last hint, : last cmd, / search)
+cmdline | <Tab> / <S-Tab> | complete (history, bookmarks with !, settings)
+cmdline | <Up> / <Down> | command history
+input | <Esc> / <C-[> | back to normal mode
+input | <C-O> | run one normal-mode command
+input | <C-T> | edit field in $EDITOR (nvim)
+input | <C-V> | pass next key to page
+input | <C-Z> | pass-through mode
+pass | <Esc> / <C-[> | leave pass-through mode
+""".strip().splitlines()]
+
+
+def fuzzel(rows, prompt):
+    if not rows:
+        notify(f'{prompt.strip()} — nothing to pick')
+        return None
+    r = subprocess.run(['fuzzel', '--dmenu', '--index', '--width', '90', '--prompt', prompt,
+                        '--lines', str(min(len(rows), 15))],
+                       input='\n'.join(rows), capture_output=True, text=True)
+    return int(r.stdout) if r.returncode == 0 and r.stdout.strip() else None
+
+
+def notify(msg):
+    subprocess.run(['notify-send', '-a', 'vimb', '-t', '2000', msg], check=False)
+
+
+def read_tsv(path):
+    try:
+        return [l.split('\t') for l in path.read_text().splitlines() if l.strip()]
+    except FileNotFoundError:
+        return []
+
+
+def open_pick(entries, prompt):
+    """entries: [(uri, label)] -> prints `open uri` for the pick."""
+    i = fuzzel([label for _, label in entries], prompt)
+    if i is not None:
+        print(f'open {entries[i][0]}')
+
+
+def history():
+    seen, out = set(), []
+    for uri, *title in reversed(read_tsv(DATA / 'history')):  # file is oldest-first
+        if uri not in seen:
+            seen.add(uri)
+            out.append((uri, f"{(title or [''])[0] or uri}   —   {uri}"))
+    open_pick(out, 'recent ❯ ')
+
+
+def bookmarks():
+    rows = read_tsv(DATA / 'bookmark')
+    open_pick([(r[0], f"{(r[1:2] or [''])[0] or r[0]}  [{(r[2:3] or [''])[0]}]   —   {r[0]}") for r in rows], 'bookmarks ❯ ')
+
+
+def pins():
+    rows = read_tsv(PINS)
+    open_pick([(r[0], f"{n}  {(r[1:2] or [''])[0] or r[0]}   —   {r[0]}") for n, r in enumerate(rows, 1)], 'harpoon ❯ ')
+
+
+def jump(n):
+    rows = read_tsv(PINS)
+    if 0 < n <= len(rows):
+        print(f'open {rows[n - 1][0]}')
+    else:
+        notify(f'harpoon: slot {n} empty')
+
+
+def pin(slot, uri):
+    # $VIMB_URI/$VIMB_TITLE are process-wide and go stale on tab switch, so the
+    # mapping passes the current tab's URI (register %); title comes from history.
+    if not uri:
+        return
+    title = next((r[1] for r in reversed(read_tsv(DATA / 'history')) if r[0] == uri and len(r) > 1), '')
+    rows = read_tsv(PINS)
+    if slot == 'add':
+        rows = [r for r in rows if r[0] != uri] + [[uri, title]]
+        n = len(rows)
+    else:  # set slot n, padding gaps so slot numbers stay stable
+        n = int(slot)
+        rows += [['about:blank', '(empty)']] * (n - len(rows))
+        rows[n - 1] = [uri, title]
+    PINS.parent.mkdir(parents=True, exist_ok=True)
+    PINS.write_text(''.join('\t'.join(r[:2]) + '\n' for r in rows))
+    notify(f'harpoon {n}: {title or uri}')
+
+
+def keys():
+    entries, desc = [], None
+    for line in CONFIG.read_text().splitlines():
+        if line.startswith('#:'):
+            desc = line[2:].strip()
+        elif m := re.match(r'([nci])(?:nore)?map\s+(\S+)\s+(.*)', line):
+            entries.append((m[2], desc or m[3], m[1]))
+            desc = None
+        else:
+            desc = None
+    w = min(max(len(k) for k in [e[0] for e in entries] + [b[1] for b in BUILTINS]), 22) + 2
+    mode = {'c': 'cmdline', 'i': 'input'}
+    rows = [f"{k:<{w}}{d}{'   (' + mode[m] + ' mode)' if m in mode else ''}" for k, d, m in entries]
+    rows += [f"{k:<{w}}{d}   (built-in{'' if m in ('n', 'ref') else ' · ' + m + ' mode'})" for m, k, d in BUILTINS]
+    i = fuzzel(rows, 'keys ❯ ')
+    if i is None:
+        return
+    if i < len(entries):
+        if entries[i][2] == 'n':
+            print(f'normal {entries[i][0]}')
+        else:
+            notify('reference only: ' + rows[i].split('   (')[0])
+    elif BUILTINS[i - len(entries)][0] == 'n':
+        print(f'normal! {BUILTINS[i - len(entries)][1]}')
+    else:
+        notify('reference only: ' + rows[i].split('   (')[0])
+
+
+if __name__ == '__main__':
+    cmd, *args = sys.argv[1:] or ['']
+    {'history': history, 'bookmarks': bookmarks, 'pins': pins, 'keys': keys,
+     'jump': lambda: jump(int(args[0])), 'pin': lambda: pin(args[0], args[1] if len(args) > 1 else '')}.get(cmd, lambda: sys.exit(__doc__))()

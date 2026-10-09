@@ -1,0 +1,139 @@
+# vimb config — Catppuccin Mocha, qutebrowser-style keys on top of vimb's vim defaults.
+# Reload without restarting:  :source ~/.config/vimb/config
+
+# ── Dark theme ────────────────────────────────────────────────
+# Sites see prefers-color-scheme: dark; GTK chrome goes dark too.
+set dark-mode=on
+set status-css=color:#cdd6f4;background-color:#181825;font:bold 11pt CaskaydiaMono Nerd Font Mono;
+set status-ssl-css=color:#a6e3a1;background-color:#181825;font:bold 11pt CaskaydiaMono Nerd Font Mono;
+set status-ssl-invalid-css=color:#11111b;background-color:#f38ba8;font:bold 11pt CaskaydiaMono Nerd Font Mono;
+set input-css=color:#cdd6f4;background-color:#1e1e2e;font:11pt CaskaydiaMono Nerd Font Mono;
+set input-error-css=color:#11111b;background-color:#f38ba8;font:bold 11pt CaskaydiaMono Nerd Font Mono;
+set completion-css=color:#a6adc8;background-color:#181825;font:11pt CaskaydiaMono Nerd Font Mono;
+set completion-hover-css=background-color:#313244;
+set completion-selected-css=color:#1e1e2e;background-color:#89b4fa;
+# style.css holds the dark hint labels
+set stylesheet=on
+
+# ── Hints: home-row letters like qutebrowser ─────────────────
+set hint-keys=asdfghjkl
+set hint-keys-same-length=on
+set hint-match-element=false
+set hint-follow-last=on
+
+# ── Keys ──────────────────────────────────────────────────────
+# vimb defaults stay: j/k/h/l gg G / n N f F o O t T y p r gt gT u <C-O>/<C-I> back/forward
+# `#:` lines are descriptions for the <Space>sk cheatsheet (vimb treats them as comments)
+
+# Tabs — bufferline muscle memory (S-h/S-l), J/K kept from qutebrowser
+#: previous tab
+nnoremap H gT
+#: next tab
+nnoremap L gt
+#: previous tab
+nnoremap K gT
+#: next tab
+nnoremap J gt
+#: close tab
+nnoremap d :q<CR>
+#: close tab
+nnoremap x :q<CR>
+
+# Pickers (fuzzel) — snacks muscle memory
+#: tabs picker
+nnoremap <Space><Space> :sh! ~/.local/bin/vimb-tabs $VIMB_PID<CR>
+#: tabs picker
+nnoremap <Space>sb :sh! ~/.local/bin/vimb-tabs $VIMB_PID<CR>
+#: recent pages (history)
+nnoremap <Space>s. :shellex ~/.local/bin/vimb-pick history<CR>
+#: bookmarks
+nnoremap <Space>sm :shellex ~/.local/bin/vimb-pick bookmarks<CR>
+#: search keymaps (this cheatsheet)
+nnoremap <Space>sk :shellex ~/.local/bin/vimb-pick keys<CR>
+#: help (man vimb)
+nnoremap <Space>sh :sh! foot man vimb<CR>
+#: bookmark this page (type tags, Enter)
+nnoremap <Space>ba :bma<Space>
+
+# Command line: vim's cmdline-window (Ctrl-F) — edit the : line in nvim, <CR> runs it
+#: edit command line in nvim (<CR> runs, :q cancels)
+cnoremap <C-F> <C-B>:shellex ~/.local/bin/vimb-cmdedit <CR>
+
+# Harpoon — persistent pins in ~/.local/share/vimb/harpoon
+#: harpoon: add page
+nnoremap <Space>ma :sh! ~/.local/bin/vimb-pick pin add '<C-R>%'<CR>
+#: harpoon: menu
+nnoremap <Space>mm :shellex ~/.local/bin/vimb-pick pins<CR>
+#: harpoon: edit list in nvim
+nnoremap <Space>me :sh! foot nvim ~/.local/share/vimb/harpoon<CR>
+#: harpoon: set slot 1
+nnoremap <Space>m1 :sh! ~/.local/bin/vimb-pick pin 1 '<C-R>%'<CR>
+#: harpoon: set slot 2
+nnoremap <Space>m2 :sh! ~/.local/bin/vimb-pick pin 2 '<C-R>%'<CR>
+#: harpoon: set slot 3
+nnoremap <Space>m3 :sh! ~/.local/bin/vimb-pick pin 3 '<C-R>%'<CR>
+#: harpoon: set slot 4
+nnoremap <Space>m4 :sh! ~/.local/bin/vimb-pick pin 4 '<C-R>%'<CR>
+#: harpoon: page 1
+nnoremap <Space>1 :shellex ~/.local/bin/vimb-pick jump 1<CR>
+#: harpoon: page 2
+nnoremap <Space>2 :shellex ~/.local/bin/vimb-pick jump 2<CR>
+#: harpoon: page 3
+nnoremap <Space>3 :shellex ~/.local/bin/vimb-pick jump 3<CR>
+#: harpoon: page 4
+nnoremap <Space>4 :shellex ~/.local/bin/vimb-pick jump 4<CR>
+
+# Scratch = read-it-later queue
+#: read later: push page
+nnoremap <Space>. :qpush<CR>
+#: read later: open oldest
+nnoremap <Space>S :qpop<CR>
+
+# Misc
+#: zen mode (status bar + fullscreen)
+nnoremap <Space>uz :set status-bar!|set fullscreen!<CR>
+#: quit all
+nnoremap <Space>q :quitall<CR>
+#: quit all, even with downloads running
+nnoremap <Space>Q :quitall!<CR>
+#: terminal (foot)
+nnoremap <Space>tt :sh! foot<CR>
+#: play page in mpv
+nnoremap M :sh! mpv '<C-R>%'<CR>
+set x-hint-command=:sh! mpv '<C-R>;'<CR>
+#: hint: play link in mpv
+nnoremap ;m ;x
+#: force-dark toggle (sites without dark mode)
+nnoremap ,d :eval! (()=>{const s=document.getElementById('vimb-dark');if(s){s.remove();return}const e=document.createElement('style');e.id='vimb-dark';e.textContent='html{filter:invert(.92) hue-rotate(180deg);background:#fff}img,video,picture,canvas,iframe,svg image{filter:invert(1) hue-rotate(180deg)}';document.documentElement.append(e)})()<CR>
+
+# ── Search: ":open aw niri", plain words go to DuckDuckGo ────
+shortcut-add dd=https://duckduckgo.com/?kae=d&q=$0
+shortcut-add g=https://www.google.com/search?q=$0
+shortcut-add gh=https://github.com/search?q=$0
+shortcut-add aw=https://wiki.archlinux.org/index.php?search=$0
+shortcut-add aur=https://aur.archlinux.org/packages?K=$0
+shortcut-add yt=https://www.youtube.com/results?search_query=$0
+shortcut-default dd
+set home-page=https://duckduckgo.com/?kae=d
+
+# ── DRM sites → Helium ────────────────────────────────────────
+# WebKitGTK has no EME/Widevine, so Netflix & co can never play in vimb (and keep
+# kicking you to an error/sign-in page). Hand the URL to Helium — it has Widevine
+# and keeps the login — as an app window, and stop the load here.
+augroup drm
+au!
+au LoadStarting https://netflix.com/*,https://www.netflix.com/*,https://primevideo.com/*,https://www.primevideo.com/*,https://www.hotstar.com/*,https://www.disneyplus.com/*,https://open.spotify.com/* sh! helium-browser --app="$VIMB_URI"
+au LoadStarting https://netflix.com/*,https://www.netflix.com/*,https://primevideo.com/*,https://www.primevideo.com/*,https://www.hotstar.com/*,https://www.disneyplus.com/*,https://open.spotify.com/* normal! <C-C>
+augroup end
+
+# ── Behaviour ─────────────────────────────────────────────────
+set editor-command=foot --app-id vimb-editor nvim -c 'setlocal wrap linebreak' %s
+set download-path=/home/rem/Downloads
+set scroll-step=60
+set incsearch=on
+set cookie-accept=origin
+set intelligent-tracking-prevention=on
+set notification=ask
+set geolocation=never
+# heliscroll is off; if you enable it, set this off so two springs don't stack
+set smooth-scrolling=on

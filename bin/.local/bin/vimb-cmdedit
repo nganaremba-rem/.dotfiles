@@ -1,0 +1,23 @@
+#!/usr/bin/python3
+"""Edit vimb's command line in nvim — vim's command-line window (c_CTRL-F).
+
+vimb config:  cnoremap <C-F> <C-B>:shellex vimb-cmdedit <CR>
+<C-B> jumps behind the ':' prompt, so vimb runs `shellex vimb-cmdedit <typed line>`;
+whatever this prints, vimb runs as ex commands (one per line).
+In nvim: <CR> in normal mode (or :wq) runs the edited line, :q / :q! cancels.
+"""
+import os, subprocess, sys, tempfile
+
+# ponytail: vimb shell-splits the line first, so quotes and repeated spaces are lost
+fd, path = tempfile.mkstemp(suffix='.vimbcmd')
+with os.fdopen(fd, 'w') as f:
+    f.write(' '.join(sys.argv[1:]) + '\n')
+before = os.stat(path).st_mtime_ns
+try:
+    subprocess.run(['foot', '--app-id', 'vimb-cmdedit', 'nvim', '-c', 'setlocal wrap linebreak', '-c', 'normal! $',
+                    '-c', 'nnoremap <buffer> <CR> <cmd>wq<CR>', path])
+    if os.stat(path).st_mtime_ns != before:  # written = run it; :q without write = cancel
+        with open(path) as f:
+            print('\n'.join(l.strip() for l in f if l.strip()))
+finally:
+    os.unlink(path)
