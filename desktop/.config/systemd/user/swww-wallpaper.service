@@ -1,0 +1,11 @@
+[Unit]
+Description=Set wallpaper with swww
+After=swww.service
+Requires=swww.service
+
+[Service]
+Type=oneshot
+ExecStart=/home/rem/.config/wallpaper/set.sh
+
+[Install]
+WantedBy=swww.service

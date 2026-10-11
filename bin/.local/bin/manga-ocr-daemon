@@ -1,0 +1,48 @@
+#!/home/rem/.local/share/pipx/venvs/manga-ocr/bin/python
+# Persistent manga-ocr daemon — loads model once at startup, serves OCR over a Unix socket.
+# Send an image path, receive the OCR text back.
+import os
+import socket
+import sys
+import logging
+import warnings
+
+logging.disable(logging.CRITICAL)
+warnings.filterwarnings("ignore")
+os.environ["TRANSFORMERS_VERBOSITY"] = "error"
+
+SOCKET_PATH = "/tmp/manga-ocr.sock"
+
+from manga_ocr import MangaOcr
+
+print("Loading OCR model...", flush=True)
+mocr = MangaOcr()
+print("OCR ready.", flush=True)
+
+if os.path.exists(SOCKET_PATH):
+    os.unlink(SOCKET_PATH)
+
+server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+server.bind(SOCKET_PATH)
+server.listen(5)
+
+print(f"Listening on {SOCKET_PATH}", flush=True)
+
+while True:
+    try:
+        conn, _ = server.accept()
+        with conn:
+            img_path = conn.recv(4096).decode().strip()
+            try:
+                text = mocr(img_path)
+            except Exception as e:
+                text = ""
+                print(f"OCR error: {e}", file=sys.stderr, flush=True)
+            conn.sendall(text.encode())
+    except KeyboardInterrupt:
+        break
+    except Exception as e:
+        print(f"Socket error: {e}", file=sys.stderr, flush=True)
+
+server.close()
+os.unlink(SOCKET_PATH)

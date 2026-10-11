@@ -1,0 +1,22 @@
+#!/bin/bash
+# Re-apply the 30s Bluetooth profile-restore delay after a wireplumber update.
+# Why: WhatsApp in Helium reopens the mic every few seconds; the stock 2s restore flips the headset mid-call.
+# Called out by /etc/pacman.d/hooks/wireplumber-autoswitch-override.hook
+set -e
+sys=/usr/share/wireplumber/scripts/device/autoswitch-bluetooth-profile.lua
+mine=$HOME/.local/share/wireplumber/scripts/device/autoswitch-bluetooth-profile.lua
+
+mkdir -p "$(dirname "$mine")"
+cp "$sys" "$mine"
+sd -F 'PROFILE_RESTORE_TIMEOUT_MSEC = 2000' 'PROFILE_RESTORE_TIMEOUT_MSEC = 30000' "$mine"
+
+if ! grep -q 'PROFILE_RESTORE_TIMEOUT_MSEC = 30000' "$mine"; then
+    rm "$mine"
+    systemctl --user restart wireplumber
+    echo "Upstream changed the restore-timeout line: fix NOT applied, override removed (stock 2s behaviour)."
+    echo "Check $sys for the new timeout code."
+    exit 1
+fi
+
+systemctl --user restart wireplumber
+echo "Done: 30s restore re-applied. Turn the headset off and on to get music mode back."

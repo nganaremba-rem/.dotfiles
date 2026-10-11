@@ -1,0 +1,11 @@
+os:
+  editPreset: "nvim-remote"
+gui:
+  theme:
+    selectedLineBgColor:
+      - reverse
+    selectedRangeBgColor:
+      - reverse
+keybinding:
+  universal:
+    quit: q

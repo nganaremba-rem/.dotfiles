@@ -1,0 +1,7 @@
+#!/bin/bash
+# Run a command inside the Omarchy Quattro environment (niri port).
+#   oq omarchy-menu toggle root
+# niri/bin holds the niri stand-ins (hyprctl, …) and wins by PATH order.
+export OMARCHY_PATH="$HOME/.local/share/omarchy-quattro"
+export PATH="$OMARCHY_PATH/niri/bin:$OMARCHY_PATH/bin:$PATH"
+exec "$@"

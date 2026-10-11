@@ -1,0 +1,20 @@
+[env]
+TERM = "xterm-256color"
+
+[font]
+normal = { family = "CaskaydiaCove Nerd Font Mono" }
+bold = { family = "CaskaydiaCove Nerd Font Mono" }
+italic = { family = "CaskaydiaCove Nerd Font Mono" }
+size = 11
+
+[window]
+padding.x = 14
+padding.y = 14
+decorations = "None"
+
+[keyboard]
+bindings = [
+{ key = "F11", action = "ToggleFullscreen" },
+{ key = "Insert", mods = "Shift", action = "Paste" },
+{ key = "Insert", mods = "Control", action = "Copy" }
+]

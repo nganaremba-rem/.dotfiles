@@ -1,0 +1,24 @@
+[user]
+	email = ngancloverr+remkugithub@gmail.com
+	name = nganaremba-rem
+[includeIf "gitdir:/home/rem/work/"]
+	path = /home/rem/.gitconfig-gitlab
+[color]
+	ui = auto
+[alias]
+	co = checkout
+	br = branch
+	ci = commit
+	st = status
+[pull]
+	rebase = true
+[init]
+	defaultbranch = main
+[credential "https://github.com"]
+	helper =
+	helper = !/usr/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper =
+	helper = !/usr/bin/gh auth git-credential
+[credential]
+	helper = /usr/lib/git-core/git-credential-libsecret

@@ -1,0 +1,56 @@
+#!/bin/bash
+# Download the video on a page with yt-dlp (works far beyond YouTube).
+#
+#   video-dl [URL]    no URL: $REMBROWSER_URI (rembrowser's Alt+Shift+D), then the clipboard
+#
+# Files land in ~/Videos (VIDEO_DL_DIR overrides). Progress is one notification
+# that updates in place; "Play" on the final one opens the file in mpv.
+set -euo pipefail
+
+url=${1:-${REMBROWSER_URI:-$(wl-paste -n 2>/dev/null || true)}}
+dir=${VIDEO_DL_DIR:-$HOME/Videos}
+
+if [[ ! $url =~ ^https?:// ]]; then
+    notify-send -u critical "Video download" "Not a web address: ${url:0:80}"
+    exit 1
+fi
+mkdir -p "$dir"
+
+id=$(notify-send -p "Video download" "Looking for a video…")
+note() { notify-send -r "$id" "$@" >/dev/null; }
+
+# --no-exec and `--` throughout: the URL comes from a web page, so it must never
+# be read as an option or reach a post-processing command.
+if ! yt-dlp --no-playlist --simulate --quiet --no-warnings --no-exec -- "$url" >/dev/null 2>&1; then
+    note -u critical "No video found" "$url"
+    exit 1
+fi
+
+file="" last=""
+while IFS= read -r line; do
+    case $line in
+    PROG$'\t'*)
+        percent=${line#*$'\t'}
+        percent=${percent%%.*}
+        percent=${percent//[^0-9]/}
+        [[ -n $percent && $percent != "$last" ]] || continue
+        last=$percent
+        note -h "int:value:$percent" "Downloading video" "$percent%"
+        ;;
+    FILE$'\t'*) file=${line#*$'\t'} ;;
+    esac
+done < <(yt-dlp --no-playlist --quiet --no-warnings --no-exec --progress --newline \
+    --progress-template $'download:PROG\t%(progress._percent_str)s' \
+    --paths "$dir" -o '%(title)s.%(ext)s' \
+    --print $'after_move:FILE\t%(filepath)s' -- "$url" 2>&1)
+
+# after_move prints only once the file is in place, so a real file means success.
+if [[ -f $file ]]; then
+    # -A waits for the notification to close; with Do Not Disturb on that can be
+    # never, so stop waiting after 20 s.
+    action=$(timeout 20 notify-send -r "$id" -t 10000 -A play=Play "Download complete" "${file##*/}" || true)
+    if [[ $action == play ]]; then exec mpv -- "$file"; fi
+else
+    note -u critical "Download failed" "$url"
+    exit 1
+fi

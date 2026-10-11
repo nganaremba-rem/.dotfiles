@@ -1,0 +1,58 @@
+#!/usr/bin/env python3
+"""Print the focused window's app_id on stdout whenever it changes.
+
+heliscroll reads this to decide which applications get spring physics.
+niri's WindowFocusChanged carries only a window id, so the id -> app_id map has
+to be maintained from the window events that carry it.
+"""
+import json
+import subprocess
+import sys
+
+apps = {}
+focused = None
+last_printed = None
+
+
+def emit(app):
+    global last_printed
+    app = app or ""
+    if app != last_printed:
+        last_printed = app
+        print(app, flush=True)
+
+
+proc = subprocess.Popen(
+    ["niri", "msg", "--json", "event-stream"],
+    stdout=subprocess.PIPE, text=True,
+)
+try:
+    for line in proc.stdout:
+        try:
+            ev = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+
+        if "WindowsChanged" in ev:
+            apps.clear()
+            for w in ev["WindowsChanged"]["windows"]:
+                apps[w["id"]] = w.get("app_id") or ""
+                if w.get("is_focused"):
+                    focused = w["id"]
+        elif "WindowOpenedOrChanged" in ev:
+            w = ev["WindowOpenedOrChanged"]["window"]
+            apps[w["id"]] = w.get("app_id") or ""
+            if w.get("is_focused"):
+                focused = w["id"]
+        elif "WindowFocusChanged" in ev:
+            focused = ev["WindowFocusChanged"].get("id")
+        elif "WindowClosed" in ev:
+            apps.pop(ev["WindowClosed"]["id"], None)
+        else:
+            continue
+
+        emit(apps.get(focused, ""))
+except (BrokenPipeError, KeyboardInterrupt):
+    pass
+finally:
+    proc.terminate()

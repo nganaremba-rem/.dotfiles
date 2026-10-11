@@ -1,0 +1,29 @@
+#!/bin/sh
+# remtube launcher: start the server if it isn't running, then open the UI as an app window.
+# Browser: $REMTUBE_BROWSER, else the first Chromium-family browser found (app window),
+# else Firefox or the default browser (normal tab).
+URL="http://127.0.0.1:8787"
+LOG="${XDG_STATE_HOME:-$HOME/.local/state}/remtube/server.log"
+SERVER="$HOME/.local/bin/remtube-server"
+
+up() { curl -fs -o /dev/null "$URL/api/ping"; }
+
+if ! up; then
+  mkdir -p "$(dirname "$LOG")"
+  setsid -f "$SERVER" >>"$LOG" 2>&1
+  i=0
+  while ! up && [ "$i" -lt 50 ]; do sleep 0.1; i=$((i + 1)); done
+fi
+
+if [ -n "$REMTUBE_BROWSER" ]; then
+  exec "$REMTUBE_BROWSER" --app="$URL/"
+fi
+for b in helium-browser helium chromium chromium-browser google-chrome-stable google-chrome brave brave-browser vivaldi-stable microsoft-edge-stable thorium-browser; do
+  if command -v "$b" >/dev/null 2>&1; then
+    exec "$b" --app="$URL/"
+  fi
+done
+if command -v firefox >/dev/null 2>&1; then
+  exec firefox --new-window "$URL/"
+fi
+exec xdg-open "$URL/"

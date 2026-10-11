@@ -1,0 +1,4 @@
+set recolor true
+set recolor-keephue true
+set recolor-darkcolor "#1e1e2e"   # background -> dark
+set recolor-lightcolor "#cdd6f4"    # text -> light

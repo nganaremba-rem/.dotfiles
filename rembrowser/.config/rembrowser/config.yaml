@@ -1,0 +1,77 @@
+# rembrowser config — saved changes apply immediately (no restart).
+# Open it with `rembrowser config` or :config. Built-in defaults load first.
+
+settings:
+  home-page: home # the homescreen
+  status-bar: false # pops up when needed; true = always visible
+  tab-bar: false # pops up when switching tabs; true = always visible
+  extensions: true
+  dark-mode: true # sites see prefers-color-scheme: dark (restart)
+  hint-keys: asdfghjkl
+  hint-follow-last: true
+  scroll-step: 60
+  incsearch: true
+  smooth-scrolling: true
+  geolocation: never
+  download-path: ~/Downloads
+  x-hint-command: ":sh! mpv '<C-R>;'<CR>" # what ;x runs on the hinted link
+
+search:
+  default: dd # plain words in :open go to DuckDuckGo
+  engines: # ":open aw niri" → Arch Wiki search for "niri"
+    dd: https://duckduckgo.com/?kae=d&q=$0
+    g: https://www.google.com/search?q=$0
+    gh: https://github.com/search?q=$0
+    aw: https://wiki.archlinux.org/index.php?search=$0
+    aur: https://aur.archlinux.org/packages?K=$0
+    yt: https://www.youtube.com/results?search_query=$0
+
+keys:
+  normal:
+    # Tabs — bufferline muscle memory (S-h/S-l), J/K kept from qutebrowser
+    H: { run: gT, desc: previous tab }
+    L: { run: gt, desc: next tab }
+    K: { run: gT, desc: previous tab }
+    J: { run: gt, desc: next tab }
+    d: { run: ":q<CR>", desc: close tab }
+    x: { run: ":q<CR>", desc: close tab }
+
+    # Pickers
+    "<Space><Space>": { run: ":tabs<CR>", desc: tabs picker }
+    "<Space>sb": { run: ":tabs<CR>", desc: tabs picker }
+    "<Space>s.": { run: ":history<CR>", desc: recent pages (history) }
+    "<Space>sm": { run: ":bookmarks<CR>", desc: bookmarks }
+    "<Space>sk": { run: ":keys<CR>", desc: search keymaps (this cheatsheet) }
+    "<Space>sd": { run: ":downloads<CR>", desc: downloads }
+
+    # Harpoon — pins in ~/.local/share/rembrowser/harpoon
+    "<Space>ma": { run: ":pin add<CR>", desc: "harpoon: add page" }
+    "<Space>mm": { run: ":pins<CR>", desc: "harpoon: menu" }
+    "<Space>me":
+      { run: ":sh! foot nvim ~/.local/share/rembrowser/harpoon<CR>", desc: "harpoon: edit list in nvim" }
+    "<Space>m1": { run: ":pin 1<CR>", desc: "harpoon: set slot 1" }
+    "<Space>m2": { run: ":pin 2<CR>", desc: "harpoon: set slot 2" }
+    "<Space>m3": { run: ":pin 3<CR>", desc: "harpoon: set slot 3" }
+    "<Space>m4": { run: ":pin 4<CR>", desc: "harpoon: set slot 4" }
+    "<Space>1": { run: ":jump 1<CR>", desc: "harpoon: page 1" }
+    "<Space>2": { run: ":jump 2<CR>", desc: "harpoon: page 2" }
+    "<Space>3": { run: ":jump 3<CR>", desc: "harpoon: page 3" }
+    "<Space>4": { run: ":jump 4<CR>", desc: "harpoon: page 4" }
+
+    # UI
+    "<Space>ut": { run: ":set tab-bar!<CR>", desc: pin / unpin the tab bar }
+    "<Space>ul":
+      { run: ":set status-bar!<CR>", desc: pin / unpin the status line }
+    "<Space>uz":
+      { run: ":set status-bar!|set fullscreen!<CR>", desc: zen mode (status bar + fullscreen) }
+    "<Space>uc": { run: ":config<CR>", desc: edit this config }
+
+    # Misc
+    "<Space>Q": { run: ":quitall!<CR>", desc: "quit all, even with downloads running" }
+    "<Space>tt": { run: ":sh! foot<CR>", desc: terminal (foot) }
+    M: { run: ":sh! mpv '<C-R>%'<CR>", desc: play page in mpv }
+    "<M-S-d>": { run: ":sh! video-dl<CR>", desc: "download this page's video (yt-dlp → ~/Videos)" }
+    ";m": { run: ";x", desc: "hint: play link in mpv" }
+    ",d":
+      run: ":eval! (()=>{const s=document.getElementById('rem-dark');if(s){s.remove();return}const e=document.createElement('style');e.id='rem-dark';e.textContent='html{filter:invert(.92) hue-rotate(180deg);background:#fff}img,video,picture,canvas,iframe,svg image{filter:invert(1) hue-rotate(180deg)}';document.documentElement.append(e)})()<CR>"
+      desc: force-dark toggle (sites without dark mode)

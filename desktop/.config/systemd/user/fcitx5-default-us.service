@@ -1,0 +1,10 @@
+[Unit]
+Description=Force Fcitx5 to start in keyboard-us
+After=graphical-session.target fcitx5.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/fcitx5-remote -s keyboard-us
+
+[Install]
+WantedBy=default.target

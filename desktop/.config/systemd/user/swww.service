@@ -1,0 +1,13 @@
+[Unit]
+Description=swww wallpaper daemon
+PartOf=niri.service
+After=niri.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/swww-daemon
+Restart=on-failure
+
+[Install]
+
+WantedBy=default.target

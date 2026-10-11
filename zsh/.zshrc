@@ -49,7 +49,6 @@ path=(
   "$HOME/bin"
   "$HOME/bin/nvim/bin"
   "$HOME/bin/arch"
-  "$HOME/.local/share/omarchy/bin"
   "$HOME/.local/lib/simutil"
   "$HOME/.console-ninja/.bin"
   "$HOME/.opencode/bin"
@@ -258,7 +257,6 @@ alias nrc='n ~/.config/niri/config.kdl'
 alias nwc='n ~/.config/waybar'
 alias nswc='n ~/.config/swaync'
 alias nhc='n ~/.config/hypr'
-alias noc='n ~/.local/share/omarchy'
 alias nss='n ~/.config/starship.toml'
 alias nzc='n ~/.zshrc'
 

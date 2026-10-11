@@ -1,0 +1,100 @@
+#!/usr/bin/env bash
+# Laptop hardware & system info
+
+[[ $EUID -eq 0 ]] || exec sudo "$0" "$@"
+
+d=/sys/class/dmi/id
+r() { cat "$d/$1" 2>/dev/null; }
+f() { cat "$1" 2>/dev/null; }
+p() { [[ -n ${2// /} ]] && printf '  %-16s %s\n' "$1:" "$2"; }
+h() { printf '\n\e[1;34m%s\e[0m\n' "$1"; }
+
+# ── System ──────────────────────────────────────────
+vendor=$(r sys_vendor)
+if [[ $vendor == LENOVO ]]; then
+  name=$(r product_version)
+  num=$(r product_name)
+else
+  name=$(r product_name)
+  num=$(r product_sku)
+fi
+
+h "System"
+p "Manufacturer" "$vendor"
+p "Model Name" "$name"
+p "Model Number" "$num"
+p "Serial Number" "$(r product_serial)"
+p "Family" "$(r product_family)"
+p "UUID" "$(r product_uuid)"
+
+# ── BIOS / Board ────────────────────────────────────
+h "BIOS / Motherboard"
+p "BIOS Vendor" "$(r bios_vendor)"
+p "BIOS Version" "$(r bios_version)"
+p "BIOS Date" "$(r bios_date)"
+p "Board" "$(r board_vendor) $(r board_name)"
+p "Board Serial" "$(r board_serial)"
+
+# ── CPU ─────────────────────────────────────────────
+h "CPU"
+p "Model" "$(lscpu | sed -n 's/^Model name: *//p' | head -1)"
+p "Cores/Threads" "$(lscpu -p=core,socket | grep -v '^#' | sort -u | wc -l) / $(nproc)"
+mhz=$(lscpu | sed -n 's/^CPU max MHz: *//p' | cut -d. -f1)
+[[ -n $mhz ]] && p "Max Freq" "$mhz MHz"
+
+# ── Memory ──────────────────────────────────────────
+h "Memory"
+p "Total" "$(free -h | awk '/^Mem:/{print $2}')"
+if command -v dmidecode >/dev/null; then
+  dmidecode -t 17 | awk 'BEGIN{RS=""} /Memory Device/ && /\tSize: [0-9]/ {
+    s=t=sp=l=m=""; n=split($0,a,"\n")
+    for(i=1;i<=n;i++){ split(a[i],kv,": "); k=kv[1]; gsub(/^[ \t]+/,"",k); v=kv[2]
+      if(k=="Size")s=v; else if(k=="Type")t=v; else if(k=="Speed")sp=v
+      else if(k=="Locator")l=v; else if(k=="Manufacturer")m=v }
+    printf "  %-16s %s %s %s (%s)\n", l":", s, t, sp, m }'
+fi
+
+# ── GPU / Network cards ─────────────────────────────
+if command -v lspci >/dev/null; then
+  h "GPU"
+  lspci | grep -Ei 'vga|3d|display' | cut -d: -f3- | sed 's/^ */  /'
+  h "Network Cards"
+  lspci | grep -Ei 'network|ethernet' | cut -d: -f3- | sed 's/^ */  /'
+fi
+
+# ── Storage ─────────────────────────────────────────
+h "Storage"
+lsblk -dno NAME,SIZE,MODEL,SERIAL -e7 | grep -v '^zram' | sed 's/^/  /'
+p "Root (/) used" "$(df -h / | awk 'NR==2{print $3" / "$2" ("$5")"}')"
+
+# ── Battery ─────────────────────────────────────────
+for b in /sys/class/power_supply/BAT*; do
+  [[ -d $b ]] || continue
+  h "Battery (${b##*/})"
+  full=$(f "$b/energy_full")
+  [[ -z $full ]] && full=$(f "$b/charge_full")
+  design=$(f "$b/energy_full_design")
+  [[ -z $design ]] && design=$(f "$b/charge_full_design")
+  p "Model" "$(f "$b/manufacturer") $(f "$b/model_name")"
+  p "Status" "$(f "$b/status")"
+  p "Charge" "$(f "$b/capacity")%"
+  [[ -n $full && -n $design && $design -gt 0 ]] && p "Health" "$((full * 100 / design))%"
+  p "Cycles" "$(f "$b/cycle_count")"
+done
+
+# ── Network (MAC) ───────────────────────────────────
+h "MAC Addresses"
+for i in /sys/class/net/*; do
+  n=${i##*/}
+  [[ $n == lo ]] && continue
+  p "$n" "$(f "$i/address")"
+done
+
+# ── OS ──────────────────────────────────────────────
+h "OS"
+. /etc/os-release
+p "Distro" "$PRETTY_NAME"
+p "Kernel" "$(uname -r)"
+p "Hostname" "$(f /proc/sys/kernel/hostname)"
+p "Uptime" "$(uptime -p | sed 's/^up //')"
+echo

@@ -1,0 +1,23 @@
+[Unit]
+Description=heliscroll - spring-physics mouse wheel
+Documentation=file:%h/coding/heliscroll/README.md
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+# Change --device if you swap mice; `heliscroll --list` shows the options.
+# The by-id path is stable across reboots, unlike /dev/input/eventN.
+# Terminals are bypassed by default (see --bypass); they scroll by whole lines
+# and a spring reaches them as a slow dribble of notches.
+ExecStart=%h/.local/bin/heliscroll \
+  --device /dev/input/by-id/usb-INSTANT_USB_GAMING_MOUSE-event-mouse \
+  --focus-cmd %h/.local/bin/heliscroll-focus-niri
+Restart=always
+RestartSec=5
+# The grab dies with the process, so a crash always returns the mouse.
+KillSignal=SIGTERM
+TimeoutStopSec=3
+
+[Install]
+WantedBy=graphical-session.target

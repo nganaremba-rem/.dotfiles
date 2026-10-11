@@ -1,0 +1,28 @@
+[Unit]
+# xdg-desktop-portal.service is Type=dbus. An early client activates it on the
+# bus well before graphical-session.target is reached (measured 2026-08-03:
+# portal at 21:57:59.601, graphical-session.target at 21:58:00.564), and D-Bus
+# activation ignores the unit's After=graphical-session.target. So the frontend
+# starts with XDG_CURRENT_DESKTOP unset, cannot match any <desktop>-portals.conf,
+# and falls back to the generic ~/.config/xdg-desktop-portal/portals.conf.
+#
+# On niri that meant ScreenCast was served by the wlr backend, which advertises
+# AvailableSourceTypes=1 - monitors only, no window capture - so Discord could
+# not share a window while browsers sharing a whole screen still worked.
+#
+# Restarting the frontend once the session is up makes it inherit the imported
+# environment and re-read config, so it picks the correct <desktop>-portals.conf.
+# Deliberately compositor-agnostic: this does the right thing under niri, mango,
+# hyprland or anything else, rather than hardcoding a desktop name.
+Description=Restart xdg-desktop-portal once the session environment exists
+After=graphical-session.target
+PartOf=graphical-session.target
+Requisite=graphical-session.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/systemctl --user restart xdg-desktop-portal.service
+RemainAfterExit=yes
+
+[Install]
+WantedBy=graphical-session.target
