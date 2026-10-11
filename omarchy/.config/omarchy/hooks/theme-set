@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# After a theme change: give niri the theme's border colours, but only while
+# the shell panel is in use. With DMS running, DMS owns the borders.
+
+if [[ $(panel-mode) == "shell" ]]; then
+  cp "$HOME/.local/state/omarchy/current/theme/niri.kdl" "$HOME/.config/niri/theme.kdl"
+fi

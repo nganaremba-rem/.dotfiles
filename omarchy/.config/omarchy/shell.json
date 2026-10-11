@@ -1,0 +1,162 @@
+{
+  "bar": {
+    "centerAnchor": "omarchy.clock",
+    "layout": {
+      "left": [
+        {
+          "id": "omarchy.menu"
+        },
+        {
+          "id": "omarchy.workspaces"
+        },
+        {
+          "id": "omarchy.spacer",
+          "size": 12
+        },
+        {
+          "id": "cpu",
+          "type": "command",
+          "exec": "bar-stat cpu 3",
+          "onClick": "omarchy-launch-tui remtop",
+          "tooltip": "CPU usage",
+          "fontSize": 14,
+          "stream": true
+        },
+        {
+          "id": "memory",
+          "type": "command",
+          "exec": "bar-stat mem 5",
+          "onClick": "omarchy-launch-tui remtop",
+          "tooltip": "Memory in use",
+          "fontSize": 14,
+          "stream": true
+        },
+        {
+          "id": "color-picker",
+          "type": "command",
+          "text": "󰈊",
+          "fontSize": 15,
+          "onClick": "pkill hyprpicker || hyprpicker -a",
+          "tooltip": "Pick a colour"
+        },
+        {
+          "id": "screencast",
+          "type": "command",
+          "fontSize": 15,
+          "exec": "bar-stat screencast",
+          "stream": true
+        },
+        {
+          "id": "camera",
+          "type": "command",
+          "fontSize": 15,
+          "exec": "bar-stat camera 2",
+          "stream": true
+        },
+        {
+          "id": "omarchy.microphone"
+        }
+      ],
+      "center": [
+        {
+          "id": "net-speed",
+          "type": "command",
+          "exec": "bar-stat net 2",
+          "tooltip": "Network speed",
+          "fontSize": 14,
+          "stream": true
+        },
+        {
+          "id": "omarchy.indicators"
+        },
+        {
+          "id": "omarchy.clock",
+          "format": "ddd d MMM HH:mm",
+          "formatAlt": "d MMMM 'W'ww yyyy",
+          "verticalFormat": "HH\n—\nmm",
+          "birthYear": 0,
+          "lifeExpectancy": 100
+        },
+        {
+          "id": "omarchy.elsewhen",
+          "zones": "Kolkata|Asia/Kolkata, Tokyo|Asia/Tokyo, Los Angeles|America/Los_Angeles, New York|America/New_York, London|Europe/London"
+        },
+        {
+          "id": "omarchy.weather"
+        },
+        {
+          "id": "omarchy.media"
+        },
+        {
+          "id": "omarchy.system-update"
+        }
+      ],
+      "right": [
+        {
+          "id": "omarchy.keyboard-layout"
+        },
+        {
+          "id": "omarchy.tray"
+        },
+        {
+          "id": "vpn",
+          "type": "command",
+          "exec": "s=$(warp-cli status 2>/dev/null); case \"$s\" in *'Status update: Connected'*) i='' c=green t=Connected ;; *Connecting*) i='󰖂' c=yellow t=Connecting ;; *Disconnected*) i='' c=red t=Disconnected ;; *) i='󰅖' c=grey t=Unknown ;; esac; printf '{\"text\":\"%s\",\"color\":\"%s\",\"tooltip\":\"WARP: %s\"}' \"$i\" \"$c\" \"$t\"",
+          "interval": 5,
+          "tooltip": "WARP",
+          "onClick": "warp-cli connect",
+          "onRightClick": "warp-cli disconnect",
+          "fontSize": 25
+        },
+        {
+          "id": "omarchy.agents"
+        },
+        {
+          "id": "clipboard",
+          "type": "command",
+          "text": "󰅇",
+          "fontSize": 15,
+          "onClick": "omarchy-shell shell summon omarchy.clipboard",
+          "tooltip": "Clipboard history"
+        },
+        {
+          "id": "notifications",
+          "type": "command",
+          "text": "󰂚",
+          "fontSize": 15,
+          "onClick": "omarchy-shell notifications showHistory",
+          "onRightClick": "omarchy-shell notifications dismissAll",
+          "tooltip": "Notifications (right click: dismiss all)"
+        },
+        {
+          "id": "omarchy.bluetooth"
+        },
+        {
+          "id": "omarchy.network"
+        },
+        {
+          "id": "omarchy.audio"
+        },
+        {
+          "id": "omarchy.monitor"
+        },
+        {
+          "id": "omarchy.power",
+          "showPercentage": true
+        }
+      ]
+    },
+    "position": "top",
+    "transparent": false
+  },
+  "disabledPlugins": [
+    "omarchy.polkit",
+    "omarchy.remote-session"
+  ],
+  "idle": {
+    "lock": 300,
+    "screensaver": 150
+  },
+  "plugins": [],
+  "version": 1
+}
