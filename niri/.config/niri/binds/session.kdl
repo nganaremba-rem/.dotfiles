@@ -5,14 +5,16 @@ binds {
     Mod+Shift+Slash { show-hotkey-overlay; }
 
     // ── 🔒 Lock & power ──────────────────────────────────────────────────────
-    Alt+L           hotkey-overlay-title="🔒 Lock screen (hyprlock)" { spawn-sh "pgrep -x hyprlock >/dev/null || hyprlock"; }
+    Alt+L           hotkey-overlay-title="🔒 Lock screen"            { spawn "oq" "omarchy-system-lock"; }
     Mod+Ctrl+Alt+L  hotkey-overlay-title="💤 Suspend"               { spawn "systemctl" "suspend"; }
     Mod+Delete      hotkey-overlay-title="⏻ Power menu"             { spawn "wlogout"; }
     Mod+Shift+P     { power-off-monitors; }  // 🌑 any input wakes them
     Ctrl+Alt+Delete { quit; }                // 🚪 asks for confirmation
 
     // ── ♿ Screen reader ─────────────────────────────────────────────────────
-    Super+Alt+S allow-when-locked=true hotkey-overlay-title=null { spawn-sh "pkill orca || exec orca"; }
+    // Screen reader toggle (niri default). Off: orca is not installed, and this key is the
+    // scratchpad stash in binds/extras.kdl. The first bind on a key wins, so this one shadowed it.
+    // Super+Alt+S allow-when-locked=true hotkey-overlay-title=null { spawn-sh "pkill orca || exec orca"; }
 
     // ── 🛟 Escape hatch: if an app (remote desktop, KVM) grabbed all shortcuts,
     // this still toggles the inhibitor so it can't hold the session hostage.

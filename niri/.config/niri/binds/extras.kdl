@@ -1,0 +1,23 @@
+// 🧰 Extras: scratchpad, universal clipboard, searchable keybinds.
+// Scripts live in ~/.config/niri/scripts.
+
+binds {
+    // ── 📥 Scratchpad ────────────────────────────────────────────────────────
+    Mod+Alt+S       hotkey-overlay-title="📥 Send window to scratchpad"  { spawn "~/.config/niri/scripts/scratchpad" "stash"; }
+    Mod+Grave       hotkey-overlay-title="📥 Toggle scratchpad"          { spawn "~/.config/niri/scripts/scratchpad" "toggle"; }
+
+    // ── 📋 Universal copy / paste (Ctrl+Shift+C/V in terminals, Ctrl+C/V elsewhere) ──
+    Mod+C           hotkey-overlay-title="📋 Copy"                       { spawn "~/.config/niri/scripts/uclip" "copy"; }
+    Mod+V           hotkey-overlay-title="📋 Paste"                      { spawn "~/.config/niri/scripts/uclip" "paste"; }
+
+    // ── ⌨️ Every keybind, searchable ─────────────────────────────────────────
+    Mod+F1          hotkey-overlay-title="⌨️ Search keybinds"             { spawn "oq" "omarchy-menu-keybindings"; }
+
+    // ── 🧰 Menu shortcuts ────────────────────────────────────────────────────
+    Mod+Alt+R            hotkey-overlay-title="⏰ Set reminder"            { spawn "oq" "omarchy-menu" "toggle" "reminder-set"; }
+    Mod+Ctrl+Period      hotkey-overlay-title="🎞️ Transcode a file"        { spawn "oq" "omarchy-transcode"; }
+    Mod+Ctrl+Shift+Space hotkey-overlay-title="🎨 Theme switcher"          { spawn "oq" "omarchy-menu" "toggle" "theme"; }
+    Mod+Ctrl+Space       hotkey-overlay-title="🖼️ Background switcher"     { spawn "oq" "omarchy-menu" "toggle" "background"; }
+    Mod+Ctrl+S           hotkey-overlay-title="📤 Share"                   { spawn "oq" "omarchy-menu" "toggle" "share"; }
+    Mod+Ctrl+Alt+P       hotkey-overlay-title="🧱 Switch panel (DMS ↔ shell bar)" { spawn "oq" "panel-switch" "toggle"; }
+}

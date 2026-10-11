@@ -38,6 +38,7 @@ include "binds/media.kdl"
 include "binds/screenshots.kdl"
 include "binds/session.kdl"
 include "binds/alt-tab.kdl"
+include "binds/extras.kdl"
 
 // ── 🎨 DankMaterialShell (generated — keep last) ────────────────────────────
 // 🖥️ Outputs: dms/outputs.kdl is the single source of truth; `dms greeter sync`
@@ -52,3 +53,9 @@ include optional=true "dms/outputs.kdl"
 include optional=true "dms/cursor.kdl"
 include optional=true "dms/windowrules.kdl"
 include "dms/binds.kdl"
+
+// 🎨 Theme border colours while the shell panel is in use (empty with DMS).
+include optional=true "theme.kdl"
+
+// 🎚️ Menu appearance toggles (animations, gaps, corners): generated, keep last.
+include optional=true "toggles.kdl"

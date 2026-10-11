@@ -16,12 +16,14 @@ binds {
     Mod+Alt+B            hotkey-overlay-title="⌨️ Vim browser (vimb)"        { spawn-sh "$NIRI_VIM_BROWSER"; }
 
     // ── 🔎 Launchers & pickers ───────────────────────────────────────────────
-    Mod+Space            hotkey-overlay-title="🔎 App launcher (DMS)"        { spawn-sh "$NIRI_LAUNCHER"; }
+    Mod+Space            hotkey-overlay-title="🔎 Menu (apps, setup, system…)" { spawn-sh "$NIRI_LAUNCHER"; }
+    Mod+Shift+Space      hotkey-overlay-title="🔎 App launcher (DMS)"        { spawn-sh "dms ipc call spotlight toggle"; }
     Alt+Space            hotkey-overlay-title="🚀 App launcher (rofi)"       { spawn-sh "rofi -show drun"; }
     Mod+Shift+Return     hotkey-overlay-title="🚀 App launcher (rofi)"       { spawn-sh "rofi -show drun"; }
-    Mod+Alt+Space        hotkey-overlay-title="🪟 Open windows"               { spawn-sh "rofi -show window"; }
+    Mod+Alt+Space        hotkey-overlay-title="🪟 Open windows"               { spawn-sh "dms ipc call spotlight openQuery '!'"; }
     Alt+W                hotkey-overlay-title="🪟 Open windows"               { spawn-sh "rofi -show window"; }
-    Mod+Ctrl+E           hotkey-overlay-title="😀 Emoji picker"               { spawn-sh "rofi -show emoji"; }
+    Mod+Ctrl+E           hotkey-overlay-title="😀 Emoji picker"               { spawn "oq" "omarchy-menu-emoji"; }
+    Mod+Ctrl+G           hotkey-overlay-title="🔣 Icon picker (Nerd Font)"    { spawn "oq" "omarchy-shell" "shell" "summon" "omarchy.emojis" "{\"set\":\"icons\"}"; }
     Mod+P                hotkey-overlay-title="🔍 Web search"                 { spawn-sh "~/.config/rofi/rofi/scripts/websearch"; }
 
     // ── 🧰 Terminal tools ────────────────────────────────────────────────────
@@ -36,9 +38,9 @@ binds {
 
     // ── 🎨 DankMaterialShell ─────────────────────────────────────────────────
     Mod+S                hotkey-overlay-title="⚙️ DMS settings"               { spawn "dms" "ipc" "call" "settings" "focusOrToggle"; }
-    Mod+V                hotkey-overlay-title="📋 Clipboard history"          { spawn "dms" "ipc" "call" "clipboard" "toggle"; }
+    Mod+Ctrl+V           hotkey-overlay-title="📋 Clipboard history"          { spawn "dms" "ipc" "call" "clipboard" "toggle"; }  // was Mod+V, now universal paste
     Mod+Ctrl+Alt+N       hotkey-overlay-title="🔔 Notification center"        { spawn "dms" "ipc" "call" "notifications" "toggle"; }
-    Mod+Ctrl+Alt+B       hotkey-overlay-title="🖼️ Wallpapers"                 { spawn "dms" "ipc" "call" "dash" "toggle" "wallpaper"; }
+    Mod+Ctrl+Alt+B       hotkey-overlay-title="🖼️ Wallpapers"                 { spawn "oq" "wallpaper-pick"; }
     Mod+Ctrl+W           hotkey-overlay-title="📊 Toggle bar"                 { spawn "dms" "ipc" "call" "bar" "toggle" "index" "0"; }
 
     // ── ✨ Utilities ──────────────────────────────────────────────────────────

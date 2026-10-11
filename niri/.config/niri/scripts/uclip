@@ -1,0 +1,52 @@
+#!/bin/bash
+# Universal copy / paste / cut for Mod+C / Mod+V / Mod+X:
+# Ctrl+Shift+C/V in terminals, plain Ctrl+C/V/X everywhere else.
+#
+# wtype is a virtual keyboard that reports its own modifiers to the focused
+# client, so the Super key still held for the bind is not part of the chord.
+#
+# UCLIP_BACKEND=uinput sends real key codes through ydotool instead. Those also
+# reach X11 and Chromium apps, which ignore wtype's private keymap, but a held
+# Super would join the chord, so it is only for callers with no key held (the
+# emoji and icon pickers).
+case "${1:-}" in
+copy) key=c code=46 ;;
+paste) key=v code=47 ;;
+cut) key=x code=45 ;;
+*)
+    echo "usage: uclip copy|paste|cut" >&2
+    exit 2
+    ;;
+esac
+
+window=$(niri msg -j focused-window)
+app=$(jq -r '.app_id // ""' <<<"$window")
+pid=$(jq -r '.pid // ""' <<<"$window")
+case "$app" in
+foot | footclient | kitty | Alacritty | com.mitchellh.ghostty | org.wezfurlong.wezterm | scratchpad | btop | qsmenu-term | herdr.* | org.omarchy.* | TUI*)
+    terminal=true
+    ;;
+*)
+    terminal=false
+    ;;
+esac
+
+if [[ ${UCLIP_BACKEND:-} == "uinput" ]]; then
+    # Linux key codes: 29 = left Ctrl, 42 = left Shift.
+    if [[ $terminal == true ]]; then
+        exec ydotool key 29:1 42:1 "$code:1" "$code:0" 42:0 29:0
+    fi
+    exec ydotool key 29:1 "$code:1" "$code:0" 29:0
+fi
+
+# X11 apps (through XWayland) ignore wtype's private keymap. xdotool reaches
+# them through the X server instead, and lifts the held Super for the chord.
+# niri reports the XWayland bridge as the owner of every X11 window.
+if [[ -n $pid && $(ps -o comm= -p "$pid") == xwayland-satell* ]]; then
+    exec xdotool key --clearmodifiers "ctrl+$key"
+fi
+
+if [[ $terminal == true ]]; then
+    exec wtype -M ctrl -M shift -k "$key"
+fi
+exec wtype -M ctrl -k "$key"

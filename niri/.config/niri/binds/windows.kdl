@@ -36,6 +36,7 @@ binds {
     Mod+Comma        { consume-window-into-column; }  // take the window on the right
     Mod+Period       { expel-window-from-column; }    // push the bottom window out
     Mod+Shift+Q      { toggle-column-tabbed-display; } // 🗂️ stack column as tabs
+    Mod+Backslash    hotkey-overlay-title="🔀 Toggle split (stack ↔ side by side)" { spawn "~/.config/niri/scripts/toggle-split"; }
 
     // ── ↔️ Size ──────────────────────────────────────────────────────────────
     Mod+R           { switch-preset-column-width; }   // cycle presets (settings/layout.kdl)
@@ -50,7 +51,7 @@ binds {
     Mod+Shift+Equal { set-window-height "+10%"; }
 
     // ── 🎯 Centering ─────────────────────────────────────────────────────────
-    Mod+C      { center-column; }
+    Mod+Ctrl+Alt+C { center-column; }               // was Mod+C, now universal copy (binds/extras.kdl)
     Mod+Ctrl+C { center-visible-columns; }
 
     // ── 🎈 Floating ──────────────────────────────────────────────────────────

@@ -18,7 +18,7 @@ animations {
         spring damping-ratio=0.85 stiffness=423 epsilon=0.0001
     }
     window-movement {
-        spring damping-ratio=0.75 stiffness=323 epsilon=0.0001
+        spring damping-ratio=1.0 stiffness=800 epsilon=0.0001
     }
     window-resize {
         spring damping-ratio=0.85 stiffness=423 epsilon=0.0001

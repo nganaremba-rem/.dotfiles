@@ -1,0 +1,128 @@
+#!/bin/bash
+# Scratchpad for niri, which has no special workspaces. Stashed windows are
+# parked on the empty workspace niri keeps at the bottom of the monitor, and
+# summoned, floating, onto whatever workspace is in view.
+#
+#   scratchpad stash    send the focused window to the scratchpad; on a window
+#                       that is already in it, take it out and tile it again
+#   scratchpad toggle   bring the scratchpad windows here, or send them back
+#
+# The bottom workspace rather than a named one: a named workspace sits at
+# index 1 and would shift every "focus-workspace N" bind on that monitor.
+#
+# niri animates a floating window that is moved, and that is the whole slide:
+# hiding moves the window down to the bottom edge and parks it there, showing
+# moves it back up to where it was. One move per toggle, so nothing overlaps.
+# niri keeps 75 px of a floating window on screen, so the window is parked
+# while it is still moving: it reads as carrying on out of view.
+set -euo pipefail
+
+slide_s=0.12 # how long the slide down shows before the window is parked;
+             # goes with the window-movement spring in settings/animations.kdl
+
+state="${XDG_RUNTIME_DIR:-/tmp}/niri-scratchpad" # lines: <window id> <home y>
+touch "$state"
+
+act() { niri msg action "$@"; }
+
+read -r here index output bottom < <(niri msg -j workspaces | jq -r '
+    (.[] | select(.is_focused)) as $f
+    | "\($f.id) \($f.idx) \($f.output) \([.[] | select(.output == $f.output) | .idx] | max)"')
+
+order=()
+declare -A home=() ws=() ypos=()
+while read -r id y; do
+    [[ -n $id ]] || continue
+    order+=("$id")
+    home[$id]=$y
+done <"$state"
+
+save() {
+    local id
+    for id in "${order[@]}"; do echo "$id ${home[$id]}"; done >"$state"
+}
+
+look() { # where every window is now
+    local id w y
+    ws=() ypos=()
+    while read -r id w y; do
+        ws[$id]=$w
+        ypos[$id]=$y
+    done < <(niri msg -j windows | jq -r '.[] | "\(.id) \(.workspace_id) \(.layout.tile_pos_in_workspace_view[1] // 0 | round)"')
+}
+
+# Workspace indexes are per monitor, so get onto the focused monitor first.
+send() { # <window id> <workspace index>
+    act move-window-to-monitor --id "$1" "$output"
+    act move-window-to-workspace --window-id "$1" --focus false "$2"
+}
+
+hide() { # <window id>...: slide down to the bottom edge, then park
+    local id
+    for id in "$@"; do
+        home[$id]=${ypos[$id]}
+        act move-floating-window --id "$id" -y +10000 # niri stops it at the edge
+    done
+    save
+    sleep "$slide_s"
+    for id in "$@"; do send "$id" "$bottom"; done
+}
+
+show() { # <window id>...: arrive at the bottom edge, slide up to the saved place
+    local id delta
+    for id in "$@"; do send "$id" "$index"; done
+    # Measured, not remembered: niri may have moved a parked window.
+    look
+    for id in "$@"; do
+        [[ -n ${home[$id]} ]] || continue
+        delta=$((home[$id] - ypos[$id]))
+        ((delta == 0)) || act move-floating-window --id "$id" -y "$(printf '%+d' "$delta")"
+    done
+    act focus-window --id "${!#}"
+}
+
+case "${1:-toggle}" in
+stash)
+    id=$(niri msg -j focused-window | jq -r '.id // empty')
+    [[ -n $id ]] || exit 0
+    if [[ -v home[$id] ]]; then
+        # Already a scratchpad window: release it where it is.
+        kept=()
+        for other in "${order[@]}"; do [[ $other == "$id" ]] || kept+=("$other"); done
+        order=("${kept[@]}")
+        save
+        act move-window-to-tiling --id "$id"
+        exit 0
+    fi
+    order+=("$id")
+    act move-window-to-floating --id "$id"
+    look
+    hide "$id"
+    ;;
+toggle)
+    look
+    # Forget stashed windows that were closed.
+    kept=()
+    for id in "${order[@]}"; do [[ -v ws[$id] ]] && kept+=("$id"); done
+    order=("${kept[@]}")
+    save
+
+    if ((${#order[@]} == 0)); then
+        notify-send "Scratchpad is empty" "Mod+Alt+S sends the focused window to it."
+        exit 0
+    fi
+
+    shown=()
+    for id in "${order[@]}"; do [[ ${ws[$id]} == "$here" ]] && shown+=("$id"); done
+
+    if ((${#shown[@]} > 0)); then
+        hide "${shown[@]}"
+    else
+        show "${order[@]}"
+    fi
+    ;;
+*)
+    echo "usage: scratchpad stash|toggle" >&2
+    exit 2
+    ;;
+esac

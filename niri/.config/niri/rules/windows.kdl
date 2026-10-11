@@ -36,6 +36,24 @@ window-rule {
     open-floating false
 }
 
+// 🔎 Menu: every terminal it opens (editor, TUIs, one-shot commands) is foot under
+// its own app-id, which the dms ^foot(client)?$ blur rule doesn't cover.
+window-rule {
+    match app-id=r#"^org\.omarchy\."#
+    match app-id=r#"^TUI(\.|$)"#
+    background-effect {
+        blur true
+    }
+}
+// …and one-shot commands (update, install, about) and small TUIs float.
+window-rule {
+    match app-id=r#"^org\.omarchy\.(terminal|bash|btop|about)$"#
+    match app-id=r#"^TUI\.float$"#
+    open-floating true
+    default-column-width { fixed 900; }
+    default-window-height { fixed 720; }
+}
+
 // 🧮 Small utilities and dialogs: float.
 window-rule {
     match app-id=r#"^org\.gnome\.Calculator$"#
@@ -68,6 +86,43 @@ window-rule {
 window-rule {
     match app-id=r#"firefox$"# title="^Picture-in-Picture$"
     open-floating true
+}
+
+// 🌐 rembrowser: picture-in-picture (gp) floats small in the bottom-right corner;
+// DevTools (gF) opens as a narrow column next to the page.
+window-rule {
+    match app-id="^$" title="^Picture in picture$"
+    open-floating true
+    default-column-width { fixed 480; }
+    default-window-height { fixed 270; }
+    default-floating-position x=24 y=24 relative-to="bottom-right"
+}
+window-rule {
+    match app-id=r#"^rembrowser-devtools$"#
+    default-column-width { proportion 0.4; }
+    open-focused false
+}
+
+// 📝 rembrowser's nvim popups — Ctrl-F command line (rembrowser-cmdedit) and Ctrl-T
+// form editor (rembrowser-editor): float + blur like the other foot windows…
+window-rule {
+    match app-id=r#"^rembrowser-(cmdedit|editor)$"#
+    open-floating true
+    background-effect {
+        blur true
+    }
+}
+// …sized like noice's cmdline: title bar + a line or two…
+window-rule {
+    match app-id=r#"^rembrowser-cmdedit$"#
+    default-column-width { fixed 900; }
+    default-window-height { fixed 110; }
+}
+// …or a whole form field.
+window-rule {
+    match app-id=r#"^rembrowser-editor$"#
+    default-column-width { fixed 1100; }
+    default-window-height { fixed 600; }
 }
 
 // 📝 vimb's nvim popups — Ctrl-F command line (vimb-cmdedit) and Ctrl-T form
