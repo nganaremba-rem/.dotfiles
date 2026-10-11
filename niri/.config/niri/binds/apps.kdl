@@ -14,6 +14,7 @@ binds {
     Mod+B                hotkey-overlay-title="🌐 Browser"                    { spawn-sh "$NIRI_BROWSER --new-window"; }
     Mod+E                hotkey-overlay-title="📁 File manager"               { spawn-sh "$NIRI_FILE_MANAGER"; }
     Mod+Alt+B            hotkey-overlay-title="⌨️ Vim browser (vimb)"        { spawn-sh "$NIRI_VIM_BROWSER"; }
+    Mod+Alt+F            hotkey-overlay-title="  Yazi"                       { spawn-sh "$NIRI_TERMINAL_RUN yazi"; }
 
     // ── 🔎 Launchers & pickers ───────────────────────────────────────────────
     Mod+Space            hotkey-overlay-title="🔎 Menu (apps, setup, system…)" { spawn-sh "$NIRI_LAUNCHER"; }
