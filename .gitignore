@@ -1,6 +1,8 @@
 # Secrets — never commit real keys/tokens. Track only the .example template.
 zsh/.config/zsh/secrets.zsh
 herdr/.config/herdr/*.log
+herdr/.config/herdr/*.sock
+herdr/.config/herdr/release-notes.json
 *.bak*
 *-bak*
 __pycache__/
@@ -15,9 +17,7 @@ atac/.config/atac/*
 qt/.config/qt5ct/colors/matugen.conf
 qt/.config/qt6ct/colors/matugen.conf
 # Folder shortcuts of the file manager name private project folders
-desktop/.config/gtk-3.0/bookmarks
+gtk/.config/gtk-3.0/bookmarks
 # espanso matches hold passwords; never add ~/.config/espanso here
 # The DuckDNS token lives in /usr/local/bin/ddns-update.sh; only the template is tracked
-system/files/usr/local/bin/ddns-update.sh
-# Screen-share permission token: local state
-apps/.config/gpu-screen-recorder/
+setup/system/files/usr/local/bin/ddns-update.sh

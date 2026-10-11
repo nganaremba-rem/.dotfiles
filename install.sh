@@ -2,11 +2,12 @@
 # Bootstrap this setup on a fresh Arch install:
 #   git clone https://github.com/nganaremba-rem/.dotfiles ~/.dotfiles && ~/.dotfiles/install.sh
 #
-# Steps: native packages (pkglist.txt) -> yay + AUR packages (pkglist-aur.txt)
-#        -> zinit -> stow every package in packages.txt (existing files are backed up)
-#        -> desktop shell checkout (shell-checkout/) -> system files (system/, only with WITH_SYSTEM=1).
+# Steps: native packages (setup/pacman.txt) -> yay + AUR packages (setup/aur.txt)
+#        -> zinit -> stow every package in setup/stow-packages.txt (existing files are backed up)
+#        -> desktop shell checkout (setup/shell-checkout/) -> system files (setup/system/, only with WITH_SYSTEM=1).
 # Safe to re-run. Env: SKIP_PACKAGES=1 to only stow, TARGET=dir to stow somewhere else (testing),
-#                      WITH_SYSTEM=1 to also run system/apply.sh (sudo; read system/reference/ first).
+#                      WITH_SYSTEM=1 to also run setup/system/apply.sh (sudo; read setup/system/reference/ first).
+# README.md explains the layout.
 set -euo pipefail
 
 DOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -21,8 +22,8 @@ if [[ -z "${SKIP_PACKAGES:-}" ]]; then
   sudo pacman -Syu --needed git base-devel stow zenity python-gobject libnotify
 
   # Install what the repos still carry; report the rest instead of aborting the transaction.
-  mapfile -t avail < <(comm -12 <(list pkglist.txt | sort -u) <(pacman -Slq | sort -u))
-  mapfile -t gone < <(comm -23 <(list pkglist.txt | sort -u) <(pacman -Slq | sort -u))
+  mapfile -t avail < <(comm -12 <(list setup/pacman.txt | sort -u) <(pacman -Slq | sort -u))
+  mapfile -t gone < <(comm -23 <(list setup/pacman.txt | sort -u) <(pacman -Slq | sort -u))
   sudo pacman -S --needed "${avail[@]}"
   if ((${#gone[@]})); then
     echo "!! Not in the enabled repos (enable [multilib] in /etc/pacman.conf if needed): ${gone[*]}"
@@ -35,7 +36,7 @@ if [[ -z "${SKIP_PACKAGES:-}" ]]; then
     rm -rf "$tmp"
   fi
   # Interactive on purpose: review AUR PKGBUILDs.
-  list pkglist-aur.txt | yay -S --needed -
+  list setup/aur.txt | yay -S --needed -
 fi
 
 zinit_dir="$TARGET/.local/share/zinit/zinit.git"
@@ -59,16 +60,16 @@ while read -r pkg; do
   done < <(stow -n -d "$DOT" -t "$TARGET" "$pkg" 2>&1 | sed -n 's/.* over existing target \(.*\) since .*/\1/p')
   stow -d "$DOT" -t "$TARGET" "$pkg"
   echo "stowed $pkg"
-done < <(list packages.txt)
+done < <(list setup/stow-packages.txt)
 [[ -d "$backup" ]] && echo "Replaced files saved in $backup"
 
 if [[ "$TARGET" == "$HOME" ]]; then
   # Desktop shell behind Mod+Space, the pickers and the bar: upstream + the niri patches.
-  "$DOT/shell-checkout/setup.sh"
+  "$DOT/setup/shell-checkout/setup.sh"
   fc-cache -f >/dev/null 2>&1 || true
   # sysctl, zram, resolved, udev, keyd, own units, enabled services. Asks for sudo.
   if [[ -n "${WITH_SYSTEM:-}" ]]; then
-    "$DOT/system/apply.sh"
+    "$DOT/setup/system/apply.sh"
   fi
 fi
 
@@ -81,12 +82,12 @@ Done. Manual follow-ups:
   - nvim                         # lazy.nvim + mason install plugins/LSPs on first launch
   - remtube (Mod+Alt+Y) is its own project: build/install it from its repo
   - DMS plugins (quickCapture, wallpaperCarousel): reinstall from DMS settings
-  - system half, if not done: WITH_SYSTEM=1 ~/.dotfiles/install.sh (or system/apply.sh), then
-    merge system/reference/ by hand (pacman.conf repos, grub, greetd, ufw rules, Caddyfile)
+  - system half, if not done: WITH_SYSTEM=1 ~/.dotfiles/install.sh (or setup/system/apply.sh), then
+    merge setup/system/reference/ by hand (pacman.conf repos, grub, greetd, ufw rules, Caddyfile)
   - not in this repo, set up again: WireGuard/Tailscale/ZeroTier/WARP logins, DuckDNS token
-    (system/reference/ddns-update.sh.example), espanso matches, browser profiles, ~/.claude
+    (setup/system/reference/ddns-update.sh.example), espanso matches, browser profiles, ~/.claude
   - rembrowser and heliscroll are their own projects: build/install them from their repos
-  - the WARP proxy container: system/reference/docker-warp2.txt
+  - the WARP proxy container: setup/system/reference/docker-warp2.txt
   - ~/.config/omarchy/README.md explains how to change the bar and the menu
   - log out and back in so niri, environment.d and the systemd user units pick everything up
 EOF
