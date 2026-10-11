@@ -1,0 +1,9 @@
+GRUB_DEFAULT=0
+GRUB_TIMEOUT=2
+GRUB_DISTRIBUTOR="Arch"
+GRUB_CMDLINE_LINUX_DEFAULT="quiet splash mem_sleep_default=deep  nmi_watchdog=0 nowatchdog transparent_hugepage=madvise"
+GRUB_CMDLINE_LINUX=""
+
+# enable os-prober so Windows shows
+GRUB_DISABLE_OS_PROBER=false
+

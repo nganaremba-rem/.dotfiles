@@ -1,0 +1,7 @@
+[Unit]
+Description=Daily security check (file integrity + vulnerability scan)
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/security-check.sh
+Nice=15
+IOSchedulingClass=idle

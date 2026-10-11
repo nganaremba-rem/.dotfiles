@@ -1,0 +1,14 @@
+[Unit]
+Description=Ollama Service
+After=network-online.target
+
+[Service]
+ExecStart=/usr/local/bin/ollama serve
+User=ollama
+Group=ollama
+Restart=always
+RestartSec=3
+Environment="PATH=/run/user/1000/fnm_multishells/35783_1775555727050/bin:/home/rem/.local/share/fnm:/home/rem/.local/lib/simutil:/home/rem/.opencode/bin:/home/rem/.local/share/zinit/polaris/bin:/home/rem/go/bin:/home/rem/.pub-cache/bin:/home/rem/.pyenv/shims:/home/rem/.local/share/omarchy/bin/:/home/rem/Android/Sdk/cmdline-tools/latest/bin:/home/rem/Android/Sdk/emulator:/home/rem/Android/Sdk/platform-tools:/home/rem/develop/flutter/bin:/usr/local/go/bin:/home/rem/.local/bin:/home/rem/bin/idea-IC-252.25557.131/bin:/home/rem/.local/share/pnpm:/home/rem/bin:/home/rem/bin/Postman/app:/home/rem/bin/thunderbird:/home/rem/Android/Sdk/platform-tools:/home/rem/Android/Sdk/emulator:/home/rem/.pyenv/bin:/home/rem/bin/arch:/home/rem/.console-ninja/.bin:/home/rem/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/home/rem/.local/bin:/usr/sbin:/home/rem/.local/bin:/usr/sbin:/home/rem/.local/bin"
+
+[Install]
+WantedBy=default.target

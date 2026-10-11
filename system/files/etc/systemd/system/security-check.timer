@@ -1,0 +1,8 @@
+[Unit]
+Description=Run the daily security check
+[Timer]
+OnCalendar=daily
+Persistent=true
+RandomizedDelaySec=15min
+[Install]
+WantedBy=timers.target

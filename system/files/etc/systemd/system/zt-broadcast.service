@@ -1,0 +1,12 @@
+[Unit]
+Description=Route LAN broadcast via ZeroTier
+After=zerotier-one.service
+Wants=zerotier-one.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/sh -c 'for i in $(seq 60); do IF=$(ip -o link | grep -o "zt[a-z0-9]*" | head -1); [ -n "$IF" ] && ip route replace 255.255.255.255/32 dev $IF && exit 0; sleep 1; done; exit 1'
+
+[Install]
+WantedBy=multi-user.target

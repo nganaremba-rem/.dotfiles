@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Template: the real script holds the DuckDNS token and is not in this repo.
+# Copy to /usr/local/bin/ddns-update.sh (chmod 700, root) and fill in TOKEN.
+DOMAIN="remsharma"
+TOKEN="<duckdns token>"
+
+IP=$(ip -6 addr show scope global | grep -oP "(?<=inet6 )[0-9a-f:]+(?=/64)" | head -1)
+[ -z "$IP" ] && exit 0
+
+curl -fsS "https://www.duckdns.org/update?domains=$DOMAIN&token=$TOKEN&ipv6=$IP"

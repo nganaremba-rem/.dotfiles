@@ -1,0 +1,9 @@
+[Trigger]
+Operation = Upgrade
+Type = Package
+Target = dms-shell
+
+[Action]
+Description = NOTE: DMS shell is forked via DMS_SHELL_DIR - run 'dms-resync.sh' to rebuild the fork
+When = PostTransaction
+Exec = /usr/bin/echo ">>> dms-shell upgraded. Your forked UI is now stale. Run: dms-resync.sh"

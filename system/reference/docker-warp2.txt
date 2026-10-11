@@ -1,0 +1,1 @@
+docker run -d --name warp2 --restart unless-stopped --cap-add NET_ADMIN --device /dev/net/tun -p 127.0.0.1:1080:1080 -e WARP_SLEEP=2 --health-interval 60s -v warp2-data:/var/lib/cloudflare-warp caomingjun/warp

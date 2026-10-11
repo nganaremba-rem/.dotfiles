@@ -1,0 +1,10 @@
+[Unit]
+Description=Allow WireGuard (udp/4500) through Cloudflare WARP firewall
+After=warp-svc.service
+
+[Service]
+ExecStart=/usr/local/bin/warp-allow-wg.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

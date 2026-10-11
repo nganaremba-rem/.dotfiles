@@ -1,0 +1,17 @@
+app-dev.lizardbyte.app.Sunshine.service
+appimagelauncherd.service
+espanso.service
+fcitx5-default-us.service
+foot-server.socket
+gnome-keyring-daemon.socket
+p11-kit-server.socket
+pipewire-pulse.service
+pipewire-pulse.socket
+pipewire.service
+pipewire.socket
+swayosd-server.service
+voxtype.service
+wireplumber.service
+xdg-desktop-portal-reload.service
+xdg-user-dirs.service
+ydotool.service

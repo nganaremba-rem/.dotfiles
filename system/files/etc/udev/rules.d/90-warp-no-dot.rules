@@ -1,0 +1,6 @@
+# WARP's DNS proxy (127.0.2.2/3) speaks plain DNS on :53 only, but the global
+# DNSOverTLS=yes in /etc/systemd/resolved.conf.d/dns.conf makes resolved use DoT
+# (:853) on every link -> lookups time out -> warp-cli stuck at connectivity checks.
+# WARP recreates the interface each connect, so turn DoT off for it on every add.
+# Retry loop: resolved may not have registered the new link yet when udev fires.
+ACTION=="add", SUBSYSTEM=="net", KERNEL=="CloudflareWARP", RUN+="/bin/sh -c 'for i in 1 2 3 4 5 6 7 8 9 10; do /usr/bin/resolvectl dnsovertls %k no && exit 0; sleep 0.5; done'"

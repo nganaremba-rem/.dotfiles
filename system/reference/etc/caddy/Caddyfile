@@ -1,0 +1,38 @@
+remsharma.duckdns.org {
+    log {
+        output file /var/log/caddy/access.log {
+            roll_size 10MB
+            roll_keep 5
+        }
+        format json
+    }
+
+
+    handle /bags/* {
+        uri strip_prefix /bags
+        root * "/home/rem/non official work/Kouna bag Images"
+        file_server browse
+    }
+
+    redir /games /games/
+
+    handle /games/* {
+        reverse_proxy localhost:5010
+    }
+
+
+    # Sana Gold Bill: Next.js in Docker on 127.0.0.1:8080 (~/coding/JS/gold-bill).
+    # The app is built with BASE_PATH=/gold, so the prefix is passed through, not stripped.
+    @gold path /gold /gold/*
+    handle @gold {
+        reverse_proxy 127.0.0.1:8080
+    }
+
+    # Portfolio. Range requests are ignored here (whole files, 200 OK) so link-preview crawlers
+    # like WhatsApp get the same plain replies as /gold, where previews work. Files are small.
+    handle {
+        request_header -Range
+        root * /srv/www
+        file_server
+    }
+}

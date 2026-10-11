@@ -1,0 +1,9 @@
+[Trigger]
+Operation = Upgrade
+Type = Package
+Target = wireplumber
+
+[Action]
+Description = NOTE: WirePlumber autoswitch script is overridden in ~/.local/share - re-apply the 30s fix
+When = PostTransaction
+Exec = /usr/bin/echo ">>> wireplumber upgraded. Your 30s Bluetooth autoswitch fix is now stale. Step 1: run 'wp-autoswitch-resync' as your user (not sudo). Step 2: turn the headset off and on."
