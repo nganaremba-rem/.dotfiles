@@ -1,6 +1,14 @@
 {
   "lockfileVersion": 1,
   "plugins": {
+    "codeIsland": {
+      "repo": "https://github.com/payprays/codeIsland-dms",
+      "commit": "f6143cecc61c5edd9c31bf4862ce48423fbdc975"
+    },
+    "niriWindows": {
+      "repo": "https://github.com/rochacbruno/DankNiriWindows",
+      "commit": "411d5ee9f7707029f4c12c824ec3b24ca6756a0d"
+    },
     "quickCapture": {
       "repo": "https://github.com/hthienloc/dms-quick-capture",
       "commit": "fa0a212edb9794326d2606e447c42a0bb218c56c"

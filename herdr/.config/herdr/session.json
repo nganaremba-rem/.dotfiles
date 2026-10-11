@@ -6,9 +6,9 @@
       "custom_name": null,
       "identity_cwd": "/home/rem/work/DPS/KRT_DPS",
       "public_pane_numbers": {
-        "1": 1,
+        "2": 2,
         "3": 3,
-        "2": 2
+        "1": 1
       },
       "next_public_pane_number": 33,
       "public_tab_numbers": [
@@ -138,9 +138,9 @@
       "identity_cwd": "/home/rem/coding/cdn-lab",
       "public_pane_numbers": {
         "7": 1,
-        "10": 4,
         "8": 5,
-        "9": 3
+        "9": 3,
+        "10": 4
       },
       "next_public_pane_number": 7,
       "public_tab_numbers": [
@@ -181,6 +181,9 @@
             }
           },
           "panes": {
+            "7": {
+              "cwd": "/home/rem/coding/cdn-lab"
+            },
             "8": {
               "cwd": "/home/rem/coding/cdn-lab"
             },
@@ -188,9 +191,6 @@
               "cwd": "/home/rem/coding/cdn-lab"
             },
             "9": {
-              "cwd": "/home/rem/coding/cdn-lab"
-            },
-            "7": {
               "cwd": "/home/rem/coding/cdn-lab"
             }
           },
@@ -206,11 +206,11 @@
       "custom_name": "MCP Learning",
       "identity_cwd": "/home/rem/coding/mcp-learning",
       "public_pane_numbers": {
-        "12": 2,
         "15": 12,
-        "11": 1,
         "14": 9,
-        "13": 3
+        "11": 1,
+        "13": 3,
+        "12": 2
       },
       "next_public_pane_number": 14,
       "public_tab_numbers": [
@@ -244,13 +244,13 @@
             }
           },
           "panes": {
+            "13": {
+              "cwd": "/home/rem/coding/mcp-learning"
+            },
             "12": {
               "cwd": "/home/rem/coding/mcp-learning"
             },
             "11": {
-              "cwd": "/home/rem/coding/mcp-learning"
-            },
-            "13": {
               "cwd": "/home/rem/coding/mcp-learning"
             }
           },
@@ -406,8 +406,8 @@
       "custom_name": "AI Learning",
       "identity_cwd": "/home/rem/coding/learning-ai",
       "public_pane_numbers": {
-        "21": 5,
-        "20": 1
+        "20": 1,
+        "21": 5
       },
       "next_public_pane_number": 6,
       "public_tab_numbers": [
@@ -482,9 +482,9 @@
       "custom_name": "gold-calc",
       "identity_cwd": "/home/rem/coding/JS/gold-bill",
       "public_pane_numbers": {
-        "25": 3,
         "24": 2,
-        "23": 1
+        "23": 1,
+        "25": 3
       },
       "next_public_pane_number": 4,
       "public_tab_numbers": [
@@ -570,7 +570,7 @@
                 "source": "herdr:claude",
                 "agent": "claude",
                 "kind": "id",
-                "value": "b5ed9886-3c24-4834-a705-89a450678865"
+                "value": "c53e8d50-99b7-4824-993e-386bc856775b"
               }
             }
           },
@@ -582,8 +582,8 @@
       "active_tab": 0
     }
   ],
-  "active": 1,
-  "selected": 1,
+  "active": 10,
+  "selected": 10,
   "sidebar_width": null,
   "sidebar_section_split": null,
   "collapsed_space_keys": []

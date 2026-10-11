@@ -141,3 +141,8 @@ set notification=ask
 set geolocation=never
 # heliscroll is off; if you enable it, set this off so two springs don't stack
 set smooth-scrolling=on
+
+# WebKitGTK 2.54.1 aborts vimb on any window.open/_blank popup (empty
+# optional<WindowFeatures> assert). Open popups in the current tab instead.
+# Drop this once webkitgtk-6.0 > 2.54.1 fixes it.
+set prevent-newwindow=true
