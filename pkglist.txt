@@ -38,6 +38,7 @@ caddy
 caligula
 capstone
 castxml
+cef
 chafa
 chromaprint
 cliphist
@@ -465,7 +466,6 @@ qt5ct
 qt6-wayland
 qt6ct
 quickshell
-qutebrowser
 raptor
 rasqal
 rclone
