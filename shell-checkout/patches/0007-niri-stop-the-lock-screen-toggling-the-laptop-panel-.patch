@@ -1,0 +1,91 @@
+From d5d9bdd04e525dad4fd9233d6af96a773978cfbc Mon Sep 17 00:00:00 2001
+From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
+Date: Sun, 11 Oct 2026 18:10:20 +0530
+Subject: [PATCH 07/18] niri: stop the lock screen toggling the laptop panel on
+ every wake
+
+The upstream clamshell script runs on each wake, including every key press
+on the lock screen, and called the monitor-internal stand-in with 'recover'.
+The stand-in ignored its argument and toggled the panel, so eDP-1 flapped
+off and on while the password was typed. clamshell is now a no-op on niri
+(niri handles the lid itself) and monitor-internal honours on/off/toggle.
+omarchy-system-lock uses hyprlock in DMS mode, matching swayidle there.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ niri/bin/omarchy-hyprland-monitor-clamshell |  6 +++++
+ niri/bin/omarchy-hyprland-monitor-internal  | 30 ++++++++++++++++-----
+ niri/bin/omarchy-system-lock                |  5 ++--
+ 3 files changed, 33 insertions(+), 8 deletions(-)
+ create mode 100755 niri/bin/omarchy-hyprland-monitor-clamshell
+
+diff --git a/niri/bin/omarchy-hyprland-monitor-clamshell b/niri/bin/omarchy-hyprland-monitor-clamshell
+new file mode 100755
+index 0000000..f1855ad
+--- /dev/null
++++ b/niri/bin/omarchy-hyprland-monitor-clamshell
+@@ -0,0 +1,6 @@
++#!/bin/bash
++
++# niri stand-in: nothing to do. niri turns the laptop panel off and on with the
++# lid by itself. The upstream script rewrites Hyprland monitor rules, and it
++# runs on every wake, including each key press on the lock screen.
++exit 0
+diff --git a/niri/bin/omarchy-hyprland-monitor-internal b/niri/bin/omarchy-hyprland-monitor-internal
+index c462e9f..ab7100b 100755
+--- a/niri/bin/omarchy-hyprland-monitor-internal
++++ b/niri/bin/omarchy-hyprland-monitor-internal
+@@ -1,12 +1,30 @@
+ #!/bin/bash
+ 
+-# niri stand-in: turn the laptop's built-in display off or back on.
++# niri stand-in: turn the laptop panel on or off.
++# Usage: omarchy-hyprland-monitor-internal on|off|toggle|recover
+ 
+ internal=$(niri msg -j outputs | jq -r 'keys[] | select(test("^(eDP|LVDS|DSI)-"))' | head -n1)
+ [[ -n $internal ]] || exit 1
+ 
+-if [[ $(niri msg -j outputs | jq -r --arg o "$internal" '.[$o].logical') == "null" ]]; then
+-  niri msg output "$internal" on
+-else
+-  niri msg output "$internal" off
+-fi
++is_on() {
++  [[ $(niri msg -j outputs | jq -r --arg o "$internal" '.[$o].logical') != "null" ]]
++}
++
++case "${1:-toggle}" in
++  on) niri msg output "$internal" on ;;
++  off) niri msg output "$internal" off ;;
++  toggle)
++    if is_on; then
++      niri msg output "$internal" off
++    else
++      niri msg output "$internal" on
++    fi
++    ;;
++  # Upstream calls this on every wake to undo a Hyprland-side disable flag.
++  # niri keeps no such flag, so there is nothing to recover.
++  recover) ;;
++  *)
++    echo "Usage: $(basename "$0") {on|off|toggle|recover}" >&2
++    exit 1
++    ;;
++esac
+diff --git a/niri/bin/omarchy-system-lock b/niri/bin/omarchy-system-lock
+index 785a176..82c302b 100755
+--- a/niri/bin/omarchy-system-lock
++++ b/niri/bin/omarchy-system-lock
+@@ -1,9 +1,10 @@
+ #!/bin/bash
+ 
+-# niri stand-in: lock with whichever panel is running.
++# niri stand-in: lock with whichever panel is running. One locker per panel:
++# hyprlock (what swayidle uses in DMS mode) or the shell's own lock screen.
+ 
+ if [[ $(panel-mode) == "dms" ]]; then
+-  dms ipc call lock lock
++  pgrep -x hyprlock >/dev/null || exec hyprlock
+ elif [[ -f /etc/pam.d/shell-lock-password ]]; then
+   exec "$OMARCHY_PATH/bin/omarchy-system-lock" "$@"
+ else

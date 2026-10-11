@@ -1,0 +1,39 @@
+From b0e42f02ea8308b7002f7be9784cb82e7b117b55 Mon Sep 17 00:00:00 2001
+From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
+Date: Sun, 11 Oct 2026 22:09:46 +0530
+Subject: [PATCH 14/18] emoji insert: leave the glyph on the clipboard and
+ paste with real key codes
+
+Typing with wtype skipped the clipboard and did nothing in Chromium apps,
+which ignore the private keymap wtype needs. The glyph is now copied with
+every text format on offer and pasted through uclip's uinput backend
+(ydotool), which also reaches X11 clients.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ bin/omarchy-menu-emoji-insert | 14 ++++++++++----
+ 1 file changed, 10 insertions(+), 4 deletions(-)
+
+diff --git a/bin/omarchy-menu-emoji-insert b/bin/omarchy-menu-emoji-insert
+index 92cf4fd..c8e5d03 100755
+--- a/bin/omarchy-menu-emoji-insert
++++ b/bin/omarchy-menu-emoji-insert
+@@ -9,8 +9,14 @@ emoji="${1:-}"
+ 
+ [[ -n $emoji ]] || exit
+ 
+-# niri port: type the glyph itself. Upstream copies it and presses Shift+Insert,
+-# which on this desktop pastes the primary selection (the last text selected
+-# with the mouse) instead of the clipboard.
++# niri port: leave the glyph on the clipboard and paste it with the keys the
++# focused app expects (Ctrl+Shift+V in terminals, Ctrl+V elsewhere). Upstream
++# pressed Shift+Insert, which here pastes the primary selection (the last text
++# selected with the mouse). Typing the glyph with wtype skips the clipboard,
++# and X11 and Chromium apps ignore the private keymap wtype needs, so the
++# paste keys go out as real key codes (uclip's uinput backend).
++# No --type: wl-copy then offers every text format, including the UTF-8 ones
++# terminals and X11 apps ask for; "text/plain" alone made them paste nothing.
++printf '%s' "$emoji" | wl-copy
+ sleep 0.15
+-wtype -- "$emoji"
++UCLIP_BACKEND=uinput "$HOME/.config/niri/scripts/uclip" paste

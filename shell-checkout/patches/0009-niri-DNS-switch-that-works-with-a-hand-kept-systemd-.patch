@@ -1,0 +1,122 @@
+From c83b5dec8ade78c66197db8a775bc7dbe99bbb51 Mon Sep 17 00:00:00 2001
+From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
+Date: Sun, 11 Oct 2026 18:25:18 +0530
+Subject: [PATCH 09/18] niri: DNS switch that works with a hand-kept
+ systemd-resolved setup
+
+Upstream's omarchy-dns re-execs a root helper at /usr/bin/omarchy-dns, which
+only the distro installs, so the network panel's DNS buttons did nothing.
+It would also have rewritten resolved.conf and every NetworkManager
+connection. The stand-in writes one resolved drop-in holding only the
+server list, and removes it again when the chosen provider is what the
+hand-kept config already gives.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ niri/bin/omarchy-dns | 97 ++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 97 insertions(+)
+ create mode 100755 niri/bin/omarchy-dns
+
+diff --git a/niri/bin/omarchy-dns b/niri/bin/omarchy-dns
+new file mode 100755
+index 0000000..ba0584d
+--- /dev/null
++++ b/niri/bin/omarchy-dns
+@@ -0,0 +1,97 @@
++#!/bin/bash
++
++# niri stand-in: show or switch the DNS provider on this machine's own setup.
++# Usage: omarchy-dns [Cloudflare|Google|DHCP|Custom]
++#
++# DNS here is global in systemd-resolved (a hand-kept drop-in with DNS over
++# TLS) and NetworkManager is set to dns=none. Upstream rewrites resolved.conf
++# and every NetworkManager connection, through a root helper that only the
++# distro installs. This writes one drop-in that sorts last and replaces only
++# the server list, so the hand-kept files stay as they are.
++
++set -euo pipefail
++
++DROPIN_DIR=/etc/systemd/resolved.conf.d
++DROPIN=$DROPIN_DIR/zz-menu-dns.conf
++
++servers_for() {
++  case "$1" in
++    Cloudflare) echo "1.1.1.1#cloudflare-dns.com 1.0.0.1#cloudflare-dns.com 2606:4700:4700::1111#cloudflare-dns.com 2606:4700:4700::1001#cloudflare-dns.com" ;;
++    Google) echo "8.8.8.8#dns.google 8.8.4.4#dns.google 2001:4860:4860::8888#dns.google 2001:4860:4860::8844#dns.google" ;;
++  esac
++}
++
++provider_of() {
++  case "$1" in
++    "") echo "DHCP" ;;
++    *1.1.1.1* | *cloudflare-dns.com*) echo "Cloudflare" ;;
++    *8.8.8.8* | *dns.google*) echo "Google" ;;
++    *) echo "Custom" ;;
++  esac
++}
++
++current_provider() {
++  provider_of "$(resolvectl dns 2>/dev/null | sed -n 's/^Global: *//p')"
++}
++
++# What the hand-kept drop-ins give on their own, without ours.
++baseline_provider() {
++  local file servers=""
++  for file in "$DROPIN_DIR"/*.conf; do
++    [[ -e $file && $file != "$DROPIN" ]] || continue
++    servers+=" $(sed -n 's/^DNS=//p' "$file" | tr '\n' ' ')"
++  done
++  provider_of "${servers// /}"
++}
++
++# One polkit prompt; only system binaries run as root. An empty server list
++# removes the drop-in, which returns to the hand-kept configuration.
++apply() {
++  # shellcheck disable=SC2016 # expanded by the root shell, not this one
++  pkexec /usr/bin/sh -c '
++    if [ -n "$1" ]; then
++      printf "# Written by the DNS switch in the menu. Delete to go back to dns.conf.\n[Resolve]\nDNS=\nDNS=%s\n" "$1" >"$2"
++    else
++      rm -f "$2"
++    fi
++    systemctl reload-or-restart systemd-resolved' sh "$1" "$DROPIN"
++}
++
++if (( $# == 0 )); then
++  current_provider
++  exit 0
++fi
++
++case "$1" in
++  Cloudflare | cloudflare | Google | google)
++    provider=${1^}
++    if [[ $(baseline_provider) == "$provider" ]]; then
++      apply ""
++    else
++      apply "$(servers_for "$provider")"
++    fi
++    ;;
++  DHCP | dhcp)
++    omarchy-notification-send -g 󰇖 "DHCP DNS is not available here" \
++      "NetworkManager is set to dns=none, so the router's DNS never reaches the resolver."
++    exit 1
++    ;;
++  Custom | custom)
++    echo "Enter your DNS servers (space-separated, e.g. '192.168.1.1 9.9.9.9#dns.quad9.net'):"
++    read -r servers || servers=""
++    servers=$(xargs <<<"${servers//,/ }")
++    [[ -n $servers ]] || { echo "Error: No DNS servers provided." >&2; exit 1; }
++    for server in $servers; do
++      # The list is written to a root-owned file: accept addresses only.
++      if [[ ! $server =~ ^[0-9A-Fa-f:.]+(#[A-Za-z0-9.-]+)?$ ]]; then
++        echo "Error: '$server' is not an IP address (optionally followed by #hostname)." >&2
++        exit 1
++      fi
++    done
++    apply "$servers"
++    ;;
++  *)
++    echo "Usage: omarchy-dns [Cloudflare|Google|DHCP|Custom]" >&2
++    exit 1
++    ;;
++esac

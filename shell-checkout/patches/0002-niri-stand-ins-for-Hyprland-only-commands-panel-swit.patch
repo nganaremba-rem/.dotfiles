@@ -1,0 +1,759 @@
+From 97332a2314143b3fa8a4a1d98a685bc63c42beb0 Mon Sep 17 00:00:00 2001
+From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
+Date: Sun, 11 Oct 2026 16:23:54 +0530
+Subject: [PATCH 02/18] niri: stand-ins for Hyprland-only commands, panel
+ switch, shell-only themes, local branding
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ ...launch-floating-terminal-with-presentation |  2 +-
+ bin/omarchy-notification-send                 |  2 +-
+ bin/omarchy-show-logo                         |  5 +-
+ bin/omarchy-theme-set                         |  5 +
+ niri/bin/hyprctl                              |  9 ++
+ niri/bin/niri-keybinds                        | 99 +++++++++++++++++++
+ niri/bin/niri-layout-toggle                   | 55 +++++++++++
+ niri/bin/omarchy-hyprland-corners             |  5 +
+ niri/bin/omarchy-hyprland-monitor-internal    | 12 +++
+ niri/bin/omarchy-hyprland-window-close-all    |  7 ++
+ niri/bin/omarchy-hyprland-window-gaps-toggle  |  5 +
+ niri/bin/omarchy-menu-keybindings             | 10 ++
+ niri/bin/omarchy-pkg-add                      | 29 ++++++
+ niri/bin/omarchy-restart-shell                | 11 +++
+ niri/bin/omarchy-system-lock                  | 10 ++
+ niri/bin/omarchy-system-logout                |  8 ++
+ niri/bin/omarchy-theme-bg-set                 | 11 +++
+ niri/bin/omarchy-theme-set                    | 12 +++
+ niri/bin/omarchy-toggle-animations            |  5 +
+ niri/bin/omarchy-toggle-idle                  |  9 ++
+ niri/bin/omarchy-toggle-nightlight            | 10 ++
+ .../bin/omarchy-toggle-notification-silencing |  9 ++
+ niri/bin/panel-mode                           | 11 +++
+ niri/bin/panel-switch                         | 58 +++++++++++
+ shell/plugins/agents/Panel.qml                |  6 +-
+ shell/plugins/bar/Bar.qml                     |  1 +
+ shell/plugins/bar/widgets/Workspaces.qml      | 30 +++++-
+ shell/plugins/menu/BarWidget.qml              |  3 +-
+ shell/services/BrightnessKeys.qml             |  2 +-
+ 29 files changed, 426 insertions(+), 15 deletions(-)
+ create mode 100755 niri/bin/niri-keybinds
+ create mode 100755 niri/bin/niri-layout-toggle
+ create mode 100755 niri/bin/omarchy-hyprland-corners
+ create mode 100755 niri/bin/omarchy-hyprland-monitor-internal
+ create mode 100755 niri/bin/omarchy-hyprland-window-close-all
+ create mode 100755 niri/bin/omarchy-hyprland-window-gaps-toggle
+ create mode 100755 niri/bin/omarchy-menu-keybindings
+ create mode 100755 niri/bin/omarchy-pkg-add
+ create mode 100755 niri/bin/omarchy-restart-shell
+ create mode 100755 niri/bin/omarchy-system-lock
+ create mode 100755 niri/bin/omarchy-system-logout
+ create mode 100755 niri/bin/omarchy-theme-bg-set
+ create mode 100755 niri/bin/omarchy-theme-set
+ create mode 100755 niri/bin/omarchy-toggle-animations
+ create mode 100755 niri/bin/omarchy-toggle-idle
+ create mode 100755 niri/bin/omarchy-toggle-nightlight
+ create mode 100755 niri/bin/omarchy-toggle-notification-silencing
+ create mode 100755 niri/bin/panel-mode
+ create mode 100755 niri/bin/panel-switch
+
+diff --git a/bin/omarchy-launch-floating-terminal-with-presentation b/bin/omarchy-launch-floating-terminal-with-presentation
+index 4497ff0..1d3361e 100755
+--- a/bin/omarchy-launch-floating-terminal-with-presentation
++++ b/bin/omarchy-launch-floating-terminal-with-presentation
+@@ -11,4 +11,4 @@ cmd="$*"
+ # 130 is the user bailing with Ctrl-C; anything else gets the Done/Failed prompt.
+ presentation_script="omarchy-show-logo; $cmd; code=\$?; if (( code != 130 )); then omarchy-show-done \$code; fi"
+ 
+-exec setsid uwsm-app -- xdg-terminal-exec --app-id=org.omarchy.terminal --title=Omarchy -e bash -c "$presentation_script"
++exec setsid uwsm-app -- xdg-terminal-exec --app-id=org.omarchy.terminal --title=Terminal -e bash -c "$presentation_script"
+diff --git a/bin/omarchy-notification-send b/bin/omarchy-notification-send
+index 9e7fd04..4ac91be 100755
+--- a/bin/omarchy-notification-send
++++ b/bin/omarchy-notification-send
+@@ -10,7 +10,7 @@ headline=""
+ description=""
+ glyph=
+ urgency="low"
+-app_name="omarchy-action"
++app_name="desktop"
+ app_icon=""
+ image=
+ expire_timeout=-1
+diff --git a/bin/omarchy-show-logo b/bin/omarchy-show-logo
+index 1d6cfdf..b49ad2a 100755
+--- a/bin/omarchy-show-logo
++++ b/bin/omarchy-show-logo
+@@ -2,8 +2,5 @@
+ 
+ # omarchy:summary=Display the Omarchy logo in the terminal using green color.
+ 
++# Local build: no logo, just a clean terminal.
+ clear
+-echo -e "\033[32m"
+-cat <$OMARCHY_PATH/logo.txt
+-echo -e "\033[0m"
+-echo
+diff --git a/bin/omarchy-theme-set b/bin/omarchy-theme-set
+index 87341ef..ceb3746 100755
+--- a/bin/omarchy-theme-set
++++ b/bin/omarchy-theme-set
+@@ -506,6 +506,11 @@ post_theme_commands=(
+   omarchy-theme-set-keyboard
+ )
+ 
++# niri port: the niri wrapper asks for a shell-only theme change.
++if [[ ${OMARCHY_THEME_APPS:-} == "off" ]]; then
++  post_theme_commands=()
++fi
++
+ if [[ $THEME_HEADLESS != "1" ]]; then
+   # Let the wallpaper and bar finish their reveal before app retints compete
+   # with decoding and the shell's frame rendering. An intro reloads Hyprland
+diff --git a/niri/bin/hyprctl b/niri/bin/hyprctl
+index 36c581d..0ab6572 100755
+--- a/niri/bin/hyprctl
++++ b/niri/bin/hyprctl
+@@ -58,6 +58,15 @@ case "${1:-}" in
+   activeworkspace) niri msg -j workspaces | jq '.[] | select(.is_focused) | {id, name: (.name // "\(.idx)"), monitor: .output}' ;;
+   workspaces) niri msg -j workspaces | jq '[.[] | {id, name: (.name // "\(.idx)"), monitor: .output}]' ;;
+   reload) niri msg action load-config-file ;;
++  # Layout switching on lock is Hyprland's; niri keeps its own per-window layout.
++  switchxkblayout) ;;
++  devices)
++    # Scripts only look for device names (is there a touchpad, a touchscreen).
++    rg -N '^N: Name="(.*)"' -or '$1' /proc/bus/input/devices | jq -Rn '[inputs] |
++      {mice: [.[] | select(test("touchpad|mouse|trackpoint"; "i")) | {name: (ascii_downcase | gsub("[^a-z0-9]+"; "-"))}],
++       touch: [.[] | select(test("touchscreen|touch screen"; "i")) | {name: (ascii_downcase | gsub("[^a-z0-9]+"; "-"))}],
++       keyboards: []}'
++    ;;
+   dispatch)
+     case "${2:-}" in
+       exec) shift 2; niri msg action spawn-sh -- "$*" ;;
+diff --git a/niri/bin/niri-keybinds b/niri/bin/niri-keybinds
+new file mode 100755
+index 0000000..6231d89
+--- /dev/null
++++ b/niri/bin/niri-keybinds
+@@ -0,0 +1,99 @@
++#!/usr/bin/python3
++"""List every active niri keybind as "KEY  description<TAB>action" lines.
++
++niri has no IPC call for binds, so this reads the config: config.kdl, the
++files it includes, and every `binds { }` block in them. Commented-out binds
++are skipped. Used by the keybindings list (Mod+F1).
++"""
++import re
++import sys
++from pathlib import Path
++
++CONFIG = Path.home() / ".config/niri/config.kdl"
++
++
++
++def strip_comments(text):
++    """Drop // comments, leaving // inside strings (URLs) alone."""
++    out = []
++    for line in text.splitlines():
++        quoted = False
++        for i, char in enumerate(line):
++            if char == '"' and (i == 0 or line[i - 1] != "\\"):
++                quoted = not quoted
++            elif not quoted and line.startswith("//", i):
++                line = line[:i]
++                break
++        out.append(line)
++    return "\n".join(out)
++
++
++def config_files(path, seen=None):
++    seen = seen if seen is not None else set()
++    if path in seen or not path.is_file():
++        return
++    seen.add(path)
++    yield path
++    for match in re.finditer(r'^\s*include\s+(?:optional=\w+\s+)?"([^"]+)"', strip_comments(path.read_text()), re.M):
++        yield from config_files(path.parent / match.group(1), seen)
++
++
++def blocks(text, name):
++    """Yield the body of every top-level `name { ... }` block."""
++    for match in re.finditer(rf"^{name}\s*\{{", text, re.M):
++        depth, start = 1, match.end()
++        for i in range(start, len(text)):
++            depth += {"{": 1, "}": -1}.get(text[i], 0)
++            if depth == 0:
++                yield text[start:i]
++                break
++
++
++def binds(body):
++    """Yield (key, title, action) for each bind in a binds block body."""
++    entry = re.compile(r'^\s*([A-Za-z0-9_+]+)((?:\s+[\w-]+=(?:r#"[^#]*"#|"(?:[^"\\]|\\.)*"|\S+))*)\s*\{', re.M)
++    position = 0
++    while match := entry.search(body, position):
++        depth, start = 1, match.end()
++        end = start
++        for end in range(start, len(body)):
++            depth += {"{": 1, "}": -1}.get(body[end], 0)
++            if depth == 0:
++                break
++        action = " ".join(body[start:end].split()).rstrip(";").strip()
++        title = re.search(r'hotkey-overlay-title="((?:[^"\\]|\\.)*)"', match.group(2))
++        yield match.group(1), title.group(1) if title else describe(action), action
++        position = end + 1
++
++
++def describe(action):
++    """`focus-window-up` → "Focus window up"; spawn commands are shown as typed."""
++    name, _, rest = action.partition(" ")
++    if name.startswith("spawn"):
++        return " ".join(part.strip('"') for part in rest.split())
++    return (name.replace("-", " ") + (" " + rest if rest else "")).capitalize()
++
++
++def main():
++    seen = {}
++    for path in config_files(CONFIG):
++        for body in blocks(strip_comments(path.read_text()), "binds"):
++            for key, title, action in binds(body):
++                seen[key] = (title, action)  # a later file overrides, as in niri
++    width = max(map(len, seen), default=0) + 2
++    for key, (title, action) in seen.items():
++        print(f"{key:<{width}}{title}\t{action}")
++
++
++def demo():
++    sample = 'binds {\n  Mod+K { focus-window-up; }\n  // Mod+Q { quit; }\n  Mod+B hotkey-overlay-title="Web" {\n    spawn-sh "x --app=https://a.b";\n  }\n}'
++    found = [bind for body in blocks(strip_comments(sample), "binds") for bind in binds(body)]
++    assert found == [
++        ("Mod+K", "Focus window up", "focus-window-up"),
++        ("Mod+B", "Web", 'spawn-sh "x --app=https://a.b"'),
++    ], found
++    print("ok")
++
++
++if __name__ == "__main__":
++    demo() if sys.argv[1:] == ["--check"] else main()
+diff --git a/niri/bin/niri-layout-toggle b/niri/bin/niri-layout-toggle
+new file mode 100755
+index 0000000..4b3b37c
+--- /dev/null
++++ b/niri/bin/niri-layout-toggle
+@@ -0,0 +1,55 @@
++#!/bin/bash
++
++# niri side of the appearance toggles (animations, window gaps, corners).
++# State is flag files; they are rendered into ~/.config/niri/toggles.kdl, which
++# config.kdl includes last and niri reloads on save.
++#
++#   niri-layout-toggle animations|gaps
++#   niri-layout-toggle corners [theme|sharp|rounded]   no value prints the current one
++
++state="$HOME/.local/state/omarchy/toggles/niri"
++out="$HOME/.config/niri/toggles.kdl"
++mkdir -p "$state"
++
++flip() {
++  if [[ -f $state/$1 ]]; then
++    rm "$state/$1"
++  else
++    touch "$state/$1"
++  fi
++}
++
++case "${1:-}" in
++  animations) flip no-animations ;;
++  gaps) flip no-gaps ;;
++  corners)
++    if [[ -z ${2:-} ]]; then
++      cat "$state/corners" 2>/dev/null || echo theme
++      exit 0
++    fi
++    echo "$2" >"$state/corners"
++    ;;
++  *)
++    echo "Usage: niri-layout-toggle animations|gaps|corners [theme|sharp|rounded]" >&2
++    exit 1
++    ;;
++esac
++
++radius=""
++case "$(cat "$state/corners" 2>/dev/null)" in
++  sharp) radius=0 ;;
++  rounded) radius=12 ;;
++esac
++
++{
++  echo "// Generated by niri-layout-toggle from the menu's appearance toggles. Do not edit."
++  if [[ -f $state/no-animations ]]; then
++    echo "animations { off; }"
++  fi
++  if [[ -f $state/no-gaps ]]; then
++    echo "layout { gaps 0; }"
++  fi
++  if [[ -n $radius ]]; then
++    echo "window-rule { geometry-corner-radius $radius; clip-to-geometry true; }"
++  fi
++} >"$out"
+diff --git a/niri/bin/omarchy-hyprland-corners b/niri/bin/omarchy-hyprland-corners
+new file mode 100755
+index 0000000..caec29d
+--- /dev/null
++++ b/niri/bin/omarchy-hyprland-corners
+@@ -0,0 +1,5 @@
++#!/bin/bash
++
++# niri stand-in.
++
++exec niri-layout-toggle corners "$@"
+diff --git a/niri/bin/omarchy-hyprland-monitor-internal b/niri/bin/omarchy-hyprland-monitor-internal
+new file mode 100755
+index 0000000..c462e9f
+--- /dev/null
++++ b/niri/bin/omarchy-hyprland-monitor-internal
+@@ -0,0 +1,12 @@
++#!/bin/bash
++
++# niri stand-in: turn the laptop's built-in display off or back on.
++
++internal=$(niri msg -j outputs | jq -r 'keys[] | select(test("^(eDP|LVDS|DSI)-"))' | head -n1)
++[[ -n $internal ]] || exit 1
++
++if [[ $(niri msg -j outputs | jq -r --arg o "$internal" '.[$o].logical') == "null" ]]; then
++  niri msg output "$internal" on
++else
++  niri msg output "$internal" off
++fi
+diff --git a/niri/bin/omarchy-hyprland-window-close-all b/niri/bin/omarchy-hyprland-window-close-all
+new file mode 100755
+index 0000000..7aba0f1
+--- /dev/null
++++ b/niri/bin/omarchy-hyprland-window-close-all
+@@ -0,0 +1,7 @@
++#!/bin/bash
++
++# niri stand-in: close every window (logout, reboot, shutdown call this first).
++
++niri msg -j windows | jq -r '.[].id' | while read -r id; do
++  niri msg action close-window --id "$id"
++done
+diff --git a/niri/bin/omarchy-hyprland-window-gaps-toggle b/niri/bin/omarchy-hyprland-window-gaps-toggle
+new file mode 100755
+index 0000000..205faf5
+--- /dev/null
++++ b/niri/bin/omarchy-hyprland-window-gaps-toggle
+@@ -0,0 +1,5 @@
++#!/bin/bash
++
++# niri stand-in.
++
++exec niri-layout-toggle gaps
+diff --git a/niri/bin/omarchy-menu-keybindings b/niri/bin/omarchy-menu-keybindings
+new file mode 100755
+index 0000000..89e05b8
+--- /dev/null
++++ b/niri/bin/omarchy-menu-keybindings
+@@ -0,0 +1,10 @@
++#!/bin/bash
++
++# niri stand-in: every active niri bind in one searchable list. niri has no
++# IPC for binds, so niri-keybinds reads them from the config.
++
++if [[ ${1:-} == "--print" || ${1:-} == "-p" ]]; then
++  niri-keybinds | cut -f1
++else
++  niri-keybinds | cut -f1 | omarchy-menu-select 'Keybindings' -- --width 800 --height 500 >/dev/null || true
++fi
+diff --git a/niri/bin/omarchy-pkg-add b/niri/bin/omarchy-pkg-add
+new file mode 100755
+index 0000000..a51ee6c
+--- /dev/null
++++ b/niri/bin/omarchy-pkg-add
+@@ -0,0 +1,29 @@
++#!/bin/bash
++
++# niri stand-in: this machine has no extra package repo, so anything pacman's
++# sync databases do not carry is taken from the AUR instead.
++
++repo=() aur=()
++for pkg in "$@"; do
++  if pacman -Q -- "$pkg" &>/dev/null; then
++    continue
++  elif pacman -Si -- "$pkg" &>/dev/null; then
++    repo+=("$pkg")
++  else
++    aur+=("$pkg")
++  fi
++done
++
++if (( ${#repo[@]} > 0 )); then
++  sudo pacman -S --noconfirm --needed -- "${repo[@]}" || exit 1
++fi
++if (( ${#aur[@]} > 0 )); then
++  yay -S --needed -- "${aur[@]}" || exit 1
++fi
++
++for pkg in "$@"; do
++  if ! pacman -Q -- "$pkg" &>/dev/null; then
++    echo -e "\033[31mError: Package '$pkg' did not install\033[0m" >&2
++    exit 1
++  fi
++done
+diff --git a/niri/bin/omarchy-restart-shell b/niri/bin/omarchy-restart-shell
+new file mode 100755
+index 0000000..7104367
+--- /dev/null
++++ b/niri/bin/omarchy-restart-shell
+@@ -0,0 +1,11 @@
++#!/bin/bash
++
++# niri stand-in: restart the shell. omarchy-launch-shell supervises it and
++# starts a fresh one when the old one is killed; start the supervisor if it is
++# not there.
++
++pkill -f "quickshell -n -p $OMARCHY_PATH/shell"
++
++if ! pgrep -f "bin/omarchy-launch-shell" >/dev/null; then
++  setsid -f omarchy-launch-shell >/dev/null 2>&1
++fi
+diff --git a/niri/bin/omarchy-system-lock b/niri/bin/omarchy-system-lock
+new file mode 100755
+index 0000000..8404e4f
+--- /dev/null
++++ b/niri/bin/omarchy-system-lock
+@@ -0,0 +1,10 @@
++#!/bin/bash
++
++# niri stand-in: lock with whichever panel is running.
++
++if [[ $(panel-mode) == "dms" ]]; then
++  dms ipc call lock lock
++else
++  # The shell's own lock screen needs a PAM service this machine lacks.
++  swaylock -f
++fi
+diff --git a/niri/bin/omarchy-system-logout b/niri/bin/omarchy-system-logout
+new file mode 100755
+index 0000000..3ef2307
+--- /dev/null
++++ b/niri/bin/omarchy-system-logout
+@@ -0,0 +1,8 @@
++#!/bin/bash
++
++# niri stand-in: close the apps, then end the niri session.
++
++omarchy-osd -i logout -m "Logging out" -d 5000
++omarchy-hyprland-window-close-all
++sleep 1 # Allow apps like Chrome to shutdown correctly
++niri msg action quit --skip-confirmation
+diff --git a/niri/bin/omarchy-theme-bg-set b/niri/bin/omarchy-theme-bg-set
+new file mode 100755
+index 0000000..e4db3f5
+--- /dev/null
++++ b/niri/bin/omarchy-theme-bg-set
+@@ -0,0 +1,11 @@
++#!/bin/bash
++
++# niri stand-in: hand the wallpaper to whichever panel draws it.
++
++if [[ $(panel-mode) == "dms" ]]; then
++  [[ -f ${1:-} ]] || { echo "Usage: omarchy-theme-bg-set <path-to-media>" >&2; exit 1; }
++  ln -nsf "$(realpath "$1")" "$HOME/.local/state/omarchy/current/background"
++  dms ipc call wallpaper set "$(realpath "$1")" >/dev/null
++else
++  exec "$OMARCHY_PATH/bin/omarchy-theme-bg-set" "$@"
++fi
+diff --git a/niri/bin/omarchy-theme-set b/niri/bin/omarchy-theme-set
+new file mode 100755
+index 0000000..2801f84
+--- /dev/null
++++ b/niri/bin/omarchy-theme-set
+@@ -0,0 +1,12 @@
++#!/bin/bash
++
++# niri stand-in: a theme restyles this shell and niri's borders only. Terminals,
++# editors, GTK and the browser keep their own colours, and with the DMS panel
++# running the wallpaper stays DMS's.
++
++export OMARCHY_THEME_APPS=off
++if [[ $(panel-mode) == "dms" ]]; then
++  export OMARCHY_THEME_SKIP_BACKGROUND=1
++fi
++
++exec "$OMARCHY_PATH/bin/omarchy-theme-set" "$@"
+diff --git a/niri/bin/omarchy-toggle-animations b/niri/bin/omarchy-toggle-animations
+new file mode 100755
+index 0000000..9b7bee7
+--- /dev/null
++++ b/niri/bin/omarchy-toggle-animations
+@@ -0,0 +1,5 @@
++#!/bin/bash
++
++# niri stand-in.
++
++exec niri-layout-toggle animations
+diff --git a/niri/bin/omarchy-toggle-idle b/niri/bin/omarchy-toggle-idle
+new file mode 100755
+index 0000000..cdc1497
+--- /dev/null
++++ b/niri/bin/omarchy-toggle-idle
+@@ -0,0 +1,9 @@
++#!/bin/bash
++
++# niri stand-in: stay-awake toggle for whichever panel is running.
++
++if [[ $(panel-mode) == "dms" ]]; then
++  dms ipc call inhibit toggle >/dev/null
++else
++  exec "$OMARCHY_PATH/bin/omarchy-toggle-idle" "$@"
++fi
+diff --git a/niri/bin/omarchy-toggle-nightlight b/niri/bin/omarchy-toggle-nightlight
+new file mode 100755
+index 0000000..ea8928f
+--- /dev/null
++++ b/niri/bin/omarchy-toggle-nightlight
+@@ -0,0 +1,10 @@
++#!/bin/bash
++
++# niri stand-in: hyprsunset speaks a Hyprland-only protocol, so night light is
++# DMS's. With the DMS panel stopped there is nothing to drive it yet.
++
++if [[ $(panel-mode) == "dms" ]]; then
++  dms ipc call night toggle >/dev/null
++else
++  omarchy-notification-send -u low "Night light" "Only available with the DMS panel for now."
++fi
+diff --git a/niri/bin/omarchy-toggle-notification-silencing b/niri/bin/omarchy-toggle-notification-silencing
+new file mode 100755
+index 0000000..a1a9b30
+--- /dev/null
++++ b/niri/bin/omarchy-toggle-notification-silencing
+@@ -0,0 +1,9 @@
++#!/bin/bash
++
++# niri stand-in: do-not-disturb toggle for whichever panel is running.
++
++if [[ $(panel-mode) == "dms" ]]; then
++  dms ipc call notifications toggleDoNotDisturb >/dev/null
++else
++  exec "$OMARCHY_PATH/bin/omarchy-toggle-notification-silencing" "$@"
++fi
+diff --git a/niri/bin/panel-mode b/niri/bin/panel-mode
+new file mode 100755
+index 0000000..504ae61
+--- /dev/null
++++ b/niri/bin/panel-mode
+@@ -0,0 +1,11 @@
++#!/bin/bash
++
++# Which desktop panel is running: "dms" (DankMaterialShell bar, notifications,
++# lock) or "shell" (this shell's own bar and services). The niri stand-ins in
++# this directory route toggles to whichever one is live.
++
++if systemctl --user --quiet is-active dms.service; then
++  echo dms
++else
++  echo shell
++fi
+diff --git a/niri/bin/panel-switch b/niri/bin/panel-switch
+new file mode 100755
+index 0000000..cf01d79
+--- /dev/null
++++ b/niri/bin/panel-switch
+@@ -0,0 +1,58 @@
++#!/bin/bash
++
++# Switch the desktop panel between DankMaterialShell and this shell's own bar.
++# The shell itself always runs (menu, pickers, reminders); only the bar,
++# notifications, on-screen display, media keys and wallpaper change hands.
++#
++#   panel-switch dms|shell|toggle
++
++# Services the two panels would fight over. The lock screen and idle timer stay
++# off in both modes: the lock needs a PAM service this machine does not have.
++contested=(omarchy.background omarchy.notifications omarchy.osd omarchy.battery omarchy.media)
++
++target=${1:-toggle}
++if [[ $target == "toggle" ]]; then
++  if [[ $(panel-mode) == "dms" ]]; then
++    target=shell
++  else
++    target=dms
++  fi
++fi
++
++case "$target" in
++  shell)
++    systemctl --user stop dms.service
++    # The link goes stale when the theme changed while DMS drew the wallpaper.
++    background="$HOME/.local/state/omarchy/current/background"
++    if [[ ! -e $background ]]; then
++      first=$(find -L "$HOME/.local/state/omarchy/current/theme/backgrounds" -maxdepth 1 -type f | sort | head -n1)
++      [[ -n $first ]] && ln -nsf "$first" "$background"
++    fi
++    for plugin in "${contested[@]}"; do
++      omarchy-shell -q shell setPluginEnabled "$plugin" true
++    done
++    omarchy-toggle-bar off
++    cp "$HOME/.local/state/omarchy/current/theme/niri.kdl" "$HOME/.config/niri/theme.kdl" 2>/dev/null
++    ;;
++  dms)
++    for plugin in "${contested[@]}"; do
++      omarchy-shell -q shell setPluginEnabled "$plugin" false
++    done
++    omarchy-toggle-bar on
++    : >"$HOME/.config/niri/theme.kdl" # border colours go back to DMS
++
++    # dms.service only counts as started once it owns the notification bus
++    # name, and this shell's notification service keeps that name until the
++    # shell restarts without it. Starting DMS first would hang for 90 seconds.
++    omarchy-restart-shell
++    for _ in {1..50}; do
++      busctl --user status org.freedesktop.Notifications &>/dev/null || break
++      sleep 0.2
++    done
++    systemctl --user start --no-block dms.service
++    ;;
++  *)
++    echo "Usage: panel-switch dms|shell|toggle" >&2
++    exit 1
++    ;;
++esac
+diff --git a/shell/plugins/agents/Panel.qml b/shell/plugins/agents/Panel.qml
+index 4e40a2e..34a3053 100644
+--- a/shell/plugins/agents/Panel.qml
++++ b/shell/plugins/agents/Panel.qml
+@@ -339,9 +339,9 @@ Panel {
+ 
+   // A few ways into making Omarchy your own, handed to the default agent.
+   readonly property var starterPrompts: [
+-    { glyph: "󰏘", label: "Theme", prompt: "Make me a new Omarchy theme. Ask me what look or inspiration I have in mind, then build it following the Omarchy skill's theming guide and switch to it." },
+-    { glyph: "󰐱", label: "Plugin", prompt: "Make me a new Omarchy shell plugin. Ask me what I'd like it to do, then build it following the Omarchy skill's plugin guide and enable it." },
+-    { glyph: "󰣆", label: "App", prompt: "Make me a new app for my Omarchy desktop. Ask me what it should do, then build it following the omarchy-app skill and install it so it shows up in the app launcher." }
++    { glyph: "󰏘", label: "Theme", prompt: "Make me a new theme. Ask me what look or inspiration I have in mind, then build it following the Omarchy skill's theming guide and switch to it." },
++    { glyph: "󰐱", label: "Plugin", prompt: "Make me a new shell plugin. Ask me what I'd like it to do, then build it following the Omarchy skill's plugin guide and enable it." },
++    { glyph: "󰣆", label: "App", prompt: "Make me a new app for my desktop. Ask me what it should do, then build it following the omarchy-app skill and install it so it shows up in the app launcher." }
+   ]
+ 
+   function startPrompt(prompt) {
+diff --git a/shell/plugins/bar/Bar.qml b/shell/plugins/bar/Bar.qml
+index 392a7c4..f5a372e 100644
+--- a/shell/plugins/bar/Bar.qml
++++ b/shell/plugins/bar/Bar.qml
+@@ -783,6 +783,7 @@ Item {
+   // belongs. Empty until Hyprland reports one, which leaves panel routing on
+   // its per-monitor fallback rather than guessing at an output.
+   function focusedScreenName() {
++    if (Niri.active) return Niri.focusedOutput
+     var monitor = Hyprland.focusedMonitor
+     return monitor ? String(monitor.name || "") : ""
+   }
+diff --git a/shell/plugins/bar/widgets/Workspaces.qml b/shell/plugins/bar/widgets/Workspaces.qml
+index 4d808ba..438b9cb 100644
+--- a/shell/plugins/bar/widgets/Workspaces.qml
++++ b/shell/plugins/bar/widgets/Workspaces.qml
+@@ -10,7 +10,19 @@ BarWidget {
+   id: root
+   moduleName: "omarchy.workspaces"
+ 
++  // niri port: workspaces are per monitor and numbered by position, so each
++  // bar lists the ones on its own output (the last is niri's empty spare).
++  readonly property string outputName: QsWindow.window && QsWindow.window.screen ? QsWindow.window.screen.name : ""
++  readonly property var niriWorkspaces: Niri.active ? Niri.workspacesOn(outputName) : []
++
++  function niriWorkspace(idx) {
++    for (var i = 0; i < niriWorkspaces.length; i++)
++      if (niriWorkspaces[i].idx === idx) return niriWorkspaces[i]
++    return null
++  }
++
+   function workspaceById(id) {
++    if (Niri.active) return niriWorkspace(id)
+     var values = Hyprland.workspaces.values
+     for (var i = 0; i < values.length; i++) {
+       if (values[i].id === id) return values[i]
+@@ -20,6 +32,7 @@ BarWidget {
+   }
+ 
+   function workspaceIds() {
++    if (Niri.active) return niriWorkspaces.map(function(w) { return w.idx })
+     var ids = [1, 2, 3, 4, 5]
+     var values = Hyprland.workspaces.values
+ 
+@@ -34,12 +47,17 @@ BarWidget {
+ 
+   function focusWorkspace(id) {
+     if (!root.bar) return
++    if (Niri.active) {
++      // An index means "on the focused monitor", so go to this bar's monitor first.
++      root.bar.run("niri msg action focus-monitor " + Util.shellQuote(root.outputName) + " && niri msg action focus-workspace " + id)
++      return
++    }
+     root.bar.run("hyprctl dispatch " + Util.shellQuote("hl.dsp.focus({ workspace = \"" + id + "\" })"))
+   }
+ 
+   // The focused workspace shows its layout: a square tiles, a circle scrolls,
+   // and a triangle floats. Clicking it cycles to the next one, as Super + L does.
+-  property string focusedMode: "dwindle"
++  property string focusedMode: Niri.active ? "scrolling" : "dwindle"
+   property bool modeStale: false
+ 
+   function modeGlyph(mode) {
+@@ -49,6 +67,7 @@ BarWidget {
+   }
+ 
+   function refresh() {
++    if (Niri.active) return   // niri only scrolls; there is no layout to read
+     if (modeProc.running) {
+       root.modeStale = true
+       return
+@@ -57,6 +76,7 @@ BarWidget {
+   }
+ 
+   function cycleLayout() {
++    if (Niri.active) return
+     if (root.bar) root.bar.run("omarchy-hyprland-workspace-layout-toggle")
+   }
+ 
+@@ -111,8 +131,12 @@ BarWidget {
+         required property int modelData
+ 
+         readonly property var workspace: root.workspaceById(modelData)
+-        readonly property bool occupied: workspace !== null && workspace.toplevels.values.length > 0
+-        readonly property bool focused: Hyprland.focusedWorkspace !== null && Hyprland.focusedWorkspace.id === modelData
++        readonly property bool occupied: Niri.active
++          ? workspace !== null && Niri.windowCount(workspace.id) > 0
++          : workspace !== null && workspace.toplevels.values.length > 0
++        readonly property bool focused: Niri.active
++          ? workspace !== null && workspace.is_active
++          : Hyprland.focusedWorkspace !== null && Hyprland.focusedWorkspace.id === modelData
+ 
+         bar: root.bar
+         text: focused ? root.modeGlyph(root.focusedMode) : (modelData === 10 ? "0" : String(modelData))
+diff --git a/shell/plugins/menu/BarWidget.qml b/shell/plugins/menu/BarWidget.qml
+index 61e5e80..503e355 100644
+--- a/shell/plugins/menu/BarWidget.qml
++++ b/shell/plugins/menu/BarWidget.qml
+@@ -12,8 +12,7 @@ BarWidget {
+     id: button
+     anchors.fill: parent
+     bar: root.bar
+-    text: "\ue900"
+-    fontFamily: "omarchy"
++    text: "\udb82\udcc7"
+     centerFigures: false
+     horizontalMargin: 7.5
+     onPressed: function(button) {
+diff --git a/shell/services/BrightnessKeys.qml b/shell/services/BrightnessKeys.qml
+index 0f14b14..8ff3bef 100644
+--- a/shell/services/BrightnessKeys.qml
++++ b/shell/services/BrightnessKeys.qml
+@@ -26,7 +26,7 @@ Item {
+   // caller falls back to the script.
+   function handle(action) {
+     var monitor = Hyprland.focusedMonitor
+-    var name = monitor ? String(monitor.name || "") : ""
++    var name = Niri.active ? Niri.focusedOutput : (monitor ? String(monitor.name || "") : "")
+     if (!/^(eDP|LVDS|DSI)-/.test(name) || !device) return false
+     if (action !== "raise" && action !== "lower") return false
+ 

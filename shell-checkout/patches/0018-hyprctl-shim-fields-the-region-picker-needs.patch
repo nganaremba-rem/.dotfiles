@@ -1,0 +1,55 @@
+From e531ec907b0696f6e91907a106c50c87f7e2f02f Mon Sep 17 00:00:00 2001
+From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
+Date: Mon, 12 Oct 2026 00:31:28 +0530
+Subject: [PATCH 18/18] hyprctl shim: fields the region picker needs
+
+The screen recording rows in the menu pick their target with
+omarchy-capture-region, which reads each monitor's active workspace and each
+window's position from hyprctl. The shim gave neither, so the picker died in jq
+and no recording started.
+
+Monitors now report their active workspace. Windows report position and size
+where niri knows them (floating windows) and are marked hidden otherwise, so
+the picker offers the monitor, floating windows and a free selection.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ niri/bin/hyprctl | 17 +++++++++++++++--
+ 1 file changed, 15 insertions(+), 2 deletions(-)
+
+diff --git a/niri/bin/hyprctl b/niri/bin/hyprctl
+index a3147d6..5a537f7 100755
+--- a/niri/bin/hyprctl
++++ b/niri/bin/hyprctl
+@@ -26,8 +26,10 @@ config_number() { # <key> <default>
+ monitors() { # [all] includes outputs that are switched off
+   local all=false
+   [[ ${1:-} == "all" ]] && all=true
+-  niri msg -j outputs | jq --argjson all "$all" --argjson focused "$(niri msg -j focused-output)" '
++  niri msg -j outputs | jq --argjson all "$all" --argjson focused "$(niri msg -j focused-output)" \
++    --argjson workspaces "$(niri msg -j workspaces)" '
+     [to_entries[] | .value as $o | select($all or $o.logical != null) | {
++      activeWorkspace: {id: ([$workspaces[] | select(.output == $o.name and .is_active) | .id][0] // 0)},
+       id: .key, name: $o.name, description: "\($o.make) \($o.model)",
+       make: $o.make, model: $o.model, serial: ($o.serial // ""),
+       width: ($o.modes[$o.current_mode].width // 0),
+@@ -71,7 +73,18 @@ case "${1:-}" in
+     fi
+     ;;
+   activewindow) niri msg -j focused-window | jq "if . == null then {} else $window_json end" ;;
+-  clients) niri msg -j windows | jq "[.[] | $window_json]" ;;
++  clients)
++    # niri's IPC only places floating windows; tiled ones are reported hidden
++    # so a region picker offers no rectangle for them.
++    niri msg -j windows | jq --argjson workspaces "$(niri msg -j workspaces)" --argjson outputs "$(niri msg -j outputs)" "
++      (\$workspaces | map({key: (.id | tostring), value: .output}) | from_entries) as \$output_of
++      | [.[] | (\$outputs[\$output_of[.workspace_id | tostring] // \"\"].logical // {x: 0, y: 0}) as \$origin
++          | .layout.tile_pos_in_workspace_view as \$pos
++          | $window_json + {hidden: (\$pos == null), size: .layout.window_size,
++              at: (if \$pos == null then [0, 0] else
++                [(\$origin.x + \$pos[0] + .layout.window_offset_in_tile[0] | round),
++                 (\$origin.y + \$pos[1] + .layout.window_offset_in_tile[1] | round)] end)}]"
++    ;;
+   activeworkspace) niri msg -j workspaces | jq '.[] | select(.is_focused) | {id, name: (.name // "\(.idx)"), monitor: .output}' ;;
+   workspaces) niri msg -j workspaces | jq '[.[] | {id, name: (.name // "\(.idx)"), monitor: .output}]' ;;
+   reload) niri msg action load-config-file ;;

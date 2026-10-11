@@ -1,0 +1,209 @@
+From 93a9d46865fa5e42d2d8c56cdcb6b7d3e57c2373 Mon Sep 17 00:00:00 2001
+From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
+Date: Sun, 11 Oct 2026 21:14:53 +0530
+Subject: [PATCH 11/18] shell: modal vim keys on the type-to-filter surfaces
+
+Menu, image picker, emoji, clipboard and reminder open in insert mode, where
+typing filters as before. Esc switches to normal mode: h j k l move, d/u page,
+letters do not type, i/a// returns to typing, and Esc or q closes. A small
+hint shows while normal mode is on.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ shell/Commons/Vim.qml                      | 53 ++++++++++++++++++++++
+ shell/Commons/qmldir                       |  1 +
+ shell/Ui/OverlayWindow.qml                 | 25 ++++++++++
+ shell/plugins/clipboard/Clipboard.qml      |  3 ++
+ shell/plugins/emojis/Emojis.qml            |  2 +
+ shell/plugins/image-picker/ImagePicker.qml |  2 +
+ shell/plugins/menu/Menu.qml                |  3 ++
+ shell/plugins/reminders/ReminderFlow.qml   |  2 +
+ 8 files changed, 91 insertions(+)
+ create mode 100644 shell/Commons/Vim.qml
+
+diff --git a/shell/Commons/Vim.qml b/shell/Commons/Vim.qml
+new file mode 100644
+index 0000000..9adfb51
+--- /dev/null
++++ b/shell/Commons/Vim.qml
+@@ -0,0 +1,53 @@
++pragma Singleton
++import QtQuick
++import Quickshell
++
++// niri port: modal keys for the type-to-filter surfaces (menu, image picker,
++// emoji, clipboard, reminder). A surface opens in insert mode, where typing
++// filters as before. Esc switches to normal mode, where h j k l move and
++// letters do not type. Esc again (or q) closes; i, a or / goes back to typing.
++// Bar panels are not modal: PanelKeyCatcher already takes h j k l there.
++Singleton {
++  id: root
++
++  property bool normal: false
++
++  // OverlayWindow calls this each time a surface is shown.
++  function reset() { normal = false }
++
++  readonly property var motions: ({
++    "h": Qt.Key_Left, "j": Qt.Key_Down, "k": Qt.Key_Up, "l": Qt.Key_Right,
++    "d": Qt.Key_PageDown, "u": Qt.Key_PageUp
++  })
++
++  // Keys normal mode hands on unchanged.
++  readonly property var passed: [
++    Qt.Key_Return, Qt.Key_Enter, Qt.Key_Left, Qt.Key_Right, Qt.Key_Up, Qt.Key_Down,
++    Qt.Key_PageUp, Qt.Key_PageDown, Qt.Key_Tab, Qt.Key_Backtab, Qt.Key_Delete
++  ]
++
++  // First line of a Keys.onPressed handler: `event = Vim.translate(event, quit)`.
++  // Returns the event to handle (h j k l arrive as arrow keys), or null when
++  // the key was used up here. `quit` closes the surface.
++  function translate(event, quit) {
++    if (!normal) {
++      if (event.key !== Qt.Key_Escape) return event
++      normal = true
++      event.accepted = true
++      return null
++    }
++
++    if (passed.indexOf(event.key) !== -1) return event
++
++    event.accepted = true
++    if (event.key === Qt.Key_Escape || event.text === "q") {
++      normal = false
++      quit()
++    } else if (event.text === "i" || event.text === "a" || event.text === "/") {
++      normal = false
++    } else if (event.text in motions) {
++      return { key: motions[event.text], modifiers: Qt.NoModifier, text: "", accepted: true }
++    }
++    return null
++  }
++}
+diff --git a/shell/Commons/qmldir b/shell/Commons/qmldir
+index 11f5e44..50c884b 100644
+--- a/shell/Commons/qmldir
++++ b/shell/Commons/qmldir
+@@ -8,4 +8,5 @@ singleton Niri 1.0 Niri.qml
+ singleton Style 1.0 Style.qml
+ singleton UntypedInput 1.0 UntypedInput.qml
+ singleton Util 1.0 Util.qml
++singleton Vim 1.0 Vim.qml
+ ShellIpc 1.0 ShellIpc.qml
+diff --git a/shell/Ui/OverlayWindow.qml b/shell/Ui/OverlayWindow.qml
+index 52868c5..13b9233 100644
+--- a/shell/Ui/OverlayWindow.qml
++++ b/shell/Ui/OverlayWindow.qml
+@@ -3,6 +3,7 @@ import Quickshell
+ import Quickshell.Hyprland
+ import Quickshell.Wayland
+ import qs.Commons
++import qs.Commons as Commons
+ 
+ // Map a fresh fullscreen surface on each open. Keep its first frames
+ // transparent until Qt receives the output's scale, so it opens sharp without
+@@ -57,6 +58,7 @@ PanelWindow {
+   // Live monitor scaling does not emit a Hyprland monitor event, so its cached
+   // scale can lag behind Qt. Refresh on opening and on scale changes while open.
+   onShownChanged: {
++    if (shown) Vim.reset()
+     targetScreen = shown ? focusedScreen() : null
+     if (shown && !Niri.active) Hyprland.refreshMonitors()
+   }
+@@ -86,6 +88,29 @@ PanelWindow {
+ 
+   // Opacity preserves keyboard handling while the scale arrives, including
+   // search keystrokes and Escape pressed immediately after opening.
++  // niri port: say so when keys navigate instead of type (see Commons/Vim.qml).
++  Rectangle {
++    visible: Vim.normal && window.shown
++    anchors.horizontalCenter: parent.horizontalCenter
++    anchors.bottom: parent.bottom
++    anchors.bottomMargin: Style.space(40)
++    width: modeHint.implicitWidth + Style.space(24)
++    height: modeHint.implicitHeight + Style.space(12)
++    radius: Style.cornerRadius
++    color: Commons.Color.background
++    border.width: 1
++    border.color: Commons.Color.accent
++
++    Text {
++      id: modeHint
++      anchors.centerIn: parent
++      text: "NORMAL   h j k l move   i type   Esc close"
++      color: Commons.Color.foreground
++      font.family: Style.font.family
++      font.pixelSize: Style.font.bodySmall
++    }
++  }
++
+   Binding {
+     target: window.contentItem
+     property: "opacity"
+diff --git a/shell/plugins/clipboard/Clipboard.qml b/shell/plugins/clipboard/Clipboard.qml
+index b6fb9f9..ea09318 100644
+--- a/shell/plugins/clipboard/Clipboard.qml
++++ b/shell/plugins/clipboard/Clipboard.qml
+@@ -352,6 +352,9 @@ Item {
+             return
+           }
+ 
++          event = Vim.translate(event, function() { root.close() })
++          if (!event) return
++
+           if (event.key === Qt.Key_Escape) {
+             if (root.filterText) root.setFilter("")
+             else root.close()
+diff --git a/shell/plugins/emojis/Emojis.qml b/shell/plugins/emojis/Emojis.qml
+index 74c9dba..851e3f0 100644
+--- a/shell/plugins/emojis/Emojis.qml
++++ b/shell/plugins/emojis/Emojis.qml
+@@ -192,6 +192,8 @@ Item {
+ 
+         Keys.priority: Keys.BeforeItem
+         Keys.onPressed: function(event) {
++          event = Vim.translate(event, function() { root.dismiss() })
++          if (!event) return
+           if (event.key === Qt.Key_Escape) {
+             if (root.filterText) root.setFilter("")
+             else root.dismiss()
+diff --git a/shell/plugins/image-picker/ImagePicker.qml b/shell/plugins/image-picker/ImagePicker.qml
+index f9280f2..e6a6d48 100644
+--- a/shell/plugins/image-picker/ImagePicker.qml
++++ b/shell/plugins/image-picker/ImagePicker.qml
+@@ -689,6 +689,8 @@ Item {
+               }
+               return
+             }
++            event = Vim.translate(event, function() { root.cancel() })
++            if (!event) return
+             if (event.key === Qt.Key_Escape) {
+               if (root.filterText) {
+                 root.updateFilter("")
+diff --git a/shell/plugins/menu/Menu.qml b/shell/plugins/menu/Menu.qml
+index 4a952c2..e26cfc6 100644
+--- a/shell/plugins/menu/Menu.qml
++++ b/shell/plugins/menu/Menu.qml
+@@ -1235,6 +1235,9 @@ Item {
+             return
+           }
+ 
++          event = Vim.translate(event, function() { root.cancel() })
++          if (!event) return
++
+           if (event.key === Qt.Key_Delete) {
+             root.requestDeleteSelected()
+             event.accepted = true
+diff --git a/shell/plugins/reminders/ReminderFlow.qml b/shell/plugins/reminders/ReminderFlow.qml
+index 48361c6..7b0e23f 100644
+--- a/shell/plugins/reminders/ReminderFlow.qml
++++ b/shell/plugins/reminders/ReminderFlow.qml
+@@ -127,6 +127,8 @@ Item {
+ 
+         Keys.priority: Keys.BeforeItem
+         Keys.onPressed: function(event) {
++          event = Vim.translate(event, function() { root.dismiss() })
++          if (!event) return
+           if (event.key === Qt.Key_Escape) {
+             if (root.filterText) root.setFilter("")
+             else root.dismiss()

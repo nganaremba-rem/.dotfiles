@@ -1,0 +1,59 @@
+From 15c84bad14a332aa819c604543dbee458a0507b0 Mon Sep 17 00:00:00 2001
+From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
+Date: Sun, 11 Oct 2026 21:40:37 +0530
+Subject: [PATCH 12/18] niri: camera and screen share readings for the bar
+
+bar-stat camera reports which process holds a camera device open, and
+bar-stat screencast reports the outputs niri is feeding to a screencast.
+Both print waybar-style JSON so a command module turns to the alert colour
+while in use.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ niri/bin/bar-stat | 26 +++++++++++++++++++++++---
+ 1 file changed, 23 insertions(+), 3 deletions(-)
+
+diff --git a/niri/bin/bar-stat b/niri/bin/bar-stat
+index 1b0fe41..5657886 100755
+--- a/niri/bin/bar-stat
++++ b/niri/bin/bar-stat
+@@ -1,7 +1,9 @@
+ #!/bin/bash
+ 
+-# One-line system readings, icon first, for command modules on the bar.
+-# Usage: bar-stat cpu|mem|net
++# One-line readings for command modules on the bar: plain text for the
++# system ones, waybar-style JSON for the privacy ones so the icon turns to
++# the alert colour while the camera or a screen share is in use.
++# Usage: bar-stat cpu|mem|net|camera|screencast
+ 
+ case "${1:-}" in
+   cpu)
+@@ -21,8 +23,26 @@ case "${1:-}" in
+     rx2=$(<"$stats/rx_bytes") tx2=$(<"$stats/tx_bytes")
+     printf '↓%s ↑%s\n' "$(numfmt --to=iec $((rx2 - rx1)))" "$(numfmt --to=iec $((tx2 - tx1)))"
+     ;;
++  camera)
++    # A camera is in use while some process holds its device open.
++    users=$(fuser /dev/video* 2>/dev/null | xargs -r ps -o comm= -p | sort -u | paste -sd, -)
++    if [[ -n $users ]]; then
++      printf '{"text":"󰖠","class":"active","tooltip":"Camera in use: %s"}\n' "$users"
++    else
++      printf '{"text":"󰖠","tooltip":"Camera idle"}\n'
++    fi
++    ;;
++  screencast)
++    # niri lists every screencast it is feeding (screen share or recording).
++    targets=$(niri msg -j casts 2>/dev/null | jq -r '[.[] | select(.is_active) | .target | (.Output.name // .Window.id // "window") | tostring] | join(", ")')
++    if [[ -n $targets ]]; then
++      printf '{"text":"󱒃","class":"active","tooltip":"Screen is being shared: %s"}\n' "$targets"
++    else
++      printf '{"text":"󱒃","tooltip":"Screen share idle"}\n'
++    fi
++    ;;
+   *)
+-    echo "Usage: bar-stat cpu|mem|net" >&2
++    echo "Usage: bar-stat cpu|mem|net|camera|screencast" >&2
+     exit 1
+     ;;
+ esac

@@ -1,0 +1,411 @@
+From 205e4f59fcdd80908c4095e9355cddaaade5d944 Mon Sep 17 00:00:00 2001
+From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
+Date: Sun, 11 Oct 2026 23:05:59 +0530
+Subject: [PATCH 16/18] shell: more normal-mode keys, faster emoji grid,
+ centred lone icons
+
+Normal mode gains gg/G, Ctrl+d/u/f/b, x and dd (delete), cc and S (clear the
+filter and type again); each surface now handles Home and End for them.
+
+The emoji and icon grid used a ListModel rebuilt row by row on every key,
+which lagged with 10,000 icons. It now takes the filtered array directly.
+
+A bar label that is a single icon glyph is centred on the icon instead of on
+digit height, so icons of any size sit on the bar's middle.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ shell/Commons/Vim.qml                      | 98 ++++++++++++++++++----
+ shell/Ui/OverlayWindow.qml                 |  2 +-
+ shell/Ui/WidgetButton.qml                  | 17 +++-
+ shell/plugins/clipboard/Clipboard.qml      |  7 ++
+ shell/plugins/emojis/Emojis.qml            | 54 ++++++------
+ shell/plugins/image-picker/ImagePicker.qml |  9 ++
+ shell/plugins/menu/Menu.qml                |  9 ++
+ 7 files changed, 150 insertions(+), 46 deletions(-)
+
+diff --git a/shell/Commons/Vim.qml b/shell/Commons/Vim.qml
+index 9adfb51..4355be6 100644
+--- a/shell/Commons/Vim.qml
++++ b/shell/Commons/Vim.qml
+@@ -4,31 +4,50 @@ import Quickshell
+ 
+ // niri port: modal keys for the type-to-filter surfaces (menu, image picker,
+ // emoji, clipboard, reminder). A surface opens in insert mode, where typing
+-// filters as before. Esc switches to normal mode, where h j k l move and
+-// letters do not type. Esc again (or q) closes; i, a or / goes back to typing.
++// filters as before. Esc switches to normal mode, where keys move instead of
++// type. Esc again (or q) closes.
++//
++// Normal mode:
++//   h j k l          move
++//   gg  G            first, last
++//   Ctrl+d  Ctrl+u   page down, page up (also Ctrl+f, Ctrl+b)
++//   x  dd            delete the highlighted item, where the surface can
++//   cc  S            clear the filter and type again
++//   i a I A /        type again
++//   Esc  q           close
++//
+ // Bar panels are not modal: PanelKeyCatcher already takes h j k l there.
+ Singleton {
+   id: root
+ 
+   property bool normal: false
++  // First key of a two-key command (gg, dd, cc), forgotten after a moment.
++  property string pending: ""
+ 
+   // OverlayWindow calls this each time a surface is shown.
+-  function reset() { normal = false }
+-
+-  readonly property var motions: ({
+-    "h": Qt.Key_Left, "j": Qt.Key_Down, "k": Qt.Key_Up, "l": Qt.Key_Right,
+-    "d": Qt.Key_PageDown, "u": Qt.Key_PageUp
+-  })
++  function reset() {
++    normal = false
++    pending = ""
++  }
+ 
+   // Keys normal mode hands on unchanged.
+   readonly property var passed: [
+     Qt.Key_Return, Qt.Key_Enter, Qt.Key_Left, Qt.Key_Right, Qt.Key_Up, Qt.Key_Down,
+-    Qt.Key_PageUp, Qt.Key_PageDown, Qt.Key_Tab, Qt.Key_Backtab, Qt.Key_Delete
++    Qt.Key_PageUp, Qt.Key_PageDown, Qt.Key_Home, Qt.Key_End, Qt.Key_Tab, Qt.Key_Backtab, Qt.Key_Delete
+   ]
+ 
++  function key(code, modifiers) {
++    return { key: code, modifiers: modifiers || Qt.NoModifier, text: "", accepted: true }
++  }
++
++  function insert() {
++    normal = false
++    return null
++  }
++
+   // First line of a Keys.onPressed handler: `event = Vim.translate(event, quit)`.
+-  // Returns the event to handle (h j k l arrive as arrow keys), or null when
+-  // the key was used up here. `quit` closes the surface.
++  // Returns the event to handle (motions arrive as the plain keys the surface
++  // already knows), or null when the key was used up here. `quit` closes it.
+   function translate(event, quit) {
+     if (!normal) {
+       if (event.key !== Qt.Key_Escape) return event
+@@ -37,17 +56,64 @@ Singleton {
+       return null
+     }
+ 
+-    if (passed.indexOf(event.key) !== -1) return event
++    var first = pending
++    pending = ""
++    pendingTimeout.stop()
+ 
++    if (passed.indexOf(event.key) !== -1) return event
+     event.accepted = true
+-    if (event.key === Qt.Key_Escape || event.text === "q") {
++
++    if (event.modifiers & Qt.ControlModifier) {
++      if (event.key === Qt.Key_D || event.key === Qt.Key_F) return key(Qt.Key_PageDown)
++      if (event.key === Qt.Key_U || event.key === Qt.Key_B) return key(Qt.Key_PageUp)
++      return null
++    }
++
++    if (event.key === Qt.Key_Escape) {
+       normal = false
+       quit()
+-    } else if (event.text === "i" || event.text === "a" || event.text === "/") {
++      return null
++    }
++
++    switch (event.text) {
++    case "h": return key(Qt.Key_Left)
++    case "j": return key(Qt.Key_Down)
++    case "k": return key(Qt.Key_Up)
++    case "l": return key(Qt.Key_Right)
++    case "G": return key(Qt.Key_End)
++    case "x": return key(Qt.Key_Delete)
++    case "g":
++    case "d":
++    case "c":
++      if (first !== event.text) {
++        pending = event.text
++        pendingTimeout.restart()
++        return null
++      }
++      if (event.text === "g") return key(Qt.Key_Home)
++      if (event.text === "d") return key(Qt.Key_Delete)
++      insert()
++      return key(Qt.Key_U, Qt.ControlModifier)   // cc: the surfaces clear on Ctrl+U
++    case "S":
++      insert()
++      return key(Qt.Key_U, Qt.ControlModifier)
++    case "i":
++    case "a":
++    case "I":
++    case "A":
++    case "/":
++      return insert()
++    case "q":
+       normal = false
+-    } else if (event.text in motions) {
+-      return { key: motions[event.text], modifiers: Qt.NoModifier, text: "", accepted: true }
++      quit()
++      return null
+     }
+     return null
+   }
++
++  Timer {
++    id: pendingTimeout
++    interval: 700
++    onTriggered: root.pending = ""
++  }
+ }
+diff --git a/shell/Ui/OverlayWindow.qml b/shell/Ui/OverlayWindow.qml
+index 13b9233..e2e9de4 100644
+--- a/shell/Ui/OverlayWindow.qml
++++ b/shell/Ui/OverlayWindow.qml
+@@ -104,7 +104,7 @@ PanelWindow {
+     Text {
+       id: modeHint
+       anchors.centerIn: parent
+-      text: "NORMAL   h j k l move   i type   Esc close"
++      text: "NORMAL   h j k l   gg G   ^d ^u   x del   cc clear   i type   Esc close"
+       color: Commons.Color.foreground
+       font.family: Style.font.family
+       font.pixelSize: Style.font.bodySmall
+diff --git a/shell/Ui/WidgetButton.qml b/shell/Ui/WidgetButton.qml
+index 9267f1d..510bcd8 100644
+--- a/shell/Ui/WidgetButton.qml
++++ b/shell/Ui/WidgetButton.qml
+@@ -83,9 +83,22 @@ Item {
+     // Centering the line box puts the figures above the bar's middle, since
+     // the box keeps room for descenders. Center the figure height instead, so
+     // labels line up with the icons beside them.
+-    anchors.verticalCenterOffset: !root.centerFigures || root.vertical || root.text.indexOf("\n") !== -1
++    // niri port: a label that is one icon glyph is centred on the icon, not on
++    // digits. Nerd Font draws every icon around the same point, 0.348 em above
++    // the baseline (measured from the font's outlines; Qt's own tight bounds
++    // are wrong for some of these glyphs). The half pixel matches where the
++    // bar's icon buttons land.
++    readonly property bool loneIcon: {
++      var first = root.text.length > 0 ? root.text.codePointAt(0) : 0
++      return first >= 0xE000 && root.text.length === (first > 0xFFFF ? 2 : 1)
++    }
++    anchors.verticalCenterOffset: root.vertical || root.text.indexOf("\n") !== -1
+       ? 0
+-      : (labelMetrics.descent - labelMetrics.ascent + labelMetrics.tightBoundingRect("0").height) / 2
++      : loneIcon
++        ? Math.round(label.height / 2 - label.baselineOffset + label.font.pixelSize * 0.348 + 0.5)
++        : !root.centerFigures
++          ? 0
++          : (labelMetrics.descent - labelMetrics.ascent + labelMetrics.tightBoundingRect("0").height) / 2
+     text: root.text
+     color: root.active && root.useActiveColor ? root.activeColor : root.foreground
+     font.family: root.fontFamily
+diff --git a/shell/plugins/clipboard/Clipboard.qml b/shell/plugins/clipboard/Clipboard.qml
+index ea09318..de3f46e 100644
+--- a/shell/plugins/clipboard/Clipboard.qml
++++ b/shell/plugins/clipboard/Clipboard.qml
+@@ -366,6 +366,13 @@ Item {
+             if (event.modifiers & Qt.ShiftModifier) root.requestClearHistory()
+             else root.removeDisplayIndex(root.selectedIndex)
+             event.accepted = true
++          } else if (event.key === Qt.Key_Home || event.key === Qt.Key_End) {
++            if (displayModel.count > 0) {
++              root.cursorActive = true
++              root.selectedIndex = event.key === Qt.Key_Home ? 0 : displayModel.count - 1
++              resultList.positionViewAtIndex(root.selectedIndex, ListView.Contain)
++            }
++            event.accepted = true
+           } else if (event.key === Qt.Key_Up) {
+             root.select(-1)
+             event.accepted = true
+diff --git a/shell/plugins/emojis/Emojis.qml b/shell/plugins/emojis/Emojis.qml
+index f7c22f0..1dd1656 100644
+--- a/shell/plugins/emojis/Emojis.qml
++++ b/shell/plugins/emojis/Emojis.qml
+@@ -86,59 +86,54 @@ Item {
+     var out = EmojiSearch.filterEmojis(root.emojis, root.filterText, 20000)
+     root.filteredEmojis = out
+ 
+-    displayModel.clear()
+-    for (var j = 0; j < out.length; j++) {
+-      displayModel.append({ emoji: out[j].e, index: j })
+-    }
+-
+-    if (displayModel.count === 0) selectedIndex = 0
+-    else if (selectedIndex >= displayModel.count) selectedIndex = displayModel.count - 1
++    if (root.filteredEmojis.length === 0) selectedIndex = 0
++    else if (selectedIndex >= root.filteredEmojis.length) selectedIndex = root.filteredEmojis.length - 1
+     else if (selectedIndex < 0) selectedIndex = 0
+-    cursorActive = displayModel.count > 0
++    cursorActive = root.filteredEmojis.length > 0
+ 
+     Qt.callLater(function() {
+-      if (displayModel.count > 0) resultGrid.positionViewAtIndex(root.selectedIndex, GridView.Contain)
++      if (root.filteredEmojis.length > 0) resultGrid.positionViewAtIndex(root.selectedIndex, GridView.Contain)
+     })
+   }
+ 
+   function select(delta) {
+-    if (displayModel.count === 0) return
++    if (root.filteredEmojis.length === 0) return
+     if (!cursorActive) {
+       cursorActive = true
+-      selectedIndex = delta < 0 ? displayModel.count - 1 : 0
++      selectedIndex = delta < 0 ? root.filteredEmojis.length - 1 : 0
+     } else {
+-      selectedIndex = (selectedIndex + delta + displayModel.count) % displayModel.count
++      selectedIndex = (selectedIndex + delta + root.filteredEmojis.length) % root.filteredEmojis.length
+     }
+     resultGrid.positionViewAtIndex(selectedIndex, GridView.Contain)
+   }
+ 
+   function selectRow(delta) {
+-    if (displayModel.count === 0) return
++    if (root.filteredEmojis.length === 0) return
+     if (!cursorActive) {
+       cursorActive = true
+-      selectedIndex = delta < 0 ? displayModel.count - 1 : 0
++      selectedIndex = delta < 0 ? root.filteredEmojis.length - 1 : 0
+       resultGrid.positionViewAtIndex(selectedIndex, GridView.Contain)
+       return
+     }
+     var newIndex = selectedIndex + delta * columns
+     if (newIndex < 0) newIndex = 0
+-    if (newIndex >= displayModel.count) newIndex = displayModel.count - 1
++    if (newIndex >= root.filteredEmojis.length) newIndex = root.filteredEmojis.length - 1
+     selectedIndex = newIndex
+     resultGrid.positionViewAtIndex(selectedIndex, GridView.Contain)
+   }
+ 
+   function selectPage(delta) {
+-    if (displayModel.count === 0) return
++    if (root.filteredEmojis.length === 0) return
+     if (!cursorActive) {
+       cursorActive = true
+-      selectedIndex = delta < 0 ? displayModel.count - 1 : 0
++      selectedIndex = delta < 0 ? root.filteredEmojis.length - 1 : 0
+       resultGrid.positionViewAtIndex(selectedIndex, GridView.Contain)
+       return
+     }
+     var visibleRows = Math.max(1, Math.floor(resultGrid.height / cellHeight))
+     var newIndex = selectedIndex + delta * columns * visibleRows
+     if (newIndex < 0) newIndex = 0
+-    if (newIndex >= displayModel.count) newIndex = displayModel.count - 1
++    if (newIndex >= root.filteredEmojis.length) newIndex = root.filteredEmojis.length - 1
+     selectedIndex = newIndex
+     resultGrid.positionViewAtIndex(selectedIndex, GridView.Contain)
+   }
+@@ -151,9 +146,8 @@ Item {
+   }
+ 
+   function activateIndex(index) {
+-    if (index < 0 || index >= displayModel.count) return
+-    var row = displayModel.get(index)
+-    root.applySelected(row.emoji)
++    if (index < 0 || index >= root.filteredEmojis.length) return
++    root.applySelected(root.filteredEmojis[index].e)
+   }
+ 
+   function applySelected(emoji) {
+@@ -162,8 +156,6 @@ Item {
+     Quickshell.execDetached([root.omarchyPath + "/bin/omarchy-menu-emoji-insert", emoji])
+   }
+ 
+-  ListModel { id: displayModel }
+-
+   FileView {
+     path: root.omarchyPath + "/shell/plugins/emojis/" + root.dataSet + ".json"
+     onLoaded: root.loadEmojis(text())
+@@ -211,6 +203,13 @@ Item {
+           } else if (Util.editsFilter(event, root.filterText)) {
+             root.setFilter(Util.editedFilter(event, root.filterText))
+             event.accepted = true
++          } else if (event.key === Qt.Key_Home || event.key === Qt.Key_End) {
++            if (root.filteredEmojis.length > 0) {
++              root.cursorActive = true
++              root.selectedIndex = event.key === Qt.Key_Home ? 0 : root.filteredEmojis.length - 1
++              resultGrid.positionViewAtIndex(root.selectedIndex, GridView.Contain)
++            }
++            event.accepted = true
+           } else if (event.key === Qt.Key_Left) {
+             root.select(-1)
+             event.accepted = true
+@@ -231,7 +230,7 @@ Item {
+             event.accepted = true
+           } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+             if (root.cursorActive) root.activateIndex(root.selectedIndex)
+-            else if (displayModel.count > 0) root.cursorActive = true
++            else if (root.filteredEmojis.length > 0) root.cursorActive = true
+             event.accepted = true
+           } else if (event.text && event.text.length === 1 && event.text.charCodeAt(0) >= 32 && event.text.charCodeAt(0) !== 127) {
+             root.setFilter(root.filterText + event.text)
+@@ -292,7 +291,7 @@ Item {
+           GridView {
+             id: resultGrid
+             anchors.fill: parent
+-            model: displayModel
++            model: root.filteredEmojis
+             clip: true
+             cellWidth: root.cellWidth
+             cellHeight: root.cellHeight
+@@ -300,7 +299,8 @@ Item {
+ 
+             delegate: Rectangle {
+               required property int index
+-              required property string emoji
++              required property var modelData
++              readonly property string emoji: modelData.e
+ 
+               readonly property bool hasCursor: root.cursorActive && index === root.selectedIndex
+ 
+@@ -342,7 +342,7 @@ Item {
+           Column {
+             anchors.centerIn: parent
+             spacing: Style.space(8)
+-            visible: displayModel.count === 0
++            visible: root.filteredEmojis.length === 0
+ 
+             Text {
+               text: "󰈉"
+diff --git a/shell/plugins/image-picker/ImagePicker.qml b/shell/plugins/image-picker/ImagePicker.qml
+index e6a6d48..dff6100 100644
+--- a/shell/plugins/image-picker/ImagePicker.qml
++++ b/shell/plugins/image-picker/ImagePicker.qml
+@@ -707,6 +707,15 @@ Item {
+             } else if (root.filterable && Util.editsFilter(event, root.filterText)) {
+               root.updateFilter(Util.editedFilter(event, root.filterText))
+               event.accepted = true
++            } else if (event.key === Qt.Key_Home || event.key === Qt.Key_End) {
++              var step = event.key === Qt.Key_Home ? 1 : -1
++              for (var at = step > 0 ? 0 : root.imageArray.length - 1; at >= 0 && at < root.imageArray.length; at += step) {
++                if (root.itemMatches(at)) {
++                  root.select(at)
++                  break
++                }
++              }
++              event.accepted = true
+             } else if (event.key === Qt.Key_Left || (event.key === Qt.Key_Tab && event.modifiers & Qt.ShiftModifier) || event.key === Qt.Key_Backtab) {
+               root.selectAdjacent(-1)
+               event.accepted = true
+diff --git a/shell/plugins/menu/Menu.qml b/shell/plugins/menu/Menu.qml
+index e26cfc6..10a38fa 100644
+--- a/shell/plugins/menu/Menu.qml
++++ b/shell/plugins/menu/Menu.qml
+@@ -1251,6 +1251,15 @@ Item {
+           } else if ((event.key === Qt.Key_Backspace || event.key === Qt.Key_Left) && !root.filterText) {
+             root.goBack()
+             event.accepted = true
++          } else if (event.key === Qt.Key_Home || event.key === Qt.Key_End) {
++            var home = event.key === Qt.Key_Home
++            var edge = root.nextSelectable(home ? 0 : displayModel.count - 1, home ? 1 : -1)
++            if (edge >= 0) {
++              root.cursorActive = true
++              root.selectedIndex = edge
++              root.revealCursor()
++            }
++            event.accepted = true
+           } else if (event.key === Qt.Key_Up) {
+             root.select(-1)
+             event.accepted = true

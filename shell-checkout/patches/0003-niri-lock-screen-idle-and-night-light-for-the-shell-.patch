@@ -1,0 +1,1641 @@
+From 95d2d54b617f54269837fcf84274ffbbbbebcdba Mon Sep 17 00:00:00 2001
+From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
+Date: Sun, 11 Oct 2026 16:44:38 +0530
+Subject: [PATCH 03/18] niri: lock screen, idle and night light for the shell
+ panel; one idle locker per panel; visible name is Arch
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ bin/omarchy                                   |  6 ++---
+ bin/omarchy-agent-account-state               |  2 +-
+ bin/omarchy-bar                               |  2 +-
+ bin/omarchy-debug                             |  2 +-
+ bin/omarchy-dev-benchmark-cli                 |  2 +-
+ bin/omarchy-dev-link                          |  4 +--
+ bin/omarchy-dev-unlink                        |  2 +-
+ bin/omarchy-install-hermes-cli                |  2 +-
+ bin/omarchy-install-openclaw-cli              |  6 ++---
+ bin/omarchy-install-preinstalls               |  2 +-
+ bin/omarchy-migrate                           |  4 +--
+ bin/omarchy-migrate-notify                    |  4 +--
+ bin/omarchy-provision-hardware                |  2 +-
+ bin/omarchy-refresh-config                    |  2 +-
+ bin/omarchy-refresh-pacman                    |  2 +-
+ bin/omarchy-reinstall                         |  2 +-
+ bin/omarchy-reinstall-configs                 |  2 +-
+ bin/omarchy-remove-preinstalls                |  2 +-
+ ...-remove-security-thunderbolt-authorization |  2 +-
+ bin/omarchy-remove-security-usb-authorization |  2 +-
+ bin/omarchy-remove-service-sunshine           |  2 +-
+ bin/omarchy-restart-shell                     | 10 +++----
+ bin/omarchy-security-functions                |  2 +-
+ bin/omarchy-setup-direct-boot                 |  4 +--
+ bin/omarchy-setup-security-sudoless-docker    |  2 +-
+ bin/omarchy-setup-security-usb-authorization  |  4 +--
+ bin/omarchy-system-factory-reset              |  6 ++---
+ bin/omarchy-system-factory-reset-finish       |  2 +-
+ bin/omarchy-system-lid-inhibit                |  2 +-
+ bin/omarchy-system-shutdown                   |  2 +-
+ bin/omarchy-system-sleep-monitor              |  2 +-
+ bin/omarchy-theme-set-claude                  |  2 +-
+ bin/omarchy-theme-set-hermes                  |  2 +-
+ bin/omarchy-theme-set-pi                      |  2 +-
+ bin/omarchy-update-available                  |  2 +-
+ bin/omarchy-update-dev                        |  4 +--
+ bin/omarchy-update-lock                       |  2 +-
+ bin/omarchy-update-requires-free-space        |  2 +-
+ bin/omarchy-update-stay-awake                 | 10 +++----
+ bin/omarchy-upgrade-to-quattro                |  6 ++---
+ niri/bin/hyprctl                              | 24 +++++++++++++++++
+ niri/bin/omarchy-hyprland-monitor-focused     |  5 ++++
+ niri/bin/omarchy-system-lock                  |  4 ++-
+ niri/bin/omarchy-toggle-nightlight            |  7 ++---
+ niri/bin/panel-mode                           | 11 +++++---
+ niri/bin/panel-switch                         | 27 ++++++++++++++++---
+ niri/rebrand                                  | 20 ++++++++++++++
+ shell/plugins/agents/Panel.qml                |  4 +--
+ shell/plugins/agents/manifest.json            |  4 +--
+ shell/plugins/background/manifest.json        |  2 +-
+ shell/plugins/bar/manifest.json               |  2 +-
+ .../bar/widgets/ActiveWindow.manifest.json    |  2 +-
+ .../bar/widgets/Indicators.manifest.json      |  2 +-
+ .../bar/widgets/KeyboardLayout.manifest.json  |  2 +-
+ .../bar/widgets/Microphone.manifest.json      |  2 +-
+ .../plugins/bar/widgets/Spacer.manifest.json  |  2 +-
+ .../bar/widgets/SystemUpdate.manifest.json    | 10 +++----
+ shell/plugins/bar/widgets/SystemUpdate.qml    |  2 +-
+ shell/plugins/bar/widgets/Tray.manifest.json  |  2 +-
+ .../bar/widgets/Workspaces.manifest.json      |  2 +-
+ shell/plugins/clipboard/manifest.json         |  2 +-
+ shell/plugins/dev-gallery/GalleryPanel.qml    |  6 ++---
+ shell/plugins/dev-gallery/manifest.json       |  2 +-
+ shell/plugins/emojis/manifest.json            |  2 +-
+ shell/plugins/image-picker/manifest.json      |  2 +-
+ shell/plugins/lock/Service.qml                |  8 +++---
+ shell/plugins/lock/manifest.json              |  2 +-
+ shell/plugins/menu/manifest.json              | 10 +++----
+ shell/plugins/notifications/manifest.json     |  2 +-
+ shell/plugins/panels/audio/manifest.json      |  2 +-
+ shell/plugins/panels/bluetooth/manifest.json  |  2 +-
+ shell/plugins/panels/clock/manifest.json      |  2 +-
+ .../panels/disk-speedtest/manifest.json       |  2 +-
+ shell/plugins/panels/dropbox/manifest.json    |  4 +--
+ shell/plugins/panels/elsewhen/manifest.json   |  2 +-
+ shell/plugins/panels/monitor/manifest.json    |  2 +-
+ shell/plugins/panels/network/manifest.json    |  2 +-
+ shell/plugins/panels/power/manifest.json      |  2 +-
+ shell/plugins/panels/speedtest/manifest.json  |  2 +-
+ shell/plugins/panels/tailscale/manifest.json  |  4 +--
+ shell/plugins/panels/weather/manifest.json    |  2 +-
+ shell/plugins/panels/wifiqr/manifest.json     |  2 +-
+ shell/plugins/polkit/manifest.json            |  2 +-
+ shell/plugins/reminders/manifest.json         |  2 +-
+ shell/plugins/services/battery/manifest.json  |  2 +-
+ shell/plugins/services/idle/manifest.json     |  2 +-
+ shell/plugins/services/media/manifest.json    |  2 +-
+ shell/plugins/services/nightlight/Service.qml |  6 +++++
+ .../plugins/services/nightlight/manifest.json |  2 +-
+ .../services/remote-session/manifest.json     |  2 +-
+ shell/services/PluginRegistry.qml             |  2 +-
+ 91 files changed, 214 insertions(+), 134 deletions(-)
+ create mode 100755 niri/bin/omarchy-hyprland-monitor-focused
+ create mode 100755 niri/rebrand
+
+diff --git a/bin/omarchy b/bin/omarchy
+index b014675..19a4e9b 100755
+--- a/bin/omarchy
++++ b/bin/omarchy
+@@ -606,9 +606,9 @@ show_commands() {
+   local alias_rows=""
+ 
+   if [[ $include_all == "true" ]]; then
+-    echo "Omarchy commands (all):"
++    echo "Arch commands (all):"
+   else
+-    echo "Omarchy commands:"
++    echo "Arch commands:"
+   fi
+ 
+   while IFS= read -r key; do
+@@ -1087,7 +1087,7 @@ dispatch_or_help() {
+     return 0
+   fi
+ 
+-  echo "Unknown Omarchy command: omarchy ${args[*]}" >&2
++  echo "Unknown Arch command: omarchy ${args[*]}" >&2
+   suggestion=$(suggest_command "${args[0]}")
+   if [[ -n $suggestion ]]; then
+     echo "Did you mean: omarchy $suggestion ?" >&2
+diff --git a/bin/omarchy-agent-account-state b/bin/omarchy-agent-account-state
+index 0578b6c..3387b5b 100755
+--- a/bin/omarchy-agent-account-state
++++ b/bin/omarchy-agent-account-state
+@@ -633,7 +633,7 @@ def usage_by_account(provider: str) -> tuple[dict[str, Any], frozenset[str]]:
+ 
+ 
+ def notify(title: str, body: str, action: list[str] | None = None) -> None:
+-  command = ["omarchy-notification-send", "--app-name", "Omarchy Agents", "-g", "󰚩", title, body]
++  command = ["omarchy-notification-send", "--app-name", "Arch Agents", "-g", "󰚩", title, body]
+   if action:
+     command += ["--exec"] + action
+   subprocess.run(command, check=False)
+diff --git a/bin/omarchy-bar b/bin/omarchy-bar
+index d8d99de..a4eaf86 100755
+--- a/bin/omarchy-bar
++++ b/bin/omarchy-bar
+@@ -194,7 +194,7 @@ cmd_defaults() {
+   " \
+     --slurpfile defaults "$DEFAULTS_FILE" \
+     --argjson widgets "$optional_widgets"
+-  echo "Restored the default Omarchy bar"
++  echo "Restored the default Arch bar"
+ }
+ 
+ cmd_position() {
+diff --git a/bin/omarchy-debug b/bin/omarchy-debug
+index 59fbc4f..03d1dd5 100755
+--- a/bin/omarchy-debug
++++ b/bin/omarchy-debug
+@@ -37,7 +37,7 @@ fi
+ cat > "$LOG_FILE" <<EOF
+ Date: $(date)
+ Hostname: $(hostname)
+-Omarchy Package: $(pacman -Q omarchy-dev 2>/dev/null || pacman -Q omarchy 2>/dev/null || echo "unknown")
++Arch Package: $(pacman -Q omarchy-dev 2>/dev/null || pacman -Q omarchy 2>/dev/null || echo "unknown")
+ 
+ =========================================
+ SYSTEM INFORMATION
+diff --git a/bin/omarchy-dev-benchmark-cli b/bin/omarchy-dev-benchmark-cli
+index f5dc388..6599eff 100755
+--- a/bin/omarchy-dev-benchmark-cli
++++ b/bin/omarchy-dev-benchmark-cli
+@@ -99,7 +99,7 @@ if [[ ! $REPEAT =~ ^[0-9]+$ ]] || (( REPEAT < 1 )); then
+   exit 2
+ fi
+ 
+-printf 'Omarchy CLI benchmark (%d runs each)\n\n' "$REPEAT"
++printf 'Arch CLI benchmark (%d runs each)\n\n' "$REPEAT"
+ run_case "omarchy" "$CLI"
+ run_case "omarchy --help" "$CLI" --help
+ run_case "omarchy commands" "$CLI" commands
+diff --git a/bin/omarchy-dev-link b/bin/omarchy-dev-link
+index b09473b..2c3363d 100755
+--- a/bin/omarchy-dev-link
++++ b/bin/omarchy-dev-link
+@@ -85,7 +85,7 @@ target=$(realpath -e "$1" 2>/dev/null) || {
+ 
+ for required in bin default shell; do
+   if [[ ! -d $target/$required ]]; then
+-    echo "Warning: $target/$required not found — does this look like an Omarchy source checkout?" >&2
++    echo "Warning: $target/$required not found — does this look like an Arch source checkout?" >&2
+   fi
+ done
+ 
+@@ -114,7 +114,7 @@ fi
+ 
+ sudo install -Dm440 -o root -g root "$staged_sudoers" "$sudoers_file"
+ 
+-echo "Pointed Omarchy at $target"
++echo "Pointed Arch at $target"
+ echo "sudo now resolves omarchy-* from $target/bin"
+ echo
+ 
+diff --git a/bin/omarchy-dev-unlink b/bin/omarchy-dev-unlink
+index b189263..187632b 100755
+--- a/bin/omarchy-dev-unlink
++++ b/bin/omarchy-dev-unlink
+@@ -56,7 +56,7 @@ printf 'export OMARCHY_PATH="%s"\n' "$default_target" | sudo tee /etc/omarchy.co
+ # points at — and keeps trusting a user-writable directory for root's commands.
+ sudo rm -f "$sudoers_file"
+ 
+-echo "Pointed Omarchy at $default_target"
++echo "Pointed Arch at $default_target"
+ echo
+ 
+ if (( prompt_reboot )) && gum confirm "Reboot now to activate?"; then
+diff --git a/bin/omarchy-install-hermes-cli b/bin/omarchy-install-hermes-cli
+index a5acd0f..96ee8f8 100755
+--- a/bin/omarchy-install-hermes-cli
++++ b/bin/omarchy-install-hermes-cli
+@@ -528,7 +528,7 @@ fi
+ # What omarchy-agent runs is the command, not the venv, so the command is what
+ # has to answer for the seeded sessions.
+ if ! hermes_prompt_ready; then
+-  echo "Hermes is installed at $runtime, but $command_path does not run the interactive seeded sessions Omarchy needs." >&2
++  echo "Hermes is installed at $runtime, but $command_path does not run the interactive seeded sessions Arch needs." >&2
+   echo "Update Hermes with 'hermes update', then run omarchy-install-hermes-cli --now again." >&2
+   exit 1
+ fi
+diff --git a/bin/omarchy-install-openclaw-cli b/bin/omarchy-install-openclaw-cli
+index 17e5d0e..003ce56 100755
+--- a/bin/omarchy-install-openclaw-cli
++++ b/bin/omarchy-install-openclaw-cli
+@@ -197,11 +197,11 @@ esac
+ # Refused before anything is installed or touched: the command's name, what
+ # PATH finds, and a gateway running another OpenClaw all have to be clear.
+ if ! command_ours; then
+-  echo "$command_path is not the OpenClaw Omarchy set up. Move it aside, then run omarchy-install-openclaw-cli --now again." >&2
++  echo "$command_path is not the OpenClaw Arch set up. Move it aside, then run omarchy-install-openclaw-cli --now again." >&2
+   exit 1
+ fi
+ if ! path_clear; then
+-  echo "'openclaw' on PATH is $(type -P openclaw), which is what Omarchy would run instead of $runtime_command." >&2
++  echo "'openclaw' on PATH is $(type -P openclaw), which is what Arch would run instead of $runtime_command." >&2
+   echo "Remove it or reorder PATH, then run omarchy-install-openclaw-cli --now again." >&2
+   exit 1
+ fi
+@@ -265,7 +265,7 @@ ln -sfn "$runtime_command" "$command_path"
+ rehome_services
+ 
+ if ! on_path; then
+-  echo "$runtime_command is ready, but 'openclaw' on PATH is $(type -P openclaw || echo missing), which is what Omarchy runs." >&2
++  echo "$runtime_command is ready, but 'openclaw' on PATH is $(type -P openclaw || echo missing), which is what Arch runs." >&2
+   echo "Put ~/.local/bin on PATH, then run omarchy-install-openclaw-cli --now again." >&2
+   exit 1
+ fi
+diff --git a/bin/omarchy-install-preinstalls b/bin/omarchy-install-preinstalls
+index 82789f7..3133d52 100755
+--- a/bin/omarchy-install-preinstalls
++++ b/bin/omarchy-install-preinstalls
+@@ -4,7 +4,7 @@
+ # omarchy:requires-sudo=true
+ 
+ if gum confirm "Are you sure you want to restore all preinstalled web apps, TUI wrappers, and desktop applications?"; then
+-  echo -e "Restoring preinstalled Omarchy applications...\n"
++  echo -e "Restoring preinstalled Arch applications...\n"
+ 
+   # Recreates the shipped .desktop launchers (web apps and TUIs) and the mise stubs
+   # that back claude, gh, opencode, and the rest of the agents
+diff --git a/bin/omarchy-migrate b/bin/omarchy-migrate
+index e64aae3..6992eef 100755
+--- a/bin/omarchy-migrate
++++ b/bin/omarchy-migrate
+@@ -69,14 +69,14 @@ wait_for_pacman_transaction() {
+   local lock_file=/var/lib/pacman/db.lck
+ 
+   [[ -e $lock_file ]] || return 0
+-  echo "Waiting for pacman transaction to finish before running Omarchy migrations..."
++  echo "Waiting for pacman transaction to finish before running Arch migrations..."
+ 
+   for _ in {1..900}; do
+     [[ -e $lock_file ]] || return 0
+     sleep 1
+   done
+ 
+-  echo "Pacman transaction is still running; Omarchy migrations will retry on next login."
++  echo "Pacman transaction is still running; Arch migrations will retry on next login."
+   exit 0
+ }
+ 
+diff --git a/bin/omarchy-migrate-notify b/bin/omarchy-migrate-notify
+index 00cce3d..ac9e91d 100755
+--- a/bin/omarchy-migrate-notify
++++ b/bin/omarchy-migrate-notify
+@@ -40,13 +40,13 @@ fi
+ 
+ # The shell keeps the click command with the toast, so this oneshot can hand the
+ # invitation over and exit instead of staying activated until it is answered.
+-omarchy-notification-send -u critical -g  "Pending Omarchy Migrations" "$message" \
++omarchy-notification-send -u critical -g  "Pending Arch Migrations" "$message" \
+   --exec omarchy-launch-floating-terminal-with-presentation omarchy-migrate && exit 0
+ 
+ # Reached when the notification could not be handed off, so fall back to telling
+ # the user in the terminal.
+ print_pending_migrations() {
+-  echo "Omarchy has pending migrations. Run omarchy-migrate in a terminal to apply them:"
++  echo "Arch has pending migrations. Run omarchy-migrate in a terminal to apply them:"
+   while IFS= read -r migration; do
+     [[ -n $migration ]] || continue
+     printf '  %s\n' "$migration"
+diff --git a/bin/omarchy-provision-hardware b/bin/omarchy-provision-hardware
+index fee9876..c3a0382 100755
+--- a/bin/omarchy-provision-hardware
++++ b/bin/omarchy-provision-hardware
+@@ -126,7 +126,7 @@ while (( ${#remaining[@]} )); do
+   if [[ -L $script ]]; then
+     fail "Deferred step is a symlink: $step"
+   elif [[ ! -e $script ]]; then
+-    echo "Skipping deferred hardware step $step: this Omarchy no longer ships it"
++    echo "Skipping deferred hardware step $step: this Arch no longer ships it"
+   else
+     echo "Running deferred hardware step $step"
+     if ! run_logged "$script"; then
+diff --git a/bin/omarchy-refresh-config b/bin/omarchy-refresh-config
+index f4d0f50..cf4a9bb 100755
+--- a/bin/omarchy-refresh-config
++++ b/bin/omarchy-refresh-config
+@@ -35,7 +35,7 @@ if [[ -f $user_config_file ]]; then
+   if cmp -s "$user_config_file" "$backup_config_file"; then
+     rm "$backup_config_file"
+   else
+-    echo -e "\e[31mReplaced $user_config_file with new Omarchy default.\nSaved backup as ${backup_config_file}.\n\n\e[32mChanges:\e[0m"
++    echo -e "\e[31mReplaced $user_config_file with new Arch default.\nSaved backup as ${backup_config_file}.\n\n\e[32mChanges:\e[0m"
+     diff "$user_config_file" "$backup_config_file" || true
+   fi
+ else
+diff --git a/bin/omarchy-refresh-pacman b/bin/omarchy-refresh-pacman
+index 5c1eb0d..4fe1d0c 100755
+--- a/bin/omarchy-refresh-pacman
++++ b/bin/omarchy-refresh-pacman
+@@ -38,7 +38,7 @@ fi
+ templates=$(omarchy_pacman_templates "$platform") || exit 1
+ [[ -n $channel ]] || channel=$(omarchy_pacman_default_channel "$platform") || exit 1
+ if [[ ! -f $templates/pacman-$channel.conf || ! -f $templates/mirrorlist-$channel ]]; then
+-  echo "Omarchy has no $channel channel for $platform. No repository configuration changed." >&2
++  echo "Arch has no $channel channel for $platform. No repository configuration changed." >&2
+   exit 1
+ fi
+ 
+diff --git a/bin/omarchy-reinstall b/bin/omarchy-reinstall
+index e46a642..dd30341 100755
+--- a/bin/omarchy-reinstall
++++ b/bin/omarchy-reinstall
+@@ -5,7 +5,7 @@
+ 
+ set -e
+ 
+-echo -e "This will reinstall all default Omarchy packages and reset default configs.\nWarning: user config changes will be overwritten.\n"
++echo -e "This will reinstall all default Arch packages and reset default configs.\nWarning: user config changes will be overwritten.\n"
+ 
+ if gum confirm "Are you sure you want to reinstall and lose config changes?"; then
+   omarchy-reinstall-pkgs
+diff --git a/bin/omarchy-reinstall-configs b/bin/omarchy-reinstall-configs
+index f89b653..fa0007e 100755
+--- a/bin/omarchy-reinstall-configs
++++ b/bin/omarchy-reinstall-configs
+@@ -9,7 +9,7 @@ if (( EUID == 0 )); then
+   exit 1
+ fi
+ 
+-echo "Resetting Omarchy user configs to shipped defaults..."
++echo "Resetting Arch user configs to shipped defaults..."
+ 
+ # /etc/skel is the same tree useradd -m copies to seed a fresh user's $HOME.
+ # Replaying it over an existing user resyncs every package-shipped user
+diff --git a/bin/omarchy-remove-preinstalls b/bin/omarchy-remove-preinstalls
+index 61a03b0..e02ca78 100755
+--- a/bin/omarchy-remove-preinstalls
++++ b/bin/omarchy-remove-preinstalls
+@@ -3,7 +3,7 @@
+ # omarchy:summary=Remove preinstalled Omarchy applications (web apps, TUIs, and selected packages).
+ 
+ if gum confirm "Are you sure you want to remove all preinstalled web apps, TUI wrappers, and desktop applications?"; then
+-  echo -e "Removing preinstalled Omarchy applications...\n"
++  echo -e "Removing preinstalled Arch applications...\n"
+ 
+   omarchy-webapp-remove-all
+   omarchy-tui-remove-all
+diff --git a/bin/omarchy-remove-security-thunderbolt-authorization b/bin/omarchy-remove-security-thunderbolt-authorization
+index 0910041..b166f6f 100755
+--- a/bin/omarchy-remove-security-thunderbolt-authorization
++++ b/bin/omarchy-remove-security-thunderbolt-authorization
+@@ -7,4 +7,4 @@ set -euo pipefail
+ gum confirm "Restore Bolt's previous policy? New accessories may be authorized automatically when IOMMU protection is active." || exit 0
+ sudo /usr/bin/omarchy-thunderbolt-authorization-admin disable
+ systemctl --user disable --now omarchy-thunderbolt-authorization.service
+-echo "Previous Bolt policy restored. Saved Omarchy trust is retained for re-enabling."
++echo "Previous Bolt policy restored. Saved Arch trust is retained for re-enabling."
+diff --git a/bin/omarchy-remove-security-usb-authorization b/bin/omarchy-remove-security-usb-authorization
+index b396139..bbfbd95 100755
+--- a/bin/omarchy-remove-security-usb-authorization
++++ b/bin/omarchy-remove-security-usb-authorization
+@@ -16,7 +16,7 @@ while (( $# > 0 )); do
+   -h | --help)
+     echo "Usage: omarchy-remove-security-usb-authorization [--boot-only] [--yes]"
+     echo
+-    echo "Disables Omarchy's USB approval prompts and restores the kernel's"
++    echo "Disables Arch's USB approval prompts and restores the kernel's"
+     echo "normal default-allow behavior."
+     echo "Use --boot-only to keep USBGuard enabled after the system starts."
+     exit 0
+diff --git a/bin/omarchy-remove-service-sunshine b/bin/omarchy-remove-service-sunshine
+index e997622..ea52af4 100755
+--- a/bin/omarchy-remove-service-sunshine
++++ b/bin/omarchy-remove-service-sunshine
+@@ -66,4 +66,4 @@ disable_hyprland_autostart
+ close_ufw_ports
+ 
+ echo ""
+-echo "Sunshine has been removed and its Omarchy-managed Moonlight streaming ports have been closed."
++echo "Sunshine has been removed and its Arch-managed Moonlight streaming ports have been closed."
+diff --git a/bin/omarchy-restart-shell b/bin/omarchy-restart-shell
+index 0794d6b..840ba43 100755
+--- a/bin/omarchy-restart-shell
++++ b/bin/omarchy-restart-shell
+@@ -9,7 +9,7 @@ session_omarchy_path=$(systemctl --user show-environment 2>/dev/null | sed -n 's
+ : "${session_omarchy_path:=$OMARCHY_PATH}"
+ 
+ CONFIG_DIR="$session_omarchy_path/shell"
+-[[ -f $CONFIG_DIR/shell.qml ]] || { echo "Omarchy shell config not found: $CONFIG_DIR" >&2; exit 1; }
++[[ -f $CONFIG_DIR/shell.qml ]] || { echo "Arch shell config not found: $CONFIG_DIR" >&2; exit 1; }
+ 
+ # Allow running from outside the session (e.g. over ssh) by deriving the
+ # Hyprland instance signature from the newest instance runtime dir.
+@@ -30,7 +30,7 @@ if omarchy-hyprland-session-locked; then
+   locking=$(OMARCHY_PATH="$session_omarchy_path" OMARCHY_SHELL_IPC_TIMEOUT=0.5s omarchy-shell lock status 2>/dev/null |
+     jq -r '.secure or .requested' 2>/dev/null)
+   if [[ $locking == "true" ]]; then
+-    echo "Refusing to restart Omarchy shell while the session is locked." >&2
++    echo "Refusing to restart Arch shell while the session is locked." >&2
+     exit 1
+   fi
+   relock=1
+@@ -110,7 +110,7 @@ while (( SECONDS < deadline )); do
+   sleep 0.1
+ done
+ if (( shell_ready == 0 )); then
+-  echo "Omarchy shell did not become ready after restart." >&2
++  echo "Arch shell did not become ready after restart." >&2
+   exit 1
+ fi
+ 
+@@ -119,7 +119,7 @@ fi
+ # first and depends on nothing else: a user stranded behind the failsafe must
+ # not wait on the notification plugin, which may be slow or absent.
+ if (( relock )) && ! relock_session; then
+-  echo "Omarchy shell restarted, but the session lock was not re-secured." >&2
++  echo "Arch shell restarted, but the session lock was not re-secured." >&2
+   exit 1
+ fi
+ 
+@@ -135,7 +135,7 @@ if (( notifications_were_running )); then
+     sleep 0.1
+   done
+   if (( notifications_restored == 0 )); then
+-    echo "Omarchy shell restarted, but its notification service did not become ready." >&2
++    echo "Arch shell restarted, but its notification service did not become ready." >&2
+     exit 1
+   fi
+ fi
+diff --git a/bin/omarchy-security-functions b/bin/omarchy-security-functions
+index 12ad8a7..a84f640 100755
+--- a/bin/omarchy-security-functions
++++ b/bin/omarchy-security-functions
+@@ -58,7 +58,7 @@ omarchy_security_require_source_root() {
+   if [[ ${OMARCHY_PATH:-} != /* || $(/usr/bin/realpath -e -- "$OMARCHY_PATH") != "$OMARCHY_PATH" ]] ||
+     ! { [[ $command_source == "$OMARCHY_PATH/bin/$command_name" ]] ||
+       [[ $OMARCHY_PATH == "/usr/share/omarchy" && $command_source == "/usr/bin/$command_name" ]]; }; then
+-    echo "OMARCHY_PATH does not match this Omarchy command." >&2
++    echo "OMARCHY_PATH does not match this Arch command." >&2
+     return 1
+   fi
+ }
+diff --git a/bin/omarchy-setup-direct-boot b/bin/omarchy-setup-direct-boot
+index ee9f30f..3fb2ed2 100755
+--- a/bin/omarchy-setup-direct-boot
++++ b/bin/omarchy-setup-direct-boot
+@@ -39,7 +39,7 @@ existing_entry=$(efibootmgr | grep -E "^Boot[0-9A-Fa-f]+\*? Omarchy([[:space:]]|
+ if [[ -n $existing_entry ]]; then
+   boot_num=$(echo "$existing_entry" | sed -n 's/^Boot\([0-9A-Fa-f]\+\).*/\1/p')
+ 
+-  if gum confirm "Disable direct boot (remove Omarchy EFI entry)?"; then
++  if gum confirm "Disable direct boot (remove Arch EFI entry)?"; then
+     echo "Removing EFI boot entry $boot_num"
+     sudo efibootmgr --bootnum "$boot_num" --delete-bootnum >/dev/null
+   fi
+@@ -49,7 +49,7 @@ else
+   uki_file=$(sudo find /boot/EFI/Linux/ -name "omarchy*.efi" -printf "%f\n" 2>/dev/null | head -1)
+ 
+   if [[ -z $uki_file ]]; then
+-    echo "Error: No Omarchy UKI found in /boot/EFI/Linux/" >&2
++    echo "Error: No Arch UKI found in /boot/EFI/Linux/" >&2
+     exit 1
+   fi
+ 
+diff --git a/bin/omarchy-setup-security-sudoless-docker b/bin/omarchy-setup-security-sudoless-docker
+index 4577cbf..d672bb7 100755
+--- a/bin/omarchy-setup-security-sudoless-docker
++++ b/bin/omarchy-setup-security-sudoless-docker
+@@ -24,7 +24,7 @@ echo "    docker run -v /:/host alpine   # full read/write of the host, as root"
+ echo ""
+ echo "and take over the machine with no password prompt. A single rogue script,"
+ echo "dependency, or plugin running as you is enough. It is convenient for"
+-echo "development, but it removes the protection Omarchy keeps by default, where"
++echo "development, but it removes the protection Arch keeps by default, where"
+ echo "Docker access goes through a polkit/sudo prompt."
+ echo ""
+ 
+diff --git a/bin/omarchy-setup-security-usb-authorization b/bin/omarchy-setup-security-usb-authorization
+index ab3e258..55174c0 100755
+--- a/bin/omarchy-setup-security-usb-authorization
++++ b/bin/omarchy-setup-security-usb-authorization
+@@ -19,7 +19,7 @@ while (( $# > 0 )); do
+     echo "Usage: omarchy-setup-security-usb-authorization [--boot] [--yes] [--review-existing]"
+     echo
+     echo "Trusts USB devices that are connected now, then blocks new devices"
+-    echo "until you approve them from an Omarchy notification."
++    echo "until you approve them from an Arch notification."
+     echo
+     echo "--boot also blocks USB devices from the start of kernel boot. Connected"
+     echo "devices are added to USBGuard's policy, but remain unavailable before"
+@@ -94,7 +94,7 @@ fi
+ # or incomplete installations, including dangling dev-link unit symlinks.
+ session_environment=$(systemctl --user show-environment)
+ grep -Fqx -- "OMARCHY_PATH=$OMARCHY_PATH" <<<"$session_environment" || {
+-  echo "The session and this command use different Omarchy installations. Update the session before enabling USB protection." >&2
++  echo "The session and this command use different Arch installations. Update the session before enabling USB protection." >&2
+   exit 1
+ }
+ for required in "$unit_source" /usr/share/omarchy/install/helpers/usb-authorization-policy.sh; do
+diff --git a/bin/omarchy-system-factory-reset b/bin/omarchy-system-factory-reset
+index c46c5cb..b4e9666 100755
+--- a/bin/omarchy-system-factory-reset
++++ b/bin/omarchy-system-factory-reset
+@@ -39,7 +39,7 @@ LOG_FILE=/var/log/omarchy-system-factory-reset.log
+ 
+ # Never replace a newer checkout reset with a different installed implementation.
+ if ! /usr/bin/cmp -s -- "${BASH_SOURCE[0]}" "$PACKAGED_PATH"; then
+-  echo "Factory reset differs from the installed command. Install the matching Omarchy package before resetting." >&2
++  echo "Factory reset differs from the installed command. Install the matching Arch package before resetting." >&2
+   exit 1
+ fi
+ 
+@@ -585,12 +585,12 @@ require_factory_snapshot() {
+   echo
+   gum style --bold --foreground 3 "This machine has no factory snapshot to reset to."
+   echo
+-  gum style "A reset restores the @factory snapshot the Omarchy Quattro installer takes"
++  gum style "A reset restores the @factory snapshot the Arch Quattro installer takes"
+   gum style "right after installing. Machines upgraded to Quattro from an earlier version,"
+   gum style "or installed some other way, never got one, so there is no baseline here to"
+   gum style "return to."
+   echo
+-  gum style --foreground 8 "Reinstall from the Omarchy ISO to make this machine resettable."
++  gum style --foreground 8 "Reinstall from the Arch ISO to make this machine resettable."
+   exit 1
+ }
+ 
+diff --git a/bin/omarchy-system-factory-reset-finish b/bin/omarchy-system-factory-reset-finish
+index 08dc4fd..65dd6b2 100755
+--- a/bin/omarchy-system-factory-reset-finish
++++ b/bin/omarchy-system-factory-reset-finish
+@@ -30,7 +30,7 @@ fi
+ # This runs before var-log.mount, so a log file under /var/log would be
+ # shadowed (and @log is recreated below anyway). stdout goes to the journal,
+ # which is volatile in /run this early and flushed into the fresh @log later.
+-echo "=== Omarchy factory wipe started: $(date '+%Y-%m-%d %H:%M:%S') ==="
++echo "=== Arch factory wipe started: $(date '+%Y-%m-%d %H:%M:%S') ==="
+ 
+ log() {
+   echo "factory-wipe: $1"
+diff --git a/bin/omarchy-system-lid-inhibit b/bin/omarchy-system-lid-inhibit
+index 2dbd496..2d4c03e 100755
+--- a/bin/omarchy-system-lid-inhibit
++++ b/bin/omarchy-system-lid-inhibit
+@@ -93,7 +93,7 @@ if (( wanted )); then
+       --description="Omarchy clamshell lid inhibitor" \
+       --property=PartOf=graphical-session.target "${bind[@]}" \
+       systemd-inhibit --no-ask-password --what=handle-lid-switch --mode=block \
+-      --who=Omarchy --why="External display in use" sleep infinity
++      --who=Arch --why="External display in use" sleep infinity
+   fi
+ elif held; then
+   systemctl --user stop "$UNIT"
+diff --git a/bin/omarchy-system-shutdown b/bin/omarchy-system-shutdown
+index 74b091f..3d79668 100755
+--- a/bin/omarchy-system-shutdown
++++ b/bin/omarchy-system-shutdown
+@@ -18,7 +18,7 @@ elif [[ ${1:-} == "--inhibit" ]]; then
+   # Report failures from inside the service, independently of the launching terminal.
+   # Block lid handling explicitly: it ignores high-level sleep inhibitors.
+   systemd-inhibit --what=sleep:idle:handle-lid-switch \
+-    --who=Omarchy --why="Shutdown in progress" --mode=block \
++    --who=Arch --why="Shutdown in progress" --mode=block \
+     "$0" --inhibited || {
+     status=$?
+     omarchy-notification-send -u critical "Shutdown failed" "Could not complete shutdown. Please try again."
+diff --git a/bin/omarchy-system-sleep-monitor b/bin/omarchy-system-sleep-monitor
+index 2100cee..e5b3929 100755
+--- a/bin/omarchy-system-sleep-monitor
++++ b/bin/omarchy-system-sleep-monitor
+@@ -56,6 +56,6 @@ sleep_monitor="$OMARCHY_PATH/bin/omarchy-system-sleep-monitor"
+ exec systemd-inhibit \
+   --what=sleep \
+   --mode=delay \
+-  --who=Omarchy \
++  --who=Arch \
+   --why="Lock screen before suspend" \
+   "$sleep_monitor" --inhibited
+diff --git a/bin/omarchy-theme-set-claude b/bin/omarchy-theme-set-claude
+index 06c2799..44bbde0 100755
+--- a/bin/omarchy-theme-set-claude
++++ b/bin/omarchy-theme-set-claude
+@@ -35,7 +35,7 @@ done
+ if [[ ! -f $CLAUDE_SOURCE_PATH ]]; then
+   if (( CLAUDE_ACTIVATE == 1 )); then
+     echo "Claude Code theme source missing: $CLAUDE_SOURCE_PATH" >&2
+-    echo "Run omarchy-theme-refresh after selecting an Omarchy theme." >&2
++    echo "Run omarchy-theme-refresh after selecting an Arch theme." >&2
+     exit 1
+   fi
+ 
+diff --git a/bin/omarchy-theme-set-hermes b/bin/omarchy-theme-set-hermes
+index b084b20..5d40c81 100755
+--- a/bin/omarchy-theme-set-hermes
++++ b/bin/omarchy-theme-set-hermes
+@@ -59,7 +59,7 @@ if [[ ! -f $HERMES_SOURCE_PATH ]]; then
+ 
+   if [[ ! -s $HERMES_THEME_NAME_PATH ]]; then
+     echo "Hermes skin source missing: $HERMES_SOURCE_PATH" >&2
+-    echo "Select an Omarchy theme first." >&2
++    echo "Select an Arch theme first." >&2
+     exit 1
+   fi
+ 
+diff --git a/bin/omarchy-theme-set-pi b/bin/omarchy-theme-set-pi
+index b4e6097..8e071ec 100755
+--- a/bin/omarchy-theme-set-pi
++++ b/bin/omarchy-theme-set-pi
+@@ -37,7 +37,7 @@ done
+ if [[ ! -f $PI_SOURCE_PATH ]]; then
+   if (( PI_ACTIVATE == 1 )); then
+     echo "Pi theme source missing: $PI_SOURCE_PATH" >&2
+-    echo "Run omarchy-theme-refresh after selecting an Omarchy theme." >&2
++    echo "Run omarchy-theme-refresh after selecting an Arch theme." >&2
+     exit 1
+   fi
+ 
+diff --git a/bin/omarchy-update-available b/bin/omarchy-update-available
+index f1a70b2..abab1f9 100755
+--- a/bin/omarchy-update-available
++++ b/bin/omarchy-update-available
+@@ -39,6 +39,6 @@ if (( ${#updates[@]} > 0 )); then
+   printf '%s\n' "${updates[@]}"
+   exit 0
+ else
+-  echo "Omarchy is up to date"
++  echo "Arch is up to date"
+   exit 1
+ fi
+diff --git a/bin/omarchy-update-dev b/bin/omarchy-update-dev
+index a973246..e4a3bbd 100755
+--- a/bin/omarchy-update-dev
++++ b/bin/omarchy-update-dev
+@@ -13,9 +13,9 @@ fi
+ 
+ upstream=$(git -C "$OMARCHY_PATH" rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null || true)
+ if [[ -z $upstream ]]; then
+-  echo -e "\e[33m\nSkip Omarchy dev checkout update (current branch has no upstream)\e[0m"
++  echo -e "\e[33m\nSkip Arch dev checkout update (current branch has no upstream)\e[0m"
+   exit 0
+ fi
+ 
+-echo -e "\e[32m\nUpdate Omarchy dev checkout\e[0m"
++echo -e "\e[32m\nUpdate Arch dev checkout\e[0m"
+ git -C "$OMARCHY_PATH" pull --ff-only
+diff --git a/bin/omarchy-update-lock b/bin/omarchy-update-lock
+index ba3c97b..1200d30 100755
+--- a/bin/omarchy-update-lock
++++ b/bin/omarchy-update-lock
+@@ -33,7 +33,7 @@ case "${1:-}" in
+     mkdir -p "$lock_dir" 2>/dev/null || true
+     exec {OMARCHY_UPDATE_LOCK_FD}>"$lock_path"
+     if ! flock -n "$OMARCHY_UPDATE_LOCK_FD"; then
+-      echo "An Omarchy update is already running."
++      echo "An Arch update is already running."
+       exit 1
+     fi
+ 
+diff --git a/bin/omarchy-update-requires-free-space b/bin/omarchy-update-requires-free-space
+index 07523eb..cc4e4a8 100755
+--- a/bin/omarchy-update-requires-free-space
++++ b/bin/omarchy-update-requires-free-space
+@@ -10,7 +10,7 @@ if [[ ${OMARCHY_UPDATE_FORCE:-0} == "1" ]]; then
+ elif read -r available_bytes < <(df --output=avail --block-size=1 / 2>/dev/null | tail -n 1) &&
+   [[ $available_bytes =~ ^[0-9]+$ ]] &&
+   (( available_bytes < 10 * 1024 * 1024 * 1024 )); then
+-  echo "You need at least 10 GiB free to safely update Omarchy."
++  echo "You need at least 10 GiB free to safely update Arch."
+   exit 1
+ else
+   exit 0
+diff --git a/bin/omarchy-update-stay-awake b/bin/omarchy-update-stay-awake
+index 11b391f..01074ab 100755
+--- a/bin/omarchy-update-stay-awake
++++ b/bin/omarchy-update-stay-awake
+@@ -39,7 +39,7 @@ launch_pending=0
+ launch_token=""
+ 
+ fail_state_boundary() {
+-  echo "Refusing to use an unsafe Omarchy update inhibitor state path." >&2
++  echo "Refusing to use an unsafe Arch update inhibitor state path." >&2
+   return 1
+ }
+ 
+@@ -227,7 +227,7 @@ cleanup_pending_launch() {
+ 
+   trap - EXIT HUP INT TERM
+   if ! rollback_pending_launch; then
+-    echo "Failed to roll back the pending Omarchy update sleep inhibitor." >&2
++    echo "Failed to roll back the pending Arch update sleep inhibitor." >&2
+     (( status != 0 )) || status=1
+   fi
+   omarchy_security_exit_with_revoked_sudo "$status" \
+@@ -399,7 +399,7 @@ stop_locked() {
+         omarchy-toggle-idle allow-idle >/dev/null 2>&1 || true
+       fi
+     else
+-      echo "Ignoring unsafe Omarchy update idle ownership state." >&2
++      echo "Ignoring unsafe Arch update idle ownership state." >&2
+       failed=1
+     fi
+     rm -f -- "$idle_owner_file"
+@@ -429,13 +429,13 @@ stop_locked() {
+         fi
+       fi
+     else
+-      echo "Ignoring unsafe Omarchy update sleep inhibitor state." >&2
++      echo "Ignoring unsafe Arch update sleep inhibitor state." >&2
+       failed=1
+     fi
+     if [[ -n $inhibit_pid ]] && (( remove_inhibit_state == 1 )); then
+       if process_matches "$inhibit_pid" "$recorded_start_time" "$recorded_owner" "$token"; then
+         if ! terminate_inhibitor "$inhibit_pid" "$recorded_start_time" "$recorded_owner" "$token"; then
+-          echo "Failed to stop the Omarchy update sleep inhibitor." >&2
++          echo "Failed to stop the Arch update sleep inhibitor." >&2
+           failed=1
+           remove_inhibit_state=0
+         fi
+diff --git a/bin/omarchy-upgrade-to-quattro b/bin/omarchy-upgrade-to-quattro
+index 33c8202..deadfb2 100755
+--- a/bin/omarchy-upgrade-to-quattro
++++ b/bin/omarchy-upgrade-to-quattro
+@@ -374,7 +374,7 @@ cleanup_on_exit() {
+   # progress line, so a half-finished upgrade otherwise reads as a finished one.
+   if (( exit_status != 0 && upgrade_started && ! upgrade_completed )); then
+     printf '\n\033[31mUpgrade incomplete - do NOT reboot.\033[0m\n' >&2
+-    printf 'The system is part Omarchy 3 and part Omarchy quattro; rebooting now can leave it without a working network or desktop.\n' >&2
++    printf 'The system is part Arch 3 and part Arch quattro; rebooting now can leave it without a working network or desktop.\n' >&2
+     printf 'Fix the error reported above and run this script again. Re-running is safe and resumes the remaining steps.\n' >&2
+   fi
+ 
+@@ -1764,8 +1764,8 @@ migrate_uwsm_env_customizations() {
+ 
+     mkdir -p "$(dirname "$dest")"
+     {
+-      echo '# Preserved custom ~/.config/uwsm/env content during Omarchy quattro upgrade.'
+-      echo '# Exact legacy Omarchy-managed setup lines were replaced with no-op markers where safe.'
++      echo '# Preserved custom ~/.config/uwsm/env content during Arch quattro upgrade.'
++      echo '# Exact legacy Arch-managed setup lines were replaced with no-op markers where safe.'
+       cat "$tmp"
+     } >"$dest"
+   fi
+diff --git a/niri/bin/hyprctl b/niri/bin/hyprctl
+index 0ab6572..ffb97ce 100755
+--- a/niri/bin/hyprctl
++++ b/niri/bin/hyprctl
+@@ -67,7 +67,31 @@ case "${1:-}" in
+        touch: [.[] | select(test("touchscreen|touch screen"; "i")) | {name: (ascii_downcase | gsub("[^a-z0-9]+"; "-"))}],
+        keyboards: []}'
+     ;;
++  hyprsunset)
++    # hyprsunset speaks a Hyprland-only protocol. On niri the colour temperature
++    # is held by gammastep (wlr-gamma-control); the last value is kept in a file
++    # because gammastep cannot be asked for it.
++    state="$HOME/.local/state/omarchy/nightlight-temperature"
++    if [[ ${2:-} == "temperature" && -n ${3:-} ]]; then
++      pkill -x gammastep
++      if (( $3 < 6000 )); then
++        setsid -f gammastep -P -O "$3" >/dev/null 2>&1
++      fi
++      echo "$3" >"$state"
++    else
++      cat "$state" 2>/dev/null || echo 6500
++    fi
++    ;;
+   dispatch)
++    # Display power arrives as a Lua dispatch string.
++    if [[ ${2:-} == *dpms* ]]; then
++      if [[ $2 == *disable* ]]; then
++        niri msg action power-off-monitors
++      else
++        niri msg action power-on-monitors
++      fi
++      exit 0
++    fi
+     case "${2:-}" in
+       exec) shift 2; niri msg action spawn-sh -- "$*" ;;
+       focuswindow)
+diff --git a/niri/bin/omarchy-hyprland-monitor-focused b/niri/bin/omarchy-hyprland-monitor-focused
+new file mode 100755
+index 0000000..59f1ef6
+--- /dev/null
++++ b/niri/bin/omarchy-hyprland-monitor-focused
+@@ -0,0 +1,5 @@
++#!/bin/bash
++
++# niri stand-in: name of the focused output.
++
++niri msg -j focused-output | jq -r '.name // empty'
+diff --git a/niri/bin/omarchy-system-lock b/niri/bin/omarchy-system-lock
+index 8404e4f..785a176 100755
+--- a/niri/bin/omarchy-system-lock
++++ b/niri/bin/omarchy-system-lock
+@@ -4,7 +4,9 @@
+ 
+ if [[ $(panel-mode) == "dms" ]]; then
+   dms ipc call lock lock
++elif [[ -f /etc/pam.d/shell-lock-password ]]; then
++  exec "$OMARCHY_PATH/bin/omarchy-system-lock" "$@"
+ else
+-  # The shell's own lock screen needs a PAM service this machine lacks.
++  # Without its PAM service the shell's lock screen refuses to lock.
+   swaylock -f
+ fi
+diff --git a/niri/bin/omarchy-toggle-nightlight b/niri/bin/omarchy-toggle-nightlight
+index ea8928f..b3ac8ae 100755
+--- a/niri/bin/omarchy-toggle-nightlight
++++ b/niri/bin/omarchy-toggle-nightlight
+@@ -1,10 +1,11 @@
+ #!/bin/bash
+ 
+-# niri stand-in: hyprsunset speaks a Hyprland-only protocol, so night light is
+-# DMS's. With the DMS panel stopped there is nothing to drive it yet.
++# niri stand-in: night light belongs to whichever panel is running. The shell's
++# own goes through gammastep (see the hyprctl stand-in).
+ 
+ if [[ $(panel-mode) == "dms" ]]; then
+   dms ipc call night toggle >/dev/null
+ else
+-  omarchy-notification-send -u low "Night light" "Only available with the DMS panel for now."
++  omarchy-shell nightlight toggle >/dev/null
++  omarchy-shell -q omarchy.indicators refresh
+ fi
+diff --git a/niri/bin/panel-mode b/niri/bin/panel-mode
+index 504ae61..d8d45a0 100755
+--- a/niri/bin/panel-mode
++++ b/niri/bin/panel-mode
+@@ -1,11 +1,14 @@
+ #!/bin/bash
+ 
+-# Which desktop panel is running: "dms" (DankMaterialShell bar, notifications,
++# Which desktop panel is in use: "dms" (DankMaterialShell bar, notifications,
+ # lock) or "shell" (this shell's own bar and services). The niri stand-ins in
+ # this directory route toggles to whichever one is live.
++#
++# A flag file set by panel-switch, not "is dms.service running": the service
++# is briefly down during a switch and not yet up at login.
+ 
+-if systemctl --user --quiet is-active dms.service; then
+-  echo dms
+-else
++if [[ -f $HOME/.local/state/omarchy/toggles/shell-panel ]]; then
+   echo shell
++else
++  echo dms
+ fi
+diff --git a/niri/bin/panel-switch b/niri/bin/panel-switch
+index cf01d79..068d1f8 100755
+--- a/niri/bin/panel-switch
++++ b/niri/bin/panel-switch
+@@ -6,9 +6,21 @@
+ #
+ #   panel-switch dms|shell|toggle
+ 
+-# Services the two panels would fight over. The lock screen and idle timer stay
+-# off in both modes: the lock needs a PAM service this machine does not have.
+-contested=(omarchy.background omarchy.notifications omarchy.osd omarchy.battery omarchy.media)
++# Services the two panels would fight over. Only one of them may lock the
++# screen, time out on idle, or hold the displays' colour temperature.
++contested=(omarchy.background omarchy.notifications omarchy.osd omarchy.battery omarchy.media
++  omarchy.lock omarchy.idle omarchy.nightlight)
++
++flag="$HOME/.local/state/omarchy/toggles/shell-panel"
++
++# Exactly one idle locker may run. ~/.config/session/niri.sh starts the one
++# that fits the panel in use (it reads the flag), so restart it after a switch.
++# Two lockers race, and the loser strands the session locked with a blank screen.
++restart_idle_locker() {
++  pkill -x swayidle
++  pkill -x hyprlock
++  setsid -f "$HOME/.config/session/niri.sh" >/dev/null 2>&1
++}
+ 
+ target=${1:-toggle}
+ if [[ $target == "toggle" ]]; then
+@@ -21,7 +33,10 @@ fi
+ 
+ case "$target" in
+   shell)
+-    systemctl --user stop dms.service
++    touch "$flag"
++    # disable as well as stop, or DMS returns at the next login beside this bar
++    systemctl --user disable --now dms.service 2>/dev/null
++    restart_idle_locker
+     # The link goes stale when the theme changed while DMS drew the wallpaper.
+     background="$HOME/.local/state/omarchy/current/background"
+     if [[ ! -e $background ]]; then
+@@ -35,11 +50,13 @@ case "$target" in
+     cp "$HOME/.local/state/omarchy/current/theme/niri.kdl" "$HOME/.config/niri/theme.kdl" 2>/dev/null
+     ;;
+   dms)
++    rm -f "$flag"
+     for plugin in "${contested[@]}"; do
+       omarchy-shell -q shell setPluginEnabled "$plugin" false
+     done
+     omarchy-toggle-bar on
+     : >"$HOME/.config/niri/theme.kdl" # border colours go back to DMS
++    pkill -x gammastep                # so does the colour temperature
+ 
+     # dms.service only counts as started once it owns the notification bus
+     # name, and this shell's notification service keeps that name until the
+@@ -49,7 +66,9 @@ case "$target" in
+       busctl --user status org.freedesktop.Notifications &>/dev/null || break
+       sleep 0.2
+     done
++    systemctl --user add-wants niri.service dms.service 2>/dev/null
+     systemctl --user start --no-block dms.service
++    restart_idle_locker
+     ;;
+   *)
+     echo "Usage: panel-switch dms|shell|toggle" >&2
+diff --git a/niri/rebrand b/niri/rebrand
+new file mode 100755
+index 0000000..16dee9c
+--- /dev/null
++++ b/niri/rebrand
+@@ -0,0 +1,20 @@
++#!/bin/bash
++
++# Local branding: this desktop presents itself as Arch. Rewrites the upstream
++# product name in text a person sees (notifications, on-screen display,
++# terminal messages, plugin names). Internal names stay: command names, paths
++# and identifiers must keep matching upstream. Safe to run again after pulling
++# upstream changes.
++
++cd "$OMARCHY_PATH" || exit 1
++
++# Scripts: only lines that print or notify, never comments.
++rg -l 'Omarchy' bin | xargs -r sed -i -E \
++  '/^\s*#/!{/(notification-send|omarchy-osd|notify-send|echo|printf|gum |--who=)/s/\bOmarchy\b/Arch/g}'
++
++# Plugin manifests: names, authors and descriptions shown in plugin lists.
++fd -e json manifest shell | xargs -r sed -i -E 's/\bOmarchy\b/Arch/g'
++
++# Shell: quoted text only.
++rg -l '"[^"]*\bOmarchy\b[^"]*"' shell -g '*.qml' | xargs -r sed -i -E \
++  '/^\s*\/\//!s/("[^"]*)\bOmarchy\b([^"]*")/\1Arch\2/g'
+diff --git a/shell/plugins/agents/Panel.qml b/shell/plugins/agents/Panel.qml
+index 34a3053..027a137 100644
+--- a/shell/plugins/agents/Panel.qml
++++ b/shell/plugins/agents/Panel.qml
+@@ -339,8 +339,8 @@ Panel {
+ 
+   // A few ways into making Omarchy your own, handed to the default agent.
+   readonly property var starterPrompts: [
+-    { glyph: "󰏘", label: "Theme", prompt: "Make me a new theme. Ask me what look or inspiration I have in mind, then build it following the Omarchy skill's theming guide and switch to it." },
+-    { glyph: "󰐱", label: "Plugin", prompt: "Make me a new shell plugin. Ask me what I'd like it to do, then build it following the Omarchy skill's plugin guide and enable it." },
++    { glyph: "󰏘", label: "Theme", prompt: "Make me a new theme. Ask me what look or inspiration I have in mind, then build it following the Arch skill's theming guide and switch to it." },
++    { glyph: "󰐱", label: "Plugin", prompt: "Make me a new shell plugin. Ask me what I'd like it to do, then build it following the Arch skill's plugin guide and enable it." },
+     { glyph: "󰣆", label: "App", prompt: "Make me a new app for my desktop. Ask me what it should do, then build it following the omarchy-app skill and install it so it shows up in the app launcher." }
+   ]
+ 
+diff --git a/shell/plugins/agents/manifest.json b/shell/plugins/agents/manifest.json
+index 7ca5248..1c747e0 100644
+--- a/shell/plugins/agents/manifest.json
++++ b/shell/plugins/agents/manifest.json
+@@ -3,9 +3,9 @@
+   "id": "omarchy.agents",
+   "name": "Agents",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "license": "MIT",
+-  "description": "Claude Code, Codex, Grok, and Fireworks usage, limits, and pace in a native Omarchy bar panel.",
++  "description": "Claude Code, Codex, Grok, and Fireworks usage, limits, and pace in a native Arch bar panel.",
+   "kinds": ["bar-widget"],
+   "activation": "on-demand",
+   "entryPoints": {
+diff --git a/shell/plugins/background/manifest.json b/shell/plugins/background/manifest.json
+index aa00a22..8a4e00c 100644
+--- a/shell/plugins/background/manifest.json
++++ b/shell/plugins/background/manifest.json
+@@ -3,7 +3,7 @@
+   "id": "omarchy.background",
+   "name": "Background",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "description": "Desktop background renderer with click handling and transitions",
+   "kinds": [
+     "service"
+diff --git a/shell/plugins/bar/manifest.json b/shell/plugins/bar/manifest.json
+index d929c0a..46c7d65 100644
+--- a/shell/plugins/bar/manifest.json
++++ b/shell/plugins/bar/manifest.json
+@@ -3,7 +3,7 @@
+   "id": "omarchy.bar",
+   "name": "Bar",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "description": "Status bar with widgets",
+   "kinds": [
+     "bar"
+diff --git a/shell/plugins/bar/widgets/ActiveWindow.manifest.json b/shell/plugins/bar/widgets/ActiveWindow.manifest.json
+index ab274f7..d043e98 100644
+--- a/shell/plugins/bar/widgets/ActiveWindow.manifest.json
++++ b/shell/plugins/bar/widgets/ActiveWindow.manifest.json
+@@ -3,7 +3,7 @@
+   "id": "omarchy.active-window",
+   "name": "Active window",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "description": "Title of the focused window",
+   "kinds": [
+     "bar-widget"
+diff --git a/shell/plugins/bar/widgets/Indicators.manifest.json b/shell/plugins/bar/widgets/Indicators.manifest.json
+index a2447aa..dfbd363 100644
+--- a/shell/plugins/bar/widgets/Indicators.manifest.json
++++ b/shell/plugins/bar/widgets/Indicators.manifest.json
+@@ -3,7 +3,7 @@
+   "id": "omarchy.indicators",
+   "name": "Indicators",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "description": "Manual state indicators",
+   "kinds": [
+     "bar-widget"
+diff --git a/shell/plugins/bar/widgets/KeyboardLayout.manifest.json b/shell/plugins/bar/widgets/KeyboardLayout.manifest.json
+index 71c97ac..fddf6e8 100644
+--- a/shell/plugins/bar/widgets/KeyboardLayout.manifest.json
++++ b/shell/plugins/bar/widgets/KeyboardLayout.manifest.json
+@@ -3,7 +3,7 @@
+   "id": "omarchy.keyboard-layout",
+   "name": "Keyboard layout",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "description": "Current keyboard layout and input language, click cycles",
+   "kinds": [
+     "bar-widget"
+diff --git a/shell/plugins/bar/widgets/Microphone.manifest.json b/shell/plugins/bar/widgets/Microphone.manifest.json
+index 7cc837c..80e6257 100644
+--- a/shell/plugins/bar/widgets/Microphone.manifest.json
++++ b/shell/plugins/bar/widgets/Microphone.manifest.json
+@@ -3,7 +3,7 @@
+   "id": "omarchy.microphone",
+   "name": "Microphone",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "description": "Mic input state and mute toggle",
+   "kinds": [
+     "bar-widget"
+diff --git a/shell/plugins/bar/widgets/Spacer.manifest.json b/shell/plugins/bar/widgets/Spacer.manifest.json
+index a258f14..acc141a 100644
+--- a/shell/plugins/bar/widgets/Spacer.manifest.json
++++ b/shell/plugins/bar/widgets/Spacer.manifest.json
+@@ -3,7 +3,7 @@
+   "id": "omarchy.spacer",
+   "name": "Spacer",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "description": "Configurable blank space",
+   "kinds": [
+     "bar-widget"
+diff --git a/shell/plugins/bar/widgets/SystemUpdate.manifest.json b/shell/plugins/bar/widgets/SystemUpdate.manifest.json
+index 855cac7..a34e987 100644
+--- a/shell/plugins/bar/widgets/SystemUpdate.manifest.json
++++ b/shell/plugins/bar/widgets/SystemUpdate.manifest.json
+@@ -1,10 +1,10 @@
+ {
+   "schemaVersion": 1,
+   "id": "omarchy.system-update",
+-  "name": "Omarchy update",
++  "name": "Arch update",
+   "version": "1.0.0",
+-  "author": "Omarchy",
+-  "description": "Indicates available Omarchy updates",
++  "author": "Arch",
++  "description": "Indicates available Arch updates",
+   "kinds": [
+     "bar-widget"
+   ],
+@@ -12,8 +12,8 @@
+     "barWidget": "SystemUpdate.qml"
+   },
+   "barWidget": {
+-    "displayName": "Omarchy update",
+-    "description": "Indicates available Omarchy updates",
++    "displayName": "Arch update",
++    "description": "Indicates available Arch updates",
+     "category": "System",
+     "allowMultiple": false
+   }
+diff --git a/shell/plugins/bar/widgets/SystemUpdate.qml b/shell/plugins/bar/widgets/SystemUpdate.qml
+index 2baf6b0..c414a09 100644
+--- a/shell/plugins/bar/widgets/SystemUpdate.qml
++++ b/shell/plugins/bar/widgets/SystemUpdate.qml
+@@ -59,7 +59,7 @@ BarWidget {
+     text: "\uf021"
+     slotSize: Style.bar.statusSlot
+     fontSize: Style.font.caption
+-    tooltipText: "Pending Omarchy Updates"
++    tooltipText: "Pending Arch Updates"
+     onPressed: root.runUpdate()
+   }
+ }
+diff --git a/shell/plugins/bar/widgets/Tray.manifest.json b/shell/plugins/bar/widgets/Tray.manifest.json
+index c3bc418..0d39150 100644
+--- a/shell/plugins/bar/widgets/Tray.manifest.json
++++ b/shell/plugins/bar/widgets/Tray.manifest.json
+@@ -3,7 +3,7 @@
+   "id": "omarchy.tray",
+   "name": "System tray",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "description": "Status notifier items",
+   "kinds": [
+     "bar-widget"
+diff --git a/shell/plugins/bar/widgets/Workspaces.manifest.json b/shell/plugins/bar/widgets/Workspaces.manifest.json
+index e51f7a0..a3a5ac2 100644
+--- a/shell/plugins/bar/widgets/Workspaces.manifest.json
++++ b/shell/plugins/bar/widgets/Workspaces.manifest.json
+@@ -3,7 +3,7 @@
+   "id": "omarchy.workspaces",
+   "name": "Workspaces",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "description": "Workspace number indicators",
+   "kinds": [
+     "bar-widget"
+diff --git a/shell/plugins/clipboard/manifest.json b/shell/plugins/clipboard/manifest.json
+index ba366b8..4bb435c 100644
+--- a/shell/plugins/clipboard/manifest.json
++++ b/shell/plugins/clipboard/manifest.json
+@@ -3,7 +3,7 @@
+   "id": "omarchy.clipboard",
+   "name": "Clipboard",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "description": "A clipboard manager to view and paste history",
+   "kinds": [
+     "overlay"
+diff --git a/shell/plugins/dev-gallery/GalleryPanel.qml b/shell/plugins/dev-gallery/GalleryPanel.qml
+index af4a660..3241c03 100644
+--- a/shell/plugins/dev-gallery/GalleryPanel.qml
++++ b/shell/plugins/dev-gallery/GalleryPanel.qml
+@@ -277,7 +277,7 @@ Item {
+ 
+   FloatingWindow {
+     id: window
+-    title: "Omarchy shell – dev gallery"
++    title: "Arch shell – dev gallery"
+     color: root.background
+     implicitWidth: 720
+     implicitHeight: 760
+@@ -355,7 +355,7 @@ Item {
+             spacing: Style.space(4)
+ 
+             Text {
+-              text: "Omarchy shell · dev gallery"
++              text: "Arch shell · dev gallery"
+               color: root.foreground
+               font.family: root.fontFamily
+               font.pixelSize: Style.font.iconLarge
+@@ -1669,7 +1669,7 @@ Item {
+                     { value: "Media", label: "Media", description: "Now-playing + transport" },
+                     { value: "Workspaces", label: "Workspaces", description: "Hyprland workspace pills" },
+                     { value: "system-tray", label: "System tray", description: "StatusNotifierItem icons" },
+-                    { value: "omarchy-menu", label: "Omarchy menu", description: "Launcher / system menu" },
++                    { value: "omarchy-menu", label: "Arch menu", description: "Launcher / system menu" },
+                     { value: "power-profiles", label: "Power profiles", description: "Performance / balanced / saver" },
+                     { value: "hardware", label: "Hardware", description: "CPU, GPU, mem utilization" },
+                     { value: "notifications", label: "Notifications", description: "Recent notification history" }
+diff --git a/shell/plugins/dev-gallery/manifest.json b/shell/plugins/dev-gallery/manifest.json
+index 5491a9b..fcee10c 100644
+--- a/shell/plugins/dev-gallery/manifest.json
++++ b/shell/plugins/dev-gallery/manifest.json
+@@ -3,7 +3,7 @@
+   "id": "omarchy.dev-gallery",
+   "name": "Dev gallery",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "description": "Visual reference for omarchy-shell common UI components. Summon with: omarchy-shell shell summon omarchy.dev-gallery '{}' (or run: omarchy dev ui-preview).",
+   "kinds": [
+     "panel"
+diff --git a/shell/plugins/emojis/manifest.json b/shell/plugins/emojis/manifest.json
+index f04b47f..cf0a063 100644
+--- a/shell/plugins/emojis/manifest.json
++++ b/shell/plugins/emojis/manifest.json
+@@ -3,7 +3,7 @@
+   "id": "omarchy.emojis",
+   "name": "Emojis",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "description": "Search, copy, and type emojis",
+   "kinds": [
+     "overlay"
+diff --git a/shell/plugins/image-picker/manifest.json b/shell/plugins/image-picker/manifest.json
+index debd187..926e4f6 100644
+--- a/shell/plugins/image-picker/manifest.json
++++ b/shell/plugins/image-picker/manifest.json
+@@ -3,7 +3,7 @@
+   "id": "omarchy.image-picker",
+   "name": "Image picker",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "description": "Image-grid selector overlay used for wallpapers, themes, and any other directory of images",
+   "kinds": [
+     "overlay"
+diff --git a/shell/plugins/lock/Service.qml b/shell/plugins/lock/Service.qml
+index c775ba0..47ccf16 100644
+--- a/shell/plugins/lock/Service.qml
++++ b/shell/plugins/lock/Service.qml
+@@ -537,7 +537,7 @@ Item {
+ 
+   PamContext {
+     id: passwordPam
+-    config: "omarchy-lock-password"
++    config: "shell-lock-password"
+     user: root.userName
+ 
+     onResponseRequiredChanged: root.respondToPasswordPrompt()
+@@ -559,7 +559,7 @@ Item {
+ 
+   PamContext {
+     id: fingerprintPam
+-    config: "omarchy-lock-fingerprint"
++    config: "shell-lock-fingerprint"
+     user: root.userName
+ 
+     onPamMessage: {
+@@ -671,7 +671,7 @@ Item {
+   // Keep fprintd errors distinguishable from an explicit empty enrollment.
+   Process {
+     id: fingerprintCheckProc
+-    command: ["bash", "-c", "if [[ -f /etc/pam.d/omarchy-lock-fingerprint ]] && command -v fprintd-list >/dev/null 2>&1; then LC_ALL=C fprintd-list \"$USER\" 2>&1; else echo no; fi"]
++    command: ["bash", "-c", "if [[ -f /etc/pam.d/shell-lock-fingerprint ]] && command -v fprintd-list >/dev/null 2>&1; then LC_ALL=C fprintd-list \"$USER\" 2>&1; else echo no; fi"]
+     stdout: StdioCollector { id: fingerprintCheckStdout; waitForEnd: true }
+     onExited: root.applyFingerprintProbe(fingerprintCheckStdout.text)
+   }
+@@ -810,7 +810,7 @@ Item {
+   }
+ 
+   FileView {
+-    path: "/etc/pam.d/omarchy-lock-password"
++    path: "/etc/pam.d/shell-lock-password"
+     watchChanges: true
+     printErrors: false
+     onLoaded: root.passwordPamConfigured = true
+diff --git a/shell/plugins/lock/manifest.json b/shell/plugins/lock/manifest.json
+index 3080960..498d542 100644
+--- a/shell/plugins/lock/manifest.json
++++ b/shell/plugins/lock/manifest.json
+@@ -3,7 +3,7 @@
+   "id": "omarchy.lock",
+   "name": "Lock Screen",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "description": "Quickshell session lock with separate password and fingerprint PAM flows.",
+   "omarchy": {
+     "capabilities": [
+diff --git a/shell/plugins/menu/manifest.json b/shell/plugins/menu/manifest.json
+index 4227a22..0cb125e 100644
+--- a/shell/plugins/menu/manifest.json
++++ b/shell/plugins/menu/manifest.json
+@@ -1,10 +1,10 @@
+ {
+   "schemaVersion": 1,
+   "id": "omarchy.menu",
+-  "name": "Omarchy menu",
++  "name": "Arch menu",
+   "version": "1.0.0",
+-  "author": "Omarchy",
+-  "description": "Quickshell-powered Omarchy command menu",
++  "author": "Arch",
++  "description": "Quickshell-powered Arch command menu",
+   "kinds": [
+     "menu",
+     "bar-widget"
+@@ -15,8 +15,8 @@
+     "barWidget": "BarWidget.qml"
+   },
+   "barWidget": {
+-    "displayName": "Omarchy menu",
+-    "description": "Launches the Omarchy menu",
++    "displayName": "Arch menu",
++    "description": "Launches the Arch menu",
+     "category": "Compositor",
+     "allowMultiple": false
+   }
+diff --git a/shell/plugins/notifications/manifest.json b/shell/plugins/notifications/manifest.json
+index be71e3c..ec6765e 100644
+--- a/shell/plugins/notifications/manifest.json
++++ b/shell/plugins/notifications/manifest.json
+@@ -3,7 +3,7 @@
+   "id": "omarchy.notifications",
+   "name": "Notifications",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "description": "Notification daemon, popups, DND, and history",
+   "kinds": [
+     "service"
+diff --git a/shell/plugins/panels/audio/manifest.json b/shell/plugins/panels/audio/manifest.json
+index 3e130f2..ae6999a 100644
+--- a/shell/plugins/panels/audio/manifest.json
++++ b/shell/plugins/panels/audio/manifest.json
+@@ -3,7 +3,7 @@
+   "id": "omarchy.audio",
+   "name": "Audio",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "description": "Volume slider, output picker, per-app mixer",
+   "kinds": [
+     "bar-widget"
+diff --git a/shell/plugins/panels/bluetooth/manifest.json b/shell/plugins/panels/bluetooth/manifest.json
+index 6c87c6d..7506bc6 100644
+--- a/shell/plugins/panels/bluetooth/manifest.json
++++ b/shell/plugins/panels/bluetooth/manifest.json
+@@ -3,7 +3,7 @@
+   "id": "omarchy.bluetooth",
+   "name": "Bluetooth",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "description": "Bluetooth device list with connect/disconnect",
+   "kinds": [
+     "bar-widget"
+diff --git a/shell/plugins/panels/clock/manifest.json b/shell/plugins/panels/clock/manifest.json
+index 1640121..e26471d 100644
+--- a/shell/plugins/panels/clock/manifest.json
++++ b/shell/plugins/panels/clock/manifest.json
+@@ -3,7 +3,7 @@
+   "id": "omarchy.clock",
+   "name": "Clock",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "description": "Date/time label with a calendar popup",
+   "kinds": [
+     "bar-widget"
+diff --git a/shell/plugins/panels/disk-speedtest/manifest.json b/shell/plugins/panels/disk-speedtest/manifest.json
+index 2c7e5bc..b0be0db 100644
+--- a/shell/plugins/panels/disk-speedtest/manifest.json
++++ b/shell/plugins/panels/disk-speedtest/manifest.json
+@@ -3,7 +3,7 @@
+   "id": "omarchy.disk-speedtest",
+   "name": "Disk speed test",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "description": "Live disk write and read speed dials. Summon with: omarchy-shell shell summon omarchy.disk-speedtest",
+   "kinds": [
+     "panel"
+diff --git a/shell/plugins/panels/dropbox/manifest.json b/shell/plugins/panels/dropbox/manifest.json
+index 76bfdfd..884aeff 100644
+--- a/shell/plugins/panels/dropbox/manifest.json
++++ b/shell/plugins/panels/dropbox/manifest.json
+@@ -3,9 +3,9 @@
+   "id": "omarchy.dropbox",
+   "name": "Dropbox",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "license": "MIT",
+-  "description": "Dropbox status, storage usage, login, and recent synced files in the Omarchy bar.",
++  "description": "Dropbox status, storage usage, login, and recent synced files in the Arch bar.",
+   "kinds": [
+     "bar-widget"
+   ],
+diff --git a/shell/plugins/panels/elsewhen/manifest.json b/shell/plugins/panels/elsewhen/manifest.json
+index 53bee8c..57e07e8 100644
+--- a/shell/plugins/panels/elsewhen/manifest.json
++++ b/shell/plugins/panels/elsewhen/manifest.json
+@@ -5,7 +5,7 @@
+   "version": "1.0.0",
+   "author": "Jason Fried",
+   "license": "MIT",
+-  "description": "A world clock for the Omarchy shell: the time in several cities at once, with a spinnable globe.",
++  "description": "A world clock for the Arch shell: the time in several cities at once, with a spinnable globe.",
+   "kinds": [
+     "bar-widget"
+   ],
+diff --git a/shell/plugins/panels/monitor/manifest.json b/shell/plugins/panels/monitor/manifest.json
+index 190e3ff..e301091 100644
+--- a/shell/plugins/panels/monitor/manifest.json
++++ b/shell/plugins/panels/monitor/manifest.json
+@@ -3,7 +3,7 @@
+   "id": "omarchy.monitor",
+   "name": "Display",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "description": "Brightness slider and laptop display controls",
+   "kinds": [
+     "bar-widget"
+diff --git a/shell/plugins/panels/network/manifest.json b/shell/plugins/panels/network/manifest.json
+index 576bdc9..6cf75c7 100644
+--- a/shell/plugins/panels/network/manifest.json
++++ b/shell/plugins/panels/network/manifest.json
+@@ -3,7 +3,7 @@
+   "id": "omarchy.network",
+   "name": "Network",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "description": "Wi-Fi list and connection state",
+   "kinds": [
+     "bar-widget"
+diff --git a/shell/plugins/panels/power/manifest.json b/shell/plugins/panels/power/manifest.json
+index 64a1eac..5a92b50 100644
+--- a/shell/plugins/panels/power/manifest.json
++++ b/shell/plugins/panels/power/manifest.json
+@@ -3,7 +3,7 @@
+   "id": "omarchy.power",
+   "name": "Power",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "description": "Battery, power profile, and system stats",
+   "kinds": [
+     "bar-widget"
+diff --git a/shell/plugins/panels/speedtest/manifest.json b/shell/plugins/panels/speedtest/manifest.json
+index 05898d4..5589101 100644
+--- a/shell/plugins/panels/speedtest/manifest.json
++++ b/shell/plugins/panels/speedtest/manifest.json
+@@ -3,7 +3,7 @@
+   "id": "omarchy.speedtest",
+   "name": "Speed Test",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "description": "Internet speed test with download and upload dials",
+   "kinds": [
+     "panel"
+diff --git a/shell/plugins/panels/tailscale/manifest.json b/shell/plugins/panels/tailscale/manifest.json
+index 8de2970..c39d64d 100644
+--- a/shell/plugins/panels/tailscale/manifest.json
++++ b/shell/plugins/panels/tailscale/manifest.json
+@@ -3,9 +3,9 @@
+   "id": "omarchy.tailscale",
+   "name": "Tailscale",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "license": "MIT",
+-  "description": "Tailscale status, connection switching, machine browsing, and quick copy actions in the Omarchy bar.",
++  "description": "Tailscale status, connection switching, machine browsing, and quick copy actions in the Arch bar.",
+   "kinds": [
+     "bar-widget"
+   ],
+diff --git a/shell/plugins/panels/weather/manifest.json b/shell/plugins/panels/weather/manifest.json
+index 23fa84f..3a35788 100644
+--- a/shell/plugins/panels/weather/manifest.json
++++ b/shell/plugins/panels/weather/manifest.json
+@@ -3,7 +3,7 @@
+   "id": "omarchy.weather",
+   "name": "Weather",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "description": "Weather pill with detail popup",
+   "kinds": [
+     "bar-widget"
+diff --git a/shell/plugins/panels/wifiqr/manifest.json b/shell/plugins/panels/wifiqr/manifest.json
+index 10ab984..3bae9cf 100644
+--- a/shell/plugins/panels/wifiqr/manifest.json
++++ b/shell/plugins/panels/wifiqr/manifest.json
+@@ -3,7 +3,7 @@
+   "id": "omarchy.wifiqr",
+   "name": "Wi-Fi QR",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "description": "Share the connected Wi-Fi network as a scannable QR code",
+   "kinds": [
+     "panel"
+diff --git a/shell/plugins/polkit/manifest.json b/shell/plugins/polkit/manifest.json
+index 5d1f037..4f2f5bb 100644
+--- a/shell/plugins/polkit/manifest.json
++++ b/shell/plugins/polkit/manifest.json
+@@ -3,7 +3,7 @@
+   "id": "omarchy.polkit",
+   "name": "Polkit Agent",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "description": "Theme-aware authentication dialog for privileged actions.",
+   "omarchy": {
+     "capabilities": [
+diff --git a/shell/plugins/reminders/manifest.json b/shell/plugins/reminders/manifest.json
+index 5745d44..d9654c7 100644
+--- a/shell/plugins/reminders/manifest.json
++++ b/shell/plugins/reminders/manifest.json
+@@ -3,7 +3,7 @@
+   "id": "omarchy.reminders",
+   "name": "Reminders",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "description": "Interactive reminder setup flow",
+   "kinds": [
+     "overlay"
+diff --git a/shell/plugins/services/battery/manifest.json b/shell/plugins/services/battery/manifest.json
+index 1dc2e73..af8c215 100644
+--- a/shell/plugins/services/battery/manifest.json
++++ b/shell/plugins/services/battery/manifest.json
+@@ -3,7 +3,7 @@
+   "id": "omarchy.battery",
+   "name": "Battery",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "description": "Low battery warning service",
+   "kinds": [
+     "service"
+diff --git a/shell/plugins/services/idle/manifest.json b/shell/plugins/services/idle/manifest.json
+index 65b777b..fa9f576 100644
+--- a/shell/plugins/services/idle/manifest.json
++++ b/shell/plugins/services/idle/manifest.json
+@@ -3,7 +3,7 @@
+   "id": "omarchy.idle",
+   "name": "Idle",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "description": "Quickshell-based idle detection for screensaver, lock, and display wake.",
+   "kinds": [
+     "service"
+diff --git a/shell/plugins/services/media/manifest.json b/shell/plugins/services/media/manifest.json
+index 661c65a..efe0933 100644
+--- a/shell/plugins/services/media/manifest.json
++++ b/shell/plugins/services/media/manifest.json
+@@ -3,7 +3,7 @@
+   "id": "omarchy.media",
+   "name": "Media",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "description": "MPRIS media control service",
+   "kinds": [
+     "service",
+diff --git a/shell/plugins/services/nightlight/Service.qml b/shell/plugins/services/nightlight/Service.qml
+index 18ed7d1..ea30213 100644
+--- a/shell/plugins/services/nightlight/Service.qml
++++ b/shell/plugins/services/nightlight/Service.qml
+@@ -47,6 +47,12 @@ Item {
+   }
+ 
+   function runApply(temp) {
++    // niri port: the hyprctl stand-in drives gammastep itself.
++    if (Niri.active) {
++      applyProcess.command = ["hyprctl", "hyprsunset", "temperature", String(Number(temp))]
++      applyProcess.running = true
++      return
++    }
+     applyProcess.command = ["bash", "-lc",
+       "pgrep -x hyprsunset >/dev/null || { setsid uwsm-app -- hyprsunset >/dev/null 2>&1 & sleep 1; }; " +
+       "hyprctl hyprsunset temperature " + Number(temp)]
+diff --git a/shell/plugins/services/nightlight/manifest.json b/shell/plugins/services/nightlight/manifest.json
+index 0b1a4da..fed5e37 100644
+--- a/shell/plugins/services/nightlight/manifest.json
++++ b/shell/plugins/services/nightlight/manifest.json
+@@ -3,7 +3,7 @@
+   "id": "omarchy.nightlight",
+   "name": "Night Light",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "description": "Owns the hyprsunset night light temperature for the bar indicator and CLI.",
+   "kinds": [
+     "service"
+diff --git a/shell/plugins/services/remote-session/manifest.json b/shell/plugins/services/remote-session/manifest.json
+index cf38ad3..cc43275 100644
+--- a/shell/plugins/services/remote-session/manifest.json
++++ b/shell/plugins/services/remote-session/manifest.json
+@@ -3,7 +3,7 @@
+   "id": "omarchy.remote-session",
+   "name": "Remote Session",
+   "version": "1.0.0",
+-  "author": "Omarchy",
++  "author": "Arch",
+   "description": "Detects a gliff remote-desktop session on this machine for the bar indicator.",
+   "kinds": [
+     "service"
+diff --git a/shell/services/PluginRegistry.qml b/shell/services/PluginRegistry.qml
+index e8b8ad3..01ae9dd 100644
+--- a/shell/services/PluginRegistry.qml
++++ b/shell/services/PluginRegistry.qml
+@@ -629,7 +629,7 @@ QtObject {
+     for (var tk in thirdParty) {
+       if (firstParty[tk] || String(tk).indexOf("omarchy.") === 0) {
+         console.warn("PluginRegistry: plugin " + tk
+-          + " rejected: id is reserved for first-party Omarchy plugins")
++          + " rejected: id is reserved for first-party Arch plugins")
+         continue
+       }
+       merged[tk] = thirdParty[tk]

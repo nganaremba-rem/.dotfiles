@@ -1,0 +1,80 @@
+From a69ef2a1a5e93ed71974224e3f245ce3465693b5 Mon Sep 17 00:00:00 2001
+From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
+Date: Sun, 11 Oct 2026 21:09:20 +0530
+Subject: [PATCH 10/18] niri: wallpaper picker for a personal folder, bar
+ readings for CPU, memory and network
+
+wallpaper-pick opens the shell's image picker on ~/Pictures/wallpapers and
+its subfolders with the name filter on. bar-stat prints one-line readings
+for command modules on the bar.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ niri/bin/bar-stat       | 28 ++++++++++++++++++++++++++++
+ niri/bin/wallpaper-pick | 22 ++++++++++++++++++++++
+ 2 files changed, 50 insertions(+)
+ create mode 100755 niri/bin/bar-stat
+ create mode 100755 niri/bin/wallpaper-pick
+
+diff --git a/niri/bin/bar-stat b/niri/bin/bar-stat
+new file mode 100755
+index 0000000..1b0fe41
+--- /dev/null
++++ b/niri/bin/bar-stat
+@@ -0,0 +1,28 @@
++#!/bin/bash
++
++# One-line system readings, icon first, for command modules on the bar.
++# Usage: bar-stat cpu|mem|net
++
++case "${1:-}" in
++  cpu)
++    # Busy share of all cores over one second.
++    LC_ALL=C vmstat 1 2 | awk 'END { printf "󰻠 %d%%\n", 100 - $15 }'
++    ;;
++  mem)
++    LC_ALL=C free -m | awk '/^Mem:/ { printf "󰍛 %.1fG\n", $3 / 1024 }'
++    ;;
++  net)
++    # Down and up rate of the default-route interface over one second.
++    iface=$(ip route show default | awk '{ print $5; exit }')
++    [[ -n $iface ]] || { echo "offline"; exit 0; }
++    stats=/sys/class/net/$iface/statistics
++    rx1=$(<"$stats/rx_bytes") tx1=$(<"$stats/tx_bytes")
++    sleep 1
++    rx2=$(<"$stats/rx_bytes") tx2=$(<"$stats/tx_bytes")
++    printf '↓%s ↑%s\n' "$(numfmt --to=iec $((rx2 - rx1)))" "$(numfmt --to=iec $((tx2 - tx1)))"
++    ;;
++  *)
++    echo "Usage: bar-stat cpu|mem|net" >&2
++    exit 1
++    ;;
++esac
+diff --git a/niri/bin/wallpaper-pick b/niri/bin/wallpaper-pick
+new file mode 100755
+index 0000000..0f53091
+--- /dev/null
++++ b/niri/bin/wallpaper-pick
+@@ -0,0 +1,22 @@
++#!/bin/bash
++
++# Pick a wallpaper from the wallpaper folder in the shell's image picker (a grid
++# of thumbnails; type to filter by file name) and apply it to whichever panel
++# draws the wallpaper.
++# Usage: wallpaper-pick [folder]
++
++wallpaper_dir=${1:-${WALLPAPER_DIR:-$HOME/Pictures/wallpapers}}
++
++if [[ ! -d $wallpaper_dir ]]; then
++  omarchy-notification-send -g 󰸉 "Wallpaper folder not found" "$wallpaper_dir"
++  exit 1
++fi
++
++# The picker lists one directory level, so hand it every subfolder too.
++mapfile -t dirs < <(find -L "$wallpaper_dir" -type d | sort)
++current=$(readlink -f "$HOME/.local/state/omarchy/current/background" 2>/dev/null)
++
++picked=$(omarchy-menu-images --filterable --show-labels --selected "$current" "${dirs[@]}")
++if [[ -n $picked ]]; then
++  omarchy-theme-bg-set "$picked"
++fi

@@ -1,0 +1,353 @@
+From 72f97bdfb207bdc4b039a061bfceba69e97aa52a Mon Sep 17 00:00:00 2001
+From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
+Date: Sun, 11 Oct 2026 23:41:54 +0530
+Subject: [PATCH 17/18] bar: run command modules once and let them stream
+
+Each command module ran its command once per monitor, on a timer, through a
+fresh login shell. With five readings on three monitors that was about 16
+process starts a second.
+
+The command now runs once at the bar root and every monitor's bar shows the
+same output. A module with "stream": true keeps its command running and
+takes each line as a new reading; bar-stat is rewritten as such loops, reading
+/proc and /sys with shell builtins and printing only on change. The screencast
+reading waits for niri's cast events instead of asking on a timer, and the
+camera reading checks the kernel's open count before scanning for holders.
+
+Also stop the plugin watcher left behind by each shell restart, and skip
+injecting read-only properties into command modules (108 warnings a start).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ bin/omarchy-launch-shell  |   3 +
+ niri/bin/bar-stat         | 171 +++++++++++++++++++++++++++++++-------
+ shell/plugins/bar/Bar.qml |  95 +++++++++++++++++----
+ 3 files changed, 222 insertions(+), 47 deletions(-)
+
+diff --git a/bin/omarchy-launch-shell b/bin/omarchy-launch-shell
+index 6bc7c89..fcbd62d 100755
+--- a/bin/omarchy-launch-shell
++++ b/bin/omarchy-launch-shell
+@@ -17,6 +17,9 @@
+ run_shell() {
+   local startup_background
+   startup_background=$(readlink -f "$HOME/.local/state/omarchy/current/background" 2>/dev/null)
++  # The plugin watcher outlives a shell that was killed; without this every
++  # restart leaves one more behind.
++  pkill -f "inotifywait .* $HOME/.config/omarchy/plugins\$" || true
+   OMARCHY_STARTUP_BACKGROUND="$startup_background" QS_DISABLE_FILE_WATCHER=1 QS_NO_RELOAD_POPUP=1 \
+     systemd-cat -t omarchy-shell -- quickshell -n -p "$OMARCHY_PATH/shell" &
+   shell_pid=$!
+diff --git a/niri/bin/bar-stat b/niri/bin/bar-stat
+index 5657886..dbf9a92 100755
+--- a/niri/bin/bar-stat
++++ b/niri/bin/bar-stat
+@@ -1,48 +1,159 @@
+ #!/bin/bash
+ 
+-# One-line readings for command modules on the bar: plain text for the
+-# system ones, waybar-style JSON for the privacy ones so the icon turns to
+-# the alert colour while the camera or a screen share is in use.
+-# Usage: bar-stat cpu|mem|net|camera|screencast
++# Readings for command modules on the bar: plain text for the system ones,
++# waybar-style JSON for the privacy ones so the icon turns to the alert colour
++# while the camera or a screen share is in use.
++# Usage: bar-stat cpu|mem|net|camera|screencast [seconds]
++#
++# Each reading is a loop for a module with "stream": true. It prints a line
++# only when the reading changes, and it reads /proc and /sys with shell
++# builtins, so an idle bar starts no processes at all.
++
++interval=${2:-2}
++
++# Sleep without a process: a read that times out on a pipe nobody writes to.
++exec {quiet}<> <(:)
++nap() { read -r -t "$1" -u "$quiet" _; }
++
++# A stream outlives a bar that was killed until its next write; leave with it.
++last=""
++emit() {
++  kill -0 "$PPID" 2>/dev/null || exit 0
++  [[ $1 == "$last" ]] && return
++  last=$1
++  printf '%s\n' "$1"
++}
++
++# <bytes> to a short size in REPLY, like numfmt --to=iec.
++human() {
++  local bytes=$1
++  if (( bytes < 1024 )); then
++    REPLY=$bytes
++  elif (( bytes < 1048576 )); then
++    REPLY="$(( bytes / 1024 )).$(( bytes % 1024 * 10 / 1024 ))K"
++  else
++    REPLY="$(( bytes / 1048576 )).$(( bytes % 1048576 * 10 / 1048576 ))M"
++  fi
++}
++
++cpu_sample() {
++  local user nice system idle iowait irq softirq steal
++  read -r _ user nice system idle iowait irq softirq steal _ </proc/stat
++  cpu_total=$(( user + nice + system + idle + iowait + irq + softirq + steal ))
++  cpu_idle=$idle
++}
++
++# Interface of the default route with the lowest metric, in REPLY.
++default_iface() {
++  local iface destination metric best=""
++  REPLY=""
++  while read -r iface destination _ _ _ _ metric _; do
++    [[ $destination == "00000000" ]] || continue
++    if [[ -z $best ]] || (( metric < best )); then
++      best=$metric
++      REPLY=$iface
++    fi
++  done </proc/net/route
++}
+ 
+ case "${1:-}" in
+   cpu)
+-    # Busy share of all cores over one second.
+-    LC_ALL=C vmstat 1 2 | awk 'END { printf "󰻠 %d%%\n", 100 - $15 }'
++    # Busy share of all cores since the previous reading.
++    cpu_sample
++    nap 1
++    while true; do
++      total=$cpu_total idle=$cpu_idle
++      cpu_sample
++      if (( cpu_total > total )); then
++        printf -v line '󰻠 %d%%' "$(( 100 - 100 * (cpu_idle - idle) / (cpu_total - total) ))"
++        emit "$line"
++      fi
++      nap "$interval"
++    done
+     ;;
+   mem)
+-    LC_ALL=C free -m | awk '/^Mem:/ { printf "󰍛 %.1fG\n", $3 / 1024 }'
++    while true; do
++      while read -r key value _; do
++        case "$key" in
++          MemTotal:) total=$value ;;
++          MemAvailable:) available=$value; break ;;
++        esac
++      done </proc/meminfo
++      used=$(( total - available ))
++      printf -v line '󰍛 %d.%dG' "$(( used / 1048576 ))" "$(( used % 1048576 * 10 / 1048576 ))"
++      emit "$line"
++      nap "$interval"
++    done
+     ;;
+   net)
+-    # Down and up rate of the default-route interface over one second.
+-    iface=$(ip route show default | awk '{ print $5; exit }')
+-    [[ -n $iface ]] || { echo "offline"; exit 0; }
+-    stats=/sys/class/net/$iface/statistics
+-    rx1=$(<"$stats/rx_bytes") tx1=$(<"$stats/tx_bytes")
+-    sleep 1
+-    rx2=$(<"$stats/rx_bytes") tx2=$(<"$stats/tx_bytes")
+-    printf '↓%s ↑%s\n' "$(numfmt --to=iec $((rx2 - rx1)))" "$(numfmt --to=iec $((tx2 - tx1)))"
++    # Down and up rate per second on the default-route interface.
++    iface="" rx=0 tx=0
++    while true; do
++      default_iface
++      if [[ -z $REPLY ]]; then
++        iface=""
++        emit "offline"
++      else
++        stats=/sys/class/net/$REPLY/statistics
++        read -r new_rx <"$stats/rx_bytes"
++        read -r new_tx <"$stats/tx_bytes"
++        if [[ $REPLY == "$iface" ]]; then
++          human "$(( (new_rx - rx) / interval ))"; down=$REPLY
++          human "$(( (new_tx - tx) / interval ))"; up=$REPLY
++          emit "↓$down ↑$up"
++        fi
++        iface=${stats#/sys/class/net/} iface=${iface%/statistics} rx=$new_rx tx=$new_tx
++      fi
++      nap "$interval"
++    done
+     ;;
+   camera)
+-    # A camera is in use while some process holds its device open.
+-    users=$(fuser /dev/video* 2>/dev/null | xargs -r ps -o comm= -p | sort -u | paste -sd, -)
+-    if [[ -n $users ]]; then
+-      printf '{"text":"󰖠","class":"active","tooltip":"Camera in use: %s"}\n' "$users"
+-    else
+-      printf '{"text":"󰖠","tooltip":"Camera idle"}\n'
+-    fi
++    # The kernel counts who has the camera open, so the idle check is one
++    # small file. The scan for which program holds it runs only while in use.
++    # ponytail: USB (UVC) cameras only; any other driver takes the scan every
++    # time, which is what this did before.
++    count_file=/sys/module/uvcvideo/refcnt
++    seen=""
++    while true; do
++      if [[ -r $count_file ]]; then
++        read -r open <"$count_file"
++      else
++        open="unknown"
++      fi
++      # Look for the holders again only when the count moved.
++      if [[ $open != "$seen" || $open == "unknown" ]]; then
++        seen=$open
++        users=""
++        [[ $open == "0" ]] || users=$(fuser /dev/video* 2>/dev/null | xargs -r ps -o comm= -p | sort -u | paste -sd, -)
++      fi
++      if [[ -n $users ]]; then
++        emit "{\"text\":\"󰖠\",\"class\":\"active\",\"tooltip\":\"Camera in use: $users\"}"
++      elif [[ $open != "0" && $open != "unknown" ]]; then
++        emit '{"text":"󰖠","class":"active","tooltip":"Camera in use"}'
++      else
++        emit '{"text":"󰖠","tooltip":"Camera idle"}'
++      fi
++      nap "$interval"
++    done
+     ;;
+   screencast)
+-    # niri lists every screencast it is feeding (screen share or recording).
+-    targets=$(niri msg -j casts 2>/dev/null | jq -r '[.[] | select(.is_active) | .target | (.Output.name // .Window.id // "window") | tostring] | join(", ")')
+-    if [[ -n $targets ]]; then
+-      printf '{"text":"󱒃","class":"active","tooltip":"Screen is being shared: %s"}\n' "$targets"
+-    else
+-      printf '{"text":"󱒃","tooltip":"Screen share idle"}\n'
+-    fi
++    # niri announces every change to its screencasts (screen share or
++    # recording), so this waits for the event rather than asking on a timer.
++    niri msg -j event-stream | while read -r event; do
++      # Checked on every event: cast events are rare, and this loop must not
++      # outlive the bar until the next one.
++      kill -0 "$PPID" 2>/dev/null || exit 0
++      [[ $event == '{"Cast'* ]] || continue
++      targets=$(niri msg -j casts 2>/dev/null | jq -r '[.[] | select(.is_active) | .target | (.Output.name // .Window.id // "window") | tostring] | join(", ")')
++      if [[ -n $targets ]]; then
++        emit "{\"text\":\"󱒃\",\"class\":\"active\",\"tooltip\":\"Screen is being shared: $targets\"}"
++      else
++        emit '{"text":"󱒃","tooltip":"Screen share idle"}'
++      fi
++    done
+     ;;
+   *)
+-    echo "Usage: bar-stat cpu|mem|net|camera|screencast" >&2
++    echo "Usage: bar-stat cpu|mem|net|camera|screencast [seconds]" >&2
+     exit 1
+     ;;
+ esac
+diff --git a/shell/plugins/bar/Bar.qml b/shell/plugins/bar/Bar.qml
+index ce64a26..db74240 100644
+--- a/shell/plugins/bar/Bar.qml
++++ b/shell/plugins/bar/Bar.qml
+@@ -1182,6 +1182,78 @@ Item {
+       process.running = true
+   }
+ 
++  // niri port: one process per command module, shared by the bar on every
++  // monitor. A module either re-runs its command every `interval` seconds, or,
++  // with `"stream": true`, keeps it running and takes each output line as a
++  // new reading.
++  property var commandOutput: ({})
++  readonly property var commandEntries: {
++    var seen = ({})
++    var entries = []
++    var sections = [layoutConfig.left, layoutConfig.center, layoutConfig.right]
++    for (var i = 0; i < sections.length; i++) {
++      var section = sections[i] || []
++      for (var j = 0; j < section.length; j++) {
++        var id = entryId(section[j])
++        if (seen[id] || customModuleType(section[j]) !== "command" || !entrySettings(section[j]).exec) continue
++        seen[id] = true
++        entries.push(section[j])
++      }
++    }
++    return entries
++  }
++
++  Instantiator {
++    model: root.commandEntries
++
++    delegate: QtObject {
++      id: source
++
++      required property var modelData
++      readonly property string moduleId: root.entryId(modelData)
++      readonly property var conf: root.entrySettings(modelData)
++      readonly property bool stream: conf.stream === true
++
++      function publish(raw) {
++        if (root.commandOutput[moduleId] === raw) return
++        var next = Object.assign({}, root.commandOutput)
++        next[moduleId] = raw
++        root.commandOutput = next
++      }
++
++      property Process poll: Process {
++        command: ["bash", "-lc", String(source.conf.exec)]
++        stdout: StdioCollector {
++          waitForEnd: true
++          onStreamFinished: source.publish(text)
++        }
++      }
++
++      property Timer tick: Timer {
++        interval: Math.max(1, Number(source.conf.interval || 5)) * 1000
++        running: !source.stream
++        repeat: true
++        triggeredOnStart: true
++        onTriggered: root.runProcess(source.poll)
++      }
++
++      property Process feed: Process {
++        // A stream has no end of its own: have the kernel stop it with the shell.
++        command: ["setpriv", "--pdeathsig", "TERM", "bash", "-lc", String(source.conf.exec)]
++        running: source.stream
++        stdout: SplitParser {
++          onRead: line => source.publish(line)
++        }
++        onExited: if (source.stream) source.retry.restart()
++      }
++
++      property Timer retry: Timer {
++        interval: 2000
++        onTriggered: source.feed.running = true
++      }
++    }
++  }
++
+   function showTooltip(target, text) {
+     clearTooltip()
+ 
+@@ -2124,7 +2196,8 @@ Item {
+ 
+     function injectProps() {
+       var target = activeItem
+-      if (!target) return
++      // A command module derives these from its entry; they are read-only.
++      if (!target || commandCustom) return
+       if ("bar" in target) target.bar = firstParty
+         ? root : root.pluginBarApiFor(pluginApiId, moduleName, registered)
+       if ("moduleName" in target) target.moduleName = moduleName
+@@ -2188,21 +2261,9 @@ Item {
+       if (command) root.run(command)
+     }
+ 
+-    Process {
+-      id: customProc
+-      command: ["bash", "-lc", String(customRoot.setting("exec", ""))]
+-      stdout: StdioCollector {
+-        waitForEnd: true
+-        onStreamFinished: customRoot.update(text)
+-      }
+-    }
+-
+-    Timer {
+-      interval: Math.max(1, Number(customRoot.setting("interval", 5))) * 1000
+-      running: String(customRoot.setting("exec", "")) !== ""
+-      repeat: true
+-      triggeredOnStart: true
+-      onTriggered: root.runProcess(customProc)
+-    }
++    // The command itself runs once at the bar root, not once per monitor.
++    readonly property string raw: root.commandOutput[moduleName] || ""
++    onRawChanged: update(raw)
++    Component.onCompleted: if (raw !== "") update(raw)
+   }
+ }

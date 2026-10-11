@@ -1,0 +1,84 @@
+From 81fb9a690c55789771a0a60643312be5ac67ad5c Mon Sep 17 00:00:00 2001
+From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
+Date: Sun, 11 Oct 2026 18:19:52 +0530
+Subject: [PATCH 08/18] bar: even icon sizes
+
+Nerd Font icons differ a lot in ink size at one font size. A lone icon glyph
+is now scaled so its larger ink side matches the icon font size. The menu
+logo and the status indicators use the same sizing as the other bar icons.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ shell/Ui/BarIndicator.qml        |  3 ++-
+ shell/Ui/OpticalGlyph.qml        | 19 ++++++++++++++++++-
+ shell/plugins/menu/BarWidget.qml |  4 +---
+ 3 files changed, 21 insertions(+), 5 deletions(-)
+
+diff --git a/shell/Ui/BarIndicator.qml b/shell/Ui/BarIndicator.qml
+index 73f7480..7cb9c8f 100644
+--- a/shell/Ui/BarIndicator.qml
++++ b/shell/Ui/BarIndicator.qml
+@@ -46,7 +46,8 @@ BarIconButton {
+   useActiveColor: false
+   maintainIndicatorReveal: indicatorBlock === "inactive"
+   revealHost: indicatorHost
+-  fontSize: Style.font.caption
++  // niri port: same size as the other bar icons (upstream: Style.font.caption).
++  fontSize: Style.bar.iconFont
+   horizontalMargin: 5
+   verticalPadding: 5
+   fixedWidth: vertical ? -1 : Style.bar.statusSlot
+diff --git a/shell/Ui/OpticalGlyph.qml b/shell/Ui/OpticalGlyph.qml
+index d3751c5..7c96602 100644
+--- a/shell/Ui/OpticalGlyph.qml
++++ b/shell/Ui/OpticalGlyph.qml
+@@ -11,12 +11,29 @@ Item {
+   property color color: Commons.Color.foreground
+   property bool debugBounds: false
+ 
+-  readonly property int renderedFontSize: Math.max(1, Math.round(fontSize))
++  // niri port: at one font size Nerd Font icons differ a lot in ink size (a
++  // Bluetooth rune is half as wide as a Wi-Fi fan). A lone icon is scaled so
++  // its larger ink side equals fontSize, which makes a row of icons even.
++  // Text with letters or digits ("95% \uf240") is left alone.
++  readonly property bool loneIcon: {
++    var first = text.length > 0 ? text.codePointAt(0) : 0
++    return first >= 0xE000 && text.length === (first > 0xFFFF ? 2 : 1)
++  }
++  readonly property real inkExtent: Math.max(referenceMetrics.tightBoundingRect.width, referenceMetrics.tightBoundingRect.height)
++  readonly property real inkScale: loneIcon && inkExtent > 0 ? Math.max(0.7, Math.min(1.6, fontSize / inkExtent)) : 1
++  readonly property int renderedFontSize: Math.max(1, Math.round(fontSize * inkScale))
+   readonly property real tightWidth: Math.max(1, glyphMetrics.tightBoundingRect.width)
+   readonly property real horizontalCorrection: glyph.implicitWidth / 2 - (glyphMetrics.tightBoundingRect.x + tightWidth / 2)
+   readonly property real paintedCenterX: glyph.x + glyphMetrics.tightBoundingRect.x + tightWidth / 2
+   readonly property real baselineY: glyph.y + glyph.baselineOffset
+ 
++  TextMetrics {
++    id: referenceMetrics
++    font.family: root.fontFamily
++    font.pixelSize: Math.max(1, Math.round(root.fontSize))
++    text: root.text
++  }
++
+   TextMetrics {
+     id: glyphMetrics
+     font.family: root.fontFamily
+diff --git a/shell/plugins/menu/BarWidget.qml b/shell/plugins/menu/BarWidget.qml
+index 503e355..a336366 100644
+--- a/shell/plugins/menu/BarWidget.qml
++++ b/shell/plugins/menu/BarWidget.qml
+@@ -8,13 +8,11 @@ BarWidget {
+   implicitWidth: button.implicitWidth
+   implicitHeight: button.implicitHeight
+ 
+-  WidgetButton {
++  BarIconButton {
+     id: button
+     anchors.fill: parent
+     bar: root.bar
+     text: "\udb82\udcc7"
+-    centerFigures: false
+-    horizontalMargin: 7.5
+     onPressed: function(button) {
+       if (!root.bar) return
+       if (button === Qt.RightButton) root.bar.run("xdg-terminal-exec")

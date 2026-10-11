@@ -1,0 +1,29 @@
+From 118a9efc5ae51e73e98e3ae0666c80e312ef0df5 Mon Sep 17 00:00:00 2001
+From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
+Date: Sun, 11 Oct 2026 17:59:50 +0530
+Subject: [PATCH 06/18] niri: text size slider leaves terminal font sizes alone
+
+The Display panel's text size control rewrote the font size in foot, kitty,
+alacritty and ghostty. Terminal configs are hand-kept on this machine, so on
+niri it now scales only the shell and GTK text.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ bin/omarchy-display-text-size | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/bin/omarchy-display-text-size b/bin/omarchy-display-text-size
+index bdf8778..d394464 100755
+--- a/bin/omarchy-display-text-size
++++ b/bin/omarchy-display-text-size
+@@ -134,6 +134,10 @@ term_pt_for() {
+ # untouched — that is omarchy-font-set's job. Live-reload signals mirror
+ # omarchy-font-set; foot has no reload signal, so running instances are nudged.
+ set_terminal_size() {
++  # niri port: terminal configs are hand-kept here. The slider scales the shell
++  # and GTK text only; foot, kitty, alacritty and ghostty keep their own size.
++  [[ -n ${NIRI_SOCKET:-} ]] && return 0
++
+   local pt="$1"
+ 
+   if [[ -f ~/.config/alacritty/alacritty.toml ]]; then

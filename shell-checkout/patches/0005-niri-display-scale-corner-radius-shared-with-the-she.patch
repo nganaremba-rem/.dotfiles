@@ -1,0 +1,409 @@
+From 2b4aa3bc76c4ceb6c96fc617787cac442101d24e Mon Sep 17 00:00:00 2001
+From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
+Date: Sun, 11 Oct 2026 17:15:56 +0530
+Subject: [PATCH 05/18] niri: display scale, corner radius shared with the
+ shell, HDMI outputs in the audio panel, night light handover, bar icon tokens
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ niri/bin/audio-output-profile             | 38 +++++++++
+ niri/bin/hyprctl                          | 43 +++++++---
+ niri/bin/niri-layout-toggle               |  6 +-
+ niri/bin/omarchy-hyprland-monitor-scaling | 53 ++++++++++++
+ niri/bin/panel-switch                     | 12 +++
+ shell/Commons/Niri.qml                    |  4 +
+ shell/Commons/Style.qml                   |  4 +-
+ shell/plugins/panels/audio/Panel.qml      | 99 +++++++++++++++++++++++
+ 8 files changed, 247 insertions(+), 12 deletions(-)
+ create mode 100755 niri/bin/audio-output-profile
+ create mode 100755 niri/bin/omarchy-hyprland-monitor-scaling
+
+diff --git a/niri/bin/audio-output-profile b/niri/bin/audio-output-profile
+new file mode 100755
+index 0000000..b9cd63c
+--- /dev/null
++++ b/niri/bin/audio-output-profile
+@@ -0,0 +1,38 @@
++#!/bin/bash
++
++# Outputs that exist only as another profile of a sound card. On most laptops
++# HDMI / DisplayPort audio is one: PipeWire shows a single sink for the card's
++# active profile, so the monitors never appear as outputs until the card
++# switches profile. The audio panel lists these and switches on click.
++#
++#   audio-output-profile list                  label<TAB>card<TAB>profile per output
++#   audio-output-profile set <card> <profile>
++
++case "${1:-}" in
++  list)
++    pactl -f json list cards | jq -r '
++      .[] | .name as $card | .active_profile as $active | .profiles as $profiles
++      # keep the current input half of the profile, so the microphone stays
++      | (($active | capture("(?<input>\\+input:.*)$").input) // "") as $input
++      | .ports | to_entries[]
++      | select(.key | test("-output"))
++      | select(.value.availability != "not available")
++      | select((.value.profiles // []) | index($active) | not)
++      | [.value.profiles[] | select($profiles[.].available != false)] as $candidates
++      | select($candidates | length > 0)
++      | (first($candidates[] | select(test("stereo") and endswith($input) and ($input != "")))
++         // first($candidates[] | select(test("stereo")))
++         // $candidates[0]) as $profile
++      | (.value.properties["device.product.name"] // "") as $product
++      | [(.value.description + (if $product != "" then " (" + $product + ")" else "" end)), $card, $profile]
++      | @tsv'
++    ;;
++  set)
++    [[ -n ${2:-} && -n ${3:-} ]] || { echo "Usage: audio-output-profile set <card> <profile>" >&2; exit 1; }
++    pactl set-card-profile "$2" "$3"
++    ;;
++  *)
++    echo "Usage: audio-output-profile list | set <card> <profile>" >&2
++    exit 1
++    ;;
++esac
+diff --git a/niri/bin/hyprctl b/niri/bin/hyprctl
+index ffb97ce..a3147d6 100755
+--- a/niri/bin/hyprctl
++++ b/niri/bin/hyprctl
+@@ -14,25 +14,28 @@ for arg in "$@"; do
+ done
+ set -- "${args[@]}"
+ 
+-# Layout values live in the niri config; DMS's generated layout wins when present,
+-# as it is included last.
++# Layout values live in the niri config. Later includes win, as in niri: DMS's
++# generated layout, then the menu's appearance toggles.
+ config_number() { # <key> <default>
+   local value
+   value=$(cd "$HOME/.config/niri" 2>/dev/null &&
+-    rg -N --no-filename "^\s*$1\s+([0-9.]+)" -or '$1' settings/layout.kdl dms/layout.kdl 2>/dev/null | tail -n1)
++    rg -j1 -N --no-filename "^\s*$1\s+([0-9.]+)" -or '$1' settings/layout.kdl dms/layout.kdl toggles.kdl 2>/dev/null | tail -n1)
+   echo "${value:-$2}"
+ }
+ 
+-monitors() {
+-  niri msg -j outputs | jq --argjson focused "$(niri msg -j focused-output)" '
+-    [to_entries[] | .value as $o | select($o.logical != null) | {
++monitors() { # [all] includes outputs that are switched off
++  local all=false
++  [[ ${1:-} == "all" ]] && all=true
++  niri msg -j outputs | jq --argjson all "$all" --argjson focused "$(niri msg -j focused-output)" '
++    [to_entries[] | .value as $o | select($all or $o.logical != null) | {
+       id: .key, name: $o.name, description: "\($o.make) \($o.model)",
+       make: $o.make, model: $o.model, serial: ($o.serial // ""),
+       width: ($o.modes[$o.current_mode].width // 0),
+       height: ($o.modes[$o.current_mode].height // 0),
+       refreshRate: (($o.modes[$o.current_mode].refresh_rate // 60000) / 1000),
+-      x: $o.logical.x, y: $o.logical.y, scale: $o.logical.scale, transform: 0,
+-      focused: ($o.name == $focused.name), dpmsStatus: true, disabled: false
++      x: ($o.logical.x // 0), y: ($o.logical.y // 0), scale: ($o.logical.scale // 1), transform: 0,
++      focused: ($o.name == $focused.name), dpmsStatus: true,
++      disabled: ($o.logical == null), mirrorOf: "none"
+     }]'
+ }
+ 
+@@ -52,7 +55,21 @@ case "${1:-}" in
+       *) echo "hyprctl (niri shim): no such option: ${2:-}" >&2; exit 1 ;;
+     esac
+     ;;
+-  monitors) monitors ;;
++  monitors) monitors "${2:-}" ;;
++  eval)
++    # The display panel switches an output on or off with a Lua snippet.
++    if [[ ${2:-} =~ output\ =\ \"?([A-Za-z0-9-]+) ]]; then
++      output=${BASH_REMATCH[1]}
++      if [[ $2 == *"disabled = true"* ]]; then
++        niri msg output "$output" off
++      else
++        niri msg output "$output" on
++      fi
++    else
++      echo "hyprctl (niri shim): eval not supported: ${2:-}" >&2
++      exit 1
++    fi
++    ;;
+   activewindow) niri msg -j focused-window | jq "if . == null then {} else $window_json end" ;;
+   clients) niri msg -j windows | jq "[.[] | $window_json]" ;;
+   activeworkspace) niri msg -j workspaces | jq '.[] | select(.is_focused) | {id, name: (.name // "\(.idx)"), monitor: .output}' ;;
+@@ -79,7 +96,13 @@ case "${1:-}" in
+       fi
+       echo "$3" >"$state"
+     else
+-      cat "$state" 2>/dev/null || echo 6500
++      temperature=$(cat "$state" 2>/dev/null || echo 6500)
++      # Night light was on when the session ended: nothing holds it after a
++      # login, so the first status query puts it back.
++      if (( temperature < 6000 )) && [[ $(panel-mode) == "shell" ]] && ! pgrep -x gammastep >/dev/null; then
++        setsid -f gammastep -P -O "$temperature" >/dev/null 2>&1
++      fi
++      echo "$temperature"
+     fi
+     ;;
+   dispatch)
+diff --git a/niri/bin/niri-layout-toggle b/niri/bin/niri-layout-toggle
+index 4b3b37c..7c2d1e6 100755
+--- a/niri/bin/niri-layout-toggle
++++ b/niri/bin/niri-layout-toggle
+@@ -50,6 +50,10 @@ esac
+     echo "layout { gaps 0; }"
+   fi
+   if [[ -n $radius ]]; then
+-    echo "window-rule { geometry-corner-radius $radius; clip-to-geometry true; }"
++    # Windows here; the shell's own surfaces read this same radius back
++    # through the hyprctl stand-in, so sharp means sharp everywhere.
++    printf 'window-rule {\n    geometry-corner-radius %s\n    clip-to-geometry true\n}\n' "$radius"
+   fi
+ } >"$out"
++
++niri msg action load-config-file >/dev/null
+diff --git a/niri/bin/omarchy-hyprland-monitor-scaling b/niri/bin/omarchy-hyprland-monitor-scaling
+new file mode 100755
+index 0000000..0f48b80
+--- /dev/null
++++ b/niri/bin/omarchy-hyprland-monitor-scaling
+@@ -0,0 +1,53 @@
++#!/bin/bash
++
++# niri stand-in: read or set the focused monitor's scale.
++#
++#   omarchy-hyprland-monitor-scaling            print the current scale
++#   omarchy-hyprland-monitor-scaling up|down    step through the presets
++#   omarchy-hyprland-monitor-scaling 1.25       set it
++#
++# The scale is applied at once and written into ~/.config/niri/dms/outputs.kdl,
++# the file niri reads its outputs from. A runtime-only change would be lost at
++# the next config reload.
++
++SCALES=(1 1.25 1.6 2 3 4)
++outputs_file="$HOME/.config/niri/dms/outputs.kdl"
++
++monitor=$(niri msg -j focused-output | jq -r '.name // empty')
++current=$(niri msg -j focused-output | jq -r '.logical.scale // 1')
++[[ -n $monitor ]] || exit 1
++
++case "${1:-}" in
++  "")
++    printf '%g\n' "$current"
++    exit 0
++    ;;
++  up | down)
++    target=$current
++    for i in "${!SCALES[@]}"; do
++      if awk -v a="${SCALES[$i]}" -v b="$current" 'BEGIN { exit !(a == b) }'; then
++        if [[ $1 == "up" ]]; then
++          target=${SCALES[$((i + 1 < ${#SCALES[@]} ? i + 1 : i))]}
++        else
++          target=${SCALES[$((i > 0 ? i - 1 : 0))]}
++        fi
++      fi
++    done
++    ;;
++  *)
++    [[ $1 =~ ^[0-9]+(\.[0-9]+)?$ ]] || { echo "Usage: omarchy-hyprland-monitor-scaling [up|down|SCALE]" >&2; exit 1; }
++    target=$1
++    ;;
++esac
++
++niri msg output "$monitor" scale "$target" || exit 1
++
++# Persist: rewrite the scale line inside this monitor's output block only.
++if [[ -f $outputs_file ]]; then
++  awk -v monitor="$monitor" -v scale="$target" '
++    $1 == "output" { inside = ($2 == "\"" monitor "\"") }
++    inside && $1 == "scale" { sub(/scale[ \t]+[0-9.]+/, "scale " scale) }
++    $1 == "}" { inside = 0 }
++    { print }
++  ' "$outputs_file" >"$outputs_file.tmp" && mv "$outputs_file.tmp" "$outputs_file"
++fi
+diff --git a/niri/bin/panel-switch b/niri/bin/panel-switch
+index 068d1f8..967e506 100755
+--- a/niri/bin/panel-switch
++++ b/niri/bin/panel-switch
+@@ -33,6 +33,14 @@ fi
+ 
+ case "$target" in
+   shell)
++    # Night light must not blink off in the handover: note what DMS is doing
++    # before it stops, then give the same temperature to this shell.
++    night=$(dms ipc call night status 2>/dev/null)
++    night_temp=""
++    if [[ $night == *"Night mode: enabled"* && $night =~ Current\ temperature:\ ([0-9]+)K ]]; then
++      night_temp=${BASH_REMATCH[1]}
++    fi
++
+     touch "$flag"
+     # disable as well as stop, or DMS returns at the next login beside this bar
+     systemctl --user disable --now dms.service 2>/dev/null
+@@ -48,6 +56,10 @@ case "$target" in
+     done
+     omarchy-toggle-bar off
+     cp "$HOME/.local/state/omarchy/current/theme/niri.kdl" "$HOME/.config/niri/theme.kdl" 2>/dev/null
++    if [[ -n $night_temp ]]; then
++      hyprctl hyprsunset temperature "$night_temp"
++      omarchy-shell -q nightlight refresh
++    fi
+     ;;
+   dms)
+     rm -f "$flag"
+diff --git a/shell/Commons/Niri.qml b/shell/Commons/Niri.qml
+index 8028d11..0f63310 100644
+--- a/shell/Commons/Niri.qml
++++ b/shell/Commons/Niri.qml
+@@ -105,6 +105,10 @@ Singleton {
+       root.keyboardLayoutIndex = event.KeyboardLayoutsChanged.keyboard_layouts.current_idx
+     } else if (event.KeyboardLayoutSwitched) {
+       root.keyboardLayoutIndex = event.KeyboardLayoutSwitched.idx
++    } else if (event.ConfigLoaded) {
++      // Corner radius and gaps live in the niri config; keep the shell's
++      // surfaces in step with the windows.
++      Style.scheduleRefresh()
+     }
+   }
+ 
+diff --git a/shell/Commons/Style.qml b/shell/Commons/Style.qml
+index 8179279..f13642d 100644
+--- a/shell/Commons/Style.qml
++++ b/shell/Commons/Style.qml
+@@ -424,7 +424,9 @@ QtObject {
+       } else if (section === "bar") {
+         if (key === "scale-with-font") {
+           nextBarScaleWithFont = boolToken(raw, nextBarScaleWithFont)
+-        } else if (key === "size-horizontal" || key === "size-vertical" || key === "notch-height") {
++        } else if (key === "size-horizontal" || key === "size-vertical" || key === "notch-height"
++            // niri port: the icon tokens were read (barToken) but never parsed.
++            || key === "icon-slot" || key === "icon-canvas" || key === "icon-font" || key === "status-slot") {
+           var b = parseInt(raw, 10)
+           if (isFinite(b)) barOut[key] = b
+         }
+diff --git a/shell/plugins/panels/audio/Panel.qml b/shell/plugins/panels/audio/Panel.qml
+index 46cb39a..e8d8f4f 100644
+--- a/shell/plugins/panels/audio/Panel.qml
++++ b/shell/plugins/panels/audio/Panel.qml
+@@ -125,6 +125,37 @@ Panel {
+   // snapshot timer lets the mutation settle first, and closed panels keep their
+   // repeaters detached entirely.
+   property var displayAudioSinks: []
++
++  // Outputs PipeWire has no node for: HDMI / DisplayPort audio is another
++  // profile of the sound card, so it only becomes a sink once the card
++  // switches. audio-output-profile lists them; a click switches the profile.
++  property var profileOutputs: []
++
++  function loadProfileOutputs(text) {
++    var rows = []
++    var lines = String(text || "").split("\n")
++    for (var i = 0; i < lines.length; i++) {
++      var cols = lines[i].split("\t")
++      if (cols.length === 3) rows.push({ label: cols[0], card: cols[1], profile: cols[2] })
++    }
++    profileOutputs = rows
++  }
++
++  Process {
++    id: profileOutputsProc
++    command: ["audio-output-profile", "list"]
++    stdout: StdioCollector {
++      waitForEnd: true
++      onStreamFinished: root.loadProfileOutputs(text)
++    }
++  }
++
++  // The card needs a moment to bring the new sink up before the list is right again.
++  Timer {
++    id: profileOutputsRefresh
++    interval: 900
++    onTriggered: profileOutputsProc.running = true
++  }
+   property var displayAudioSources: []
+   property var displayAudioStreams: []
+ 
+@@ -336,6 +367,7 @@ Panel {
+   onOpenedChanged: {
+     if (opened) {
+       refreshDisplayAudioModels()
++      profileOutputsProc.running = true
+       focusSection = "output"
+       selectedIndex = -1  // first keyboard cursor reveal starts on the output slider
+       cursorActive = false
+@@ -923,6 +955,16 @@ Panel {
+                 rowIndex: index
+               }
+             }
++
++            Repeater {
++              model: root.profileOutputs
++
++              ProfileOutputRow {
++                required property var modelData
++                width: panelColumn.width
++                entry: modelData
++              }
++            }
+           }
+ 
+           // ---- Input ----
+@@ -1074,6 +1116,63 @@ Panel {
+ 
+   // ---- Reusable inline components ----
+ 
++  // An output reached by switching the sound card's profile (see
++  // profileOutputs). Pointer only: it is not part of the keyboard cursor order.
++  component ProfileOutputRow: CursorSurface {
++    id: profileRow
++    required property var entry
++
++    hasCursor: profileMouse.containsMouse
++    current: false
++    foreground: root.bar.foreground
++    fill: root.hoverFill
++    currentFill: root.selectedFill
++    implicitHeight: profileInner.implicitHeight + Style.spacing.xl
++
++    Row {
++      id: profileInner
++      anchors.left: parent.left
++      anchors.right: parent.right
++      anchors.verticalCenter: parent.verticalCenter
++      anchors.leftMargin: Style.space(6)
++      anchors.rightMargin: Style.space(6)
++      spacing: Style.space(8)
++
++      Text {
++        textFormat: Text.PlainText
++        text: "\uDB80\uDF79"
++        color: root.bar.foreground
++        font.family: root.bar.fontFamily
++        font.pixelSize: Style.font.title
++        width: Style.space(22)
++        horizontalAlignment: Text.AlignHCenter
++        anchors.verticalCenter: parent.verticalCenter
++      }
++
++      Text {
++        textFormat: Text.PlainText
++        text: profileRow.entry.label
++        color: root.bar.foreground
++        font.family: root.bar.fontFamily
++        font.pixelSize: Style.font.body
++        elide: Text.ElideRight
++        width: parent.width - Style.space(22) - Style.space(8)
++        anchors.verticalCenter: parent.verticalCenter
++      }
++    }
++
++    MouseArea {
++      id: profileMouse
++      anchors.fill: parent
++      hoverEnabled: true
++      cursorShape: Qt.PointingHandCursor
++      onClicked: {
++        Quickshell.execDetached(["audio-output-profile", "set", profileRow.entry.card, profileRow.entry.profile])
++        profileOutputsRefresh.restart()
++      }
++    }
++  }
++
+   // Output device row — cursor target inside the "output" section. Mouse
+   // hover updates the panel cursor at the root; visuals come entirely
+   // from hasCursor/current via CursorSurface, never from containsMouse.

@@ -1,0 +1,45 @@
+From d4fb96cbfa4a1a54d4bdb6eab6b5832c6fdf219a Mon Sep 17 00:00:00 2001
+From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
+Date: Sun, 11 Oct 2026 17:06:50 +0530
+Subject: [PATCH 04/18] niri: font setter leaves terminal configs alone; stop
+ sudo polling from the bar
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ niri/bin/omarchy-font-set          |  7 +++++++
+ niri/bin/omarchy-sudo-passwordless | 12 ++++++++++++
+ 2 files changed, 19 insertions(+)
+ create mode 100755 niri/bin/omarchy-font-set
+ create mode 100755 niri/bin/omarchy-sudo-passwordless
+
+diff --git a/niri/bin/omarchy-font-set b/niri/bin/omarchy-font-set
+new file mode 100755
+index 0000000..f488a2a
+--- /dev/null
++++ b/niri/bin/omarchy-font-set
+@@ -0,0 +1,7 @@
++#!/bin/bash
++
++# niri stand-in: the upstream command rewrites the font in every terminal's
++# config (foot, kitty, ghostty, alacritty) and in fontconfig. On this machine
++# those files are hand-kept, so the menu's Font row does nothing but say so.
++
++omarchy-notification-send -u low "Font not changed" "Terminal and fontconfig fonts are managed by hand here."
+diff --git a/niri/bin/omarchy-sudo-passwordless b/niri/bin/omarchy-sudo-passwordless
+new file mode 100755
+index 0000000..9554236
+--- /dev/null
++++ b/niri/bin/omarchy-sudo-passwordless
+@@ -0,0 +1,12 @@
++#!/bin/bash
++
++# niri stand-in: the bar asks "is passwordless sudo active?" every few seconds
++# on every monitor. Upstream answers through sudo, which logs a failed attempt
++# each time when its root-owned helper is not installed. Without that helper
++# the answer is simply no.
++
++if [[ ${1:-} == "--active" && ! -x /usr/bin/omarchy-sudo-passwordless ]]; then
++  exit 1
++fi
++
++exec "$OMARCHY_PATH/bin/omarchy-sudo-passwordless" "$@"

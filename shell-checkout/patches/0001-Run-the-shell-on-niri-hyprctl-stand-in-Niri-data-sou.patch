@@ -1,0 +1,291 @@
+From a518e91e7b5d2bb19d205759e1666e133887a583 Mon Sep 17 00:00:00 2001
+From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
+Date: Sun, 11 Oct 2026 16:11:54 +0530
+Subject: [PATCH 01/18] Run the shell on niri: hyprctl stand-in, Niri data
+ source, overlays follow niri's focused output
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ niri/bin/hyprctl           |  82 ++++++++++++++++++++++++
+ shell/Commons/Niri.qml     | 127 +++++++++++++++++++++++++++++++++++++
+ shell/Commons/qmldir       |   1 +
+ shell/Ui/OverlayWindow.qml |   9 ++-
+ 4 files changed, 217 insertions(+), 2 deletions(-)
+ create mode 100755 niri/bin/hyprctl
+ create mode 100644 shell/Commons/Niri.qml
+
+diff --git a/niri/bin/hyprctl b/niri/bin/hyprctl
+new file mode 100755
+index 0000000..36c581d
+--- /dev/null
++++ b/niri/bin/hyprctl
+@@ -0,0 +1,82 @@
++#!/bin/bash
++# hyprctl stand-in for niri: answers the queries and dispatches Omarchy's shell
++# and scripts actually use, from niri's IPC and config. Anything else fails
++# loudly (exit 1) so an unported Hyprland-only script is easy to spot.
++set -uo pipefail
++
++# Output is always JSON, so -j only needs dropping.
++args=()
++for arg in "$@"; do
++  case $arg in
++    -j | --batch | -q) ;;
++    *) args+=("$arg") ;;
++  esac
++done
++set -- "${args[@]}"
++
++# Layout values live in the niri config; DMS's generated layout wins when present,
++# as it is included last.
++config_number() { # <key> <default>
++  local value
++  value=$(cd "$HOME/.config/niri" 2>/dev/null &&
++    rg -N --no-filename "^\s*$1\s+([0-9.]+)" -or '$1' settings/layout.kdl dms/layout.kdl 2>/dev/null | tail -n1)
++  echo "${value:-$2}"
++}
++
++monitors() {
++  niri msg -j outputs | jq --argjson focused "$(niri msg -j focused-output)" '
++    [to_entries[] | .value as $o | select($o.logical != null) | {
++      id: .key, name: $o.name, description: "\($o.make) \($o.model)",
++      make: $o.make, model: $o.model, serial: ($o.serial // ""),
++      width: ($o.modes[$o.current_mode].width // 0),
++      height: ($o.modes[$o.current_mode].height // 0),
++      refreshRate: (($o.modes[$o.current_mode].refresh_rate // 60000) / 1000),
++      x: $o.logical.x, y: $o.logical.y, scale: $o.logical.scale, transform: 0,
++      focused: ($o.name == $focused.name), dpmsStatus: true, disabled: false
++    }]'
++}
++
++window_json='{address: "0x\(.id)", id: .id, class: (.app_id // ""), initialClass: (.app_id // ""),
++  title: (.title // ""), initialTitle: (.title // ""), pid: (.pid // 0),
++  floating: .is_floating, workspace: {id: .workspace_id, name: "\(.workspace_id)"},
++  fullscreen: 0, tags: []}'
++
++case "${1:-}" in
++  getoption)
++    case "${2:-}" in
++      decoration:rounding) echo "{\"option\":\"$2\",\"int\":$(config_number geometry-corner-radius 8),\"set\":true}" ;;
++      # The shell halves gaps_out for its own edge distance; report double so
++      # panels sit one niri gap from the screen edge.
++      general:gaps_out) echo "{\"option\":\"$2\",\"int\":$(($(config_number gaps 8) * 2)),\"set\":true}" ;;
++      animations:enabled) echo "{\"option\":\"$2\",\"int\":1,\"bool\":true,\"set\":true}" ;;
++      *) echo "hyprctl (niri shim): no such option: ${2:-}" >&2; exit 1 ;;
++    esac
++    ;;
++  monitors) monitors ;;
++  activewindow) niri msg -j focused-window | jq "if . == null then {} else $window_json end" ;;
++  clients) niri msg -j windows | jq "[.[] | $window_json]" ;;
++  activeworkspace) niri msg -j workspaces | jq '.[] | select(.is_focused) | {id, name: (.name // "\(.idx)"), monitor: .output}' ;;
++  workspaces) niri msg -j workspaces | jq '[.[] | {id, name: (.name // "\(.idx)"), monitor: .output}]' ;;
++  reload) niri msg action load-config-file ;;
++  dispatch)
++    case "${2:-}" in
++      exec) shift 2; niri msg action spawn-sh -- "$*" ;;
++      focuswindow)
++        target=${3:-}
++        case $target in
++          address:0x*) niri msg action focus-window --id "${target#address:0x}" ;;
++          class:*)
++            id=$(niri msg -j windows | jq -r --arg re "${target#class:}" 'first(.[] | select((.app_id // "") | test($re))) | .id')
++            [[ -n $id ]] && niri msg action focus-window --id "$id"
++            ;;
++          *) echo "hyprctl (niri shim): focuswindow $target not supported" >&2; exit 1 ;;
++        esac
++        ;;
++      *) echo "hyprctl (niri shim): dispatch ${2:-} not supported" >&2; exit 1 ;;
++    esac
++    ;;
++  *)
++    echo "hyprctl (niri shim): '${*:-}' not supported on niri" >&2
++    exit 1
++    ;;
++esac
+diff --git a/shell/Commons/Niri.qml b/shell/Commons/Niri.qml
+new file mode 100644
+index 0000000..8028d11
+--- /dev/null
++++ b/shell/Commons/Niri.qml
+@@ -0,0 +1,127 @@
++pragma Singleton
++import QtQuick
++import Quickshell
++import Quickshell.Io
++
++// niri port: what the shell asks a compositor for, answered by niri. Which
++// output has focus, the workspaces, the windows, the keyboard layout. Fed by
++// one `niri msg -j event-stream` reader. Under any other compositor `active`
++// is false and every property stays empty, so Hyprland code paths are unchanged.
++Singleton {
++  id: root
++
++  readonly property bool active: !!Quickshell.env("NIRI_SOCKET")
++
++  // niri's own objects, kept as the event stream reports them.
++  property var workspaces: []        // {id, idx, name, output, is_active, is_focused, is_urgent, active_window_id}
++  property var windows: ({})         // id -> {id, title, app_id, workspace_id, is_focused, is_floating, is_urgent}
++  property var keyboardLayouts: []   // layout names
++  property int keyboardLayoutIndex: 0
++
++  readonly property string focusedOutput: {
++    for (var i = 0; i < workspaces.length; i++)
++      if (workspaces[i].is_focused) return workspaces[i].output || ""
++    return ""
++  }
++
++  readonly property var focusedWindow: {
++    for (var id in windows) if (windows[id].is_focused) return windows[id]
++    return null
++  }
++
++  function screenFor(name) {
++    for (var i = 0; i < Quickshell.screens.length; i++)
++      if (Quickshell.screens[i].name === name) return Quickshell.screens[i]
++    return null
++  }
++
++  function workspacesOn(output) {
++    return workspaces.filter(function(w) { return w.output === output })
++      .sort(function(a, b) { return a.idx - b.idx })
++  }
++
++  function windowCount(workspaceId) {
++    var count = 0
++    for (var id in windows) if (windows[id].workspace_id === workspaceId) count++
++    return count
++  }
++
++  function action(args) {
++    Quickshell.execDetached(["niri", "msg", "action"].concat(args))
++  }
++
++  // Events carry either the whole list or one changed item. Always assign a
++  // fresh array/object: bindings do not see in-place mutation of a var.
++  function handle(line) {
++    var event
++    try { event = JSON.parse(line) } catch (e) { return }
++
++    if (event.WorkspacesChanged) {
++      root.workspaces = event.WorkspacesChanged.workspaces
++    } else if (event.WorkspaceActivated) {
++      var activated = event.WorkspaceActivated
++      var target = root.workspaces.filter(function(w) { return w.id === activated.id })[0]
++      if (!target) return
++      root.workspaces = root.workspaces.map(function(w) {
++        var next = Object.assign({}, w)
++        if (w.output === target.output) next.is_active = w.id === activated.id
++        if (activated.focused) next.is_focused = w.id === activated.id
++        return next
++      })
++    } else if (event.WorkspaceActiveWindowChanged) {
++      var changed = event.WorkspaceActiveWindowChanged
++      root.workspaces = root.workspaces.map(function(w) {
++        return w.id === changed.workspace_id ? Object.assign({}, w, { active_window_id: changed.active_window_id }) : w
++      })
++    } else if (event.WorkspaceUrgencyChanged) {
++      var urgency = event.WorkspaceUrgencyChanged
++      root.workspaces = root.workspaces.map(function(w) {
++        return w.id === urgency.id ? Object.assign({}, w, { is_urgent: urgency.urgent }) : w
++      })
++    } else if (event.WindowsChanged) {
++      var all = ({})
++      event.WindowsChanged.windows.forEach(function(w) { all[w.id] = w })
++      root.windows = all
++    } else if (event.WindowOpenedOrChanged) {
++      var opened = event.WindowOpenedOrChanged.window
++      var withOpened = Object.assign({}, root.windows)
++      // A window that arrives focused takes focus from whichever had it.
++      if (opened.is_focused)
++        for (var id in withOpened) withOpened[id] = Object.assign({}, withOpened[id], { is_focused: false })
++      withOpened[opened.id] = opened
++      root.windows = withOpened
++    } else if (event.WindowClosed) {
++      var withoutClosed = Object.assign({}, root.windows)
++      delete withoutClosed[event.WindowClosed.id]
++      root.windows = withoutClosed
++    } else if (event.WindowFocusChanged) {
++      var focusedId = event.WindowFocusChanged.id
++      var refocused = ({})
++      for (var key in root.windows)
++        refocused[key] = Object.assign({}, root.windows[key], { is_focused: root.windows[key].id === focusedId })
++      root.windows = refocused
++    } else if (event.KeyboardLayoutsChanged) {
++      root.keyboardLayouts = event.KeyboardLayoutsChanged.keyboard_layouts.names
++      root.keyboardLayoutIndex = event.KeyboardLayoutsChanged.keyboard_layouts.current_idx
++    } else if (event.KeyboardLayoutSwitched) {
++      root.keyboardLayoutIndex = event.KeyboardLayoutSwitched.idx
++    }
++  }
++
++  Process {
++    id: stream
++    command: ["niri", "msg", "-j", "event-stream"]
++    running: root.active
++    stdout: SplitParser {
++      onRead: data => root.handle(data)
++    }
++    // niri restarting its IPC, or a config reload gone wrong: reconnect.
++    onExited: if (root.active) reconnect.restart()
++  }
++
++  Timer {
++    id: reconnect
++    interval: 1000
++    onTriggered: stream.running = true
++  }
++}
+diff --git a/shell/Commons/qmldir b/shell/Commons/qmldir
+index e5be766..11f5e44 100644
+--- a/shell/Commons/qmldir
++++ b/shell/Commons/qmldir
+@@ -4,6 +4,7 @@ singleton Border 1.0 Border.qml
+ singleton Color 1.0 Color.qml
+ singleton IpcRegistry 1.0 IpcRegistry.qml
+ singleton InputMethodState 1.0 InputMethodState.qml
++singleton Niri 1.0 Niri.qml
+ singleton Style 1.0 Style.qml
+ singleton UntypedInput 1.0 UntypedInput.qml
+ singleton Util 1.0 Util.qml
+diff --git a/shell/Ui/OverlayWindow.qml b/shell/Ui/OverlayWindow.qml
+index bbca91e..52868c5 100644
+--- a/shell/Ui/OverlayWindow.qml
++++ b/shell/Ui/OverlayWindow.qml
+@@ -2,6 +2,7 @@ import QtQuick
+ import Quickshell
+ import Quickshell.Hyprland
+ import Quickshell.Wayland
++import qs.Commons
+ 
+ // Map a fresh fullscreen surface on each open. Keep its first frames
+ // transparent until Qt receives the output's scale, so it opens sharp without
+@@ -16,6 +17,9 @@ PanelWindow {
+ 
+   property var targetScreen: null
+   readonly property var targetMonitor: {
++    // niri port: Qt already has the output's scale from the surface, so the
++    // screen itself stands in for Hyprland's monitor object.
++    if (Niri.active) return targetScreen ? ({ name: targetScreen.name, scale: devicePixelRatio }) : null
+     var monitors = Hyprland.monitors.values
+     for (var i = 0; i < monitors.length; i++) {
+       if (targetScreen && monitors[i].name === targetScreen.name) return monitors[i]
+@@ -41,6 +45,7 @@ PanelWindow {
+   }
+ 
+   function focusedScreen() {
++    if (Niri.active) return Niri.screenFor(Niri.focusedOutput) || (Quickshell.screens.length > 0 ? Quickshell.screens[0] : null)
+     var monitor = Hyprland.focusedMonitor
+     var name = monitor ? String(monitor.name || "") : ""
+     for (var i = 0; i < Quickshell.screens.length; i++) {
+@@ -53,9 +58,9 @@ PanelWindow {
+   // scale can lag behind Qt. Refresh on opening and on scale changes while open.
+   onShownChanged: {
+     targetScreen = shown ? focusedScreen() : null
+-    if (shown) Hyprland.refreshMonitors()
++    if (shown && !Niri.active) Hyprland.refreshMonitors()
+   }
+-  onDevicePixelRatioChanged: if (shown) Hyprland.refreshMonitors()
++  onDevicePixelRatioChanged: if (shown && !Niri.active) Hyprland.refreshMonitors()
+ 
+   Connections {
+     target: Quickshell
