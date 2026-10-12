@@ -34,7 +34,10 @@ binds {
     Mod+D                hotkey-overlay-title="✅ Todo (taskwarrior-tui)"     { spawn-sh "$NIRI_TERMINAL_RUN taskwarrior-tui"; }
     Mod+Ctrl+Alt+V       hotkey-overlay-title="🔊 Sound mixer (wiremix)"      { spawn-sh "$NIRI_TERMINAL_RUN wiremix"; }
     Mod+Ctrl+Alt+W       hotkey-overlay-title="📶 Wi-Fi (wlctl)"              { spawn-sh "rfkill unblock wifi && $NIRI_TERMINAL_RUN wlctl"; }
-    Mod+Ctrl+Alt+Return  hotkey-overlay-title="🤖 Claude Code"                { spawn-sh "$NIRI_TERMINAL_RUN claude --dangerously-skip-permissions"; }
+    Mod+Ctrl+Alt+Return  hotkey-overlay-title="🤖 Claude Code"                { spawn-sh "$NIRI_TERMINAL_RUN claude"; }
+    Mod+Ctrl+Alt+Shift+Return hotkey-overlay-title="⚠️ Claude Code (bypass permissions)" { spawn-sh "$NIRI_TERMINAL_RUN claude --dangerously-skip-permissions"; }
+    Mod+Ctrl+Alt+I       hotkey-overlay-title="🤖 Codex"                      { spawn-sh "$NIRI_TERMINAL_RUN codex -c 'tui.status_line=[\"model-with-reasoning\", \"current-dir\", \"git-branch\", \"context-used\", \"used-tokens\", \"total-input-tokens\", \"total-output-tokens\", \"five-hour-limit\", \"weekly-limit\", \"estimated-thread-cost\", \"fast-mode\", \"approval-mode\"]'"; }
+    Mod+Ctrl+Alt+Shift+I hotkey-overlay-title="⚠️ Codex (bypass approvals + sandbox)" { spawn-sh "$NIRI_TERMINAL_RUN codex --dangerously-bypass-approvals-and-sandbox -c 'tui.status_line=[\"model-with-reasoning\", \"current-dir\", \"git-branch\", \"context-used\", \"used-tokens\", \"total-input-tokens\", \"total-output-tokens\", \"five-hour-limit\", \"weekly-limit\", \"estimated-thread-cost\", \"fast-mode\", \"approval-mode\"]'"; }
     Mod+Alt+I            hotkey-overlay-title="🧰 REMTUI"                     { spawn "~/.local/bin/remtui"; }
 
     // ── 🎨 DankMaterialShell ─────────────────────────────────────────────────

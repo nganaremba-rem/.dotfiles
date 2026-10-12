@@ -6,6 +6,7 @@
 #   scratchpad stash    send the focused window to the scratchpad; on a window
 #                       that is already in it, take it out and tile it again
 #   scratchpad toggle   bring the scratchpad windows here, or send them back
+#   scratchpad watch    keep parked windows off screen (settings/startup.kdl)
 #
 # The bottom workspace rather than a named one: a named workspace sits at
 # index 1 and would shift every "focus-workspace N" bind on that monitor.
@@ -15,12 +16,18 @@
 # moves it back up to where it was. One move per toggle, so nothing overlaps.
 # niri keeps 75 px of a floating window on screen, so the window is parked
 # while it is still moving: it reads as carrying on out of view.
+#
+# That 75 px is why "watch" exists. A parked window is hidden only while its
+# workspace is off screen, and the bottom workspace is the one Mod+2 or
+# workspace-down lands on next. "watch" moves parked windows down again
+# whenever a workspace comes into view.
 set -euo pipefail
 
 slide_s=0.12 # how long the slide down shows before the window is parked;
              # goes with the window-movement spring in settings/animations.kdl
 
-state="${XDG_RUNTIME_DIR:-/tmp}/niri-scratchpad" # lines: <window id> <home y>
+# lines: <window id> <home y>; home y is "-" while the window is shown
+state="${XDG_RUNTIME_DIR:-/tmp}/niri-scratchpad"
 touch "$state"
 
 act() { niri msg action "$@"; }
@@ -74,11 +81,27 @@ show() { # <window id>...: arrive at the bottom edge, slide up to the saved plac
     # Measured, not remembered: niri may have moved a parked window.
     look
     for id in "$@"; do
-        [[ -n ${home[$id]} ]] || continue
+        [[ ${home[$id]} != - ]] || continue
         delta=$((home[$id] - ypos[$id]))
         ((delta == 0)) || act move-floating-window --id "$id" -y "$(printf '%+d' "$delta")"
+        home[$id]=-
     done
+    save
     act focus-window --id "${!#}"
+}
+
+park() { # move parked windows off every workspace that is on screen
+    local id w low
+    look
+    # A workspace index counts on the window's own monitor.
+    while read -r w low; do
+        for id in "${order[@]}"; do
+            [[ ${home[$id]} != - && ${ws[$id]:-} == "$w" ]] || continue
+            act move-window-to-workspace --window-id "$id" --focus false "$low" || true
+        done
+    done < <(niri msg -j workspaces | jq -r '
+        . as $all | .[] | select(.is_active) | .output as $o
+        | "\(.id) \([$all[] | select(.output == $o) | .idx] | max)"')
 }
 
 case "${1:-toggle}" in
@@ -113,7 +136,7 @@ toggle)
     fi
 
     shown=()
-    for id in "${order[@]}"; do [[ ${ws[$id]} == "$here" ]] && shown+=("$id"); done
+    for id in "${order[@]}"; do [[ ${ws[$id]} == "$here" && ${home[$id]} == - ]] && shown+=("$id"); done
 
     if ((${#shown[@]} > 0)); then
         hide "${shown[@]}"
@@ -121,8 +144,18 @@ toggle)
         show "${order[@]}"
     fi
     ;;
+park)
+    park
+    ;;
+watch)
+    exec 9>"$state.lock"
+    flock -n 9 || exit 0 # one watcher is enough
+    "$0" park || true
+    niri msg -j event-stream | jq --unbuffered -c 'select(.WorkspaceActivated)' |
+        while read -r _; do "$0" park || true; done
+    ;;
 *)
-    echo "usage: scratchpad stash|toggle" >&2
+    echo "usage: scratchpad stash|toggle|watch" >&2
     exit 2
     ;;
 esac

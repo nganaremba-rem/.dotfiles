@@ -1,10 +1,10 @@
 [Default Applications]
 application/ogg=mpv.desktop
-application/pdf=mupdf.desktop
+application/pdf=org.gnome.Evince.desktop
 application/schema+json=nvim.desktop
 application/vnd.ms-excel.sheet.macroEnabled.12=onlyoffice-desktopeditors.desktop
 application/vnd.openxmlformats-officedocument.spreadsheetml.sheet=onlyoffice-desktopeditors.desktop
-application/vnd.openxmlformats-officedocument.wordprocessingml.document=onlyoffice-desktopeditors.desktop
+application/vnd.openxmlformats-officedocument.wordprocessingml.document=freeoffice-textmaker.desktop
 application/x-extension-burp=install4j_vjzk9h-BurpSuiteCommunity.desktop
 application/x-extension-htm=Zen.desktop
 application/x-extension-html=Zen.desktop

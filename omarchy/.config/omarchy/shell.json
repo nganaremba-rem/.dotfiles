@@ -120,13 +120,7 @@
           "tooltip": "Clipboard history"
         },
         {
-          "id": "notifications",
-          "type": "command",
-          "text": "󰂚",
-          "fontSize": 15,
-          "onClick": "omarchy-shell notifications showHistory",
-          "onRightClick": "omarchy-shell notifications dismissAll",
-          "tooltip": "Notifications (right click: dismiss all)"
+          "id": "omarchy.notifications"
         },
         {
           "id": "omarchy.bluetooth"
