@@ -4,7 +4,7 @@ const msg = document.getElementById('msg');
 const btn = document.getElementById('export');
 const say = (text, cls = '') => { msg.textContent = text; msg.className = cls; };
 
-// Same rules as `ytdl-run` (site key -> cookie file). domains = what to export.
+// Same rules as `ytdl-run` (site key -> ~/.config/ytdl/cookies/<site>.txt). domains = what to export.
 const KNOWN = [
   { site: 'youtube', domains: ['youtube.com'], hosts: ['youtube.com', 'youtu.be', 'youtube-nocookie.com'] },
   { site: 'facebook', domains: ['facebook.com'], hosts: ['facebook.com', 'fb.watch', 'fb.com'] },
@@ -21,7 +21,7 @@ function siteOf(host) {
   const reg = n >= 3 && /^(co|com|org|net|gov|ac)$/.test(p[n - 2]) && p[n - 1].length === 2 ? p.slice(-3).join('.') : p.slice(-2).join('.');
   return { site: reg.split('.')[0].replace(/[^a-z0-9-]/g, ''), domains: [reg] };
 }
-const savePath = (site) => (site === 'youtube' ? '~/.config/mpvtube/cookies.txt' : `~/.config/ytdl/cookies/${site}.txt`);
+const savePath = (site) => `~/.config/ytdl/cookies/${site}.txt`;
 
 // Export from the cookie store of the window the popup was opened in (normal or private).
 async function current() {
@@ -56,7 +56,7 @@ btn.addEventListener('click', async () => {
       return;
     }
     const url = 'data:text/plain;charset=utf-8,' + encodeURIComponent(toNetscape(cookies));
-    const filename = target.site === 'youtube' ? 'remtube-cookies.txt' : `ytdl-${target.site}.txt`;
+    const filename = `ytdl-${target.site}.txt`;
     await chrome.downloads.download({ url, filename, saveAs: true });
     say(`Exported ${cookies.length} cookies. Save as ${savePath(target.site)}, then close this private window.`, 'ok');
   } catch (e) {

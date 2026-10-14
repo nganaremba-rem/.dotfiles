@@ -22,8 +22,8 @@ exec 3>>"$log"
 [[ $log == /dev/stdout ]] || echo "META|${name:-$url}" >&3
 id=$(oq omarchy-notification-send --app-name ytdl -g 󰇚 -p -t 0 "Downloading" "$type · $q · click: progress" --exec omarchy-shell -q shell summon omarchy.notifications "{}")
 trap 'pkill -P $$; exit 130' TERM INT
-# site key from the URL -> its cookie file. YouTube shares remtube's file; every other site gets
-# ~/.config/ytdl/cookies/<site>.txt (yt-dlp only sends the cookies whose domain matches the URL).
+# site key from the URL -> its own cookie file ~/.config/ytdl/cookies/<site>.txt (dir 700, files 600;
+# the downloader's own jar, separate from remtube). yt-dlp only sends cookies whose domain matches the URL.
 site_of() {
   local h=${1#*://} p n
   h=${h%%[/:?#]*}; h=${h,,}; h=${h#www.}
@@ -38,8 +38,7 @@ site_of() {
 }
 site=$(site_of "$url")
 mkdir -p -m 700 "$HOME/.config/ytdl/cookies"
-if [[ $site == youtube ]]; then default_ck=$HOME/.config/mpvtube/cookies.txt; else default_ck=$HOME/.config/ytdl/cookies/$site.txt; fi
-cookies=${YTDL_COOKIES:-$default_ck}
+cookies=${YTDL_COOKIES:-$HOME/.config/ytdl/cookies/$site.txt}
 # errors that mean "this needs a (new) login"; a bare 403 only counts on YouTube (elsewhere it is often geo/CDN)
 needs_login='Sign in|sign in|cookies are no longer valid|--cookies|[Ll]og ?in|[Aa]uthenticat|registered users|rate-limit'
 [[ $site == youtube ]] && needs_login+='|HTTP Error 403'

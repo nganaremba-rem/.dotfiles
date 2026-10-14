@@ -129,7 +129,7 @@ pacman -Qqem | grep -vx rembrowser > ~/.dotfiles/setup/aur.txt
 | Language tools | `mise/`, `npm/`, `pacman/` (my `makepkg.conf`) |
 | Clipboard, OCR, dictation, API client | `cliphist/`, `ocr/`, `manga-ocr/`, `voxtype/`, `atac/` |
 | Smooth scrolling helper | `heliscroll/` |
-| Video/audio downloader (`Mod+Alt+D`) | `ytdl/` (popup, `ytdl-*` scripts, the YouTube cookie-export extension) |
+| Video/audio downloader (`Mod+Alt+D`) | `ytdl/` (popup, `ytdl-*` scripts, the cookie-export extension) |
 
 ### My own commands
 

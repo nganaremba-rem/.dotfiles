@@ -349,7 +349,7 @@ ShellRoot {
                                     Text { text: modelData; width: ck.width - 26; wrapMode: Text.Wrap; color: root.cText; font.family: root.fSans; font.pixelSize: 12 }
                                 }
                             }
-                            Text { text: "Extension missing or old? chrome://extensions → Load unpacked → ~/.local/share/mpvtube-cookies (reload it once; it asks permission per site)"; width: ck.width; wrapMode: Text.Wrap; color: root.cOver; font.family: root.fSans; font.pixelSize: 11; font.italic: true }
+                            Text { text: "Extension missing or old? chrome://extensions → Load unpacked → ~/.local/share/ytdl-cookies (reload it once; it asks permission per site)"; width: ck.width; wrapMode: Text.Wrap; color: root.cOver; font.family: root.fSans; font.pixelSize: 11; font.italic: true }
                         }
                     }
                     Row {
