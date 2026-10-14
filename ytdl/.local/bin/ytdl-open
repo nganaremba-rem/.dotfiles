@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# ytdl-open FILE → play in mpv; ytdl-open --folder FILE → show it in yazi (terminal).
+if [[ $1 == --folder ]]; then
+  footclient -e yazi "$2" 2>/dev/null || exec foot -e yazi "$2"
+  exit
+fi
+exec mpv -- "$1"

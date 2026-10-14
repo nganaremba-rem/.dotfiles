@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Popup picker (quickshell) for video/audio download.
+# URL: yanked from the focused browser when we know how, else the clipboard.
+app=$(niri msg --json focused-window 2>/dev/null | jq -r '.app_id // ""')
+old=$(wl-paste -n 2>/dev/null)
+# wait for the hotkey (Mod+Alt) to be released, else wtype keys get the modifiers
+[[ $app =~ rembrowser|vimb|helium|chrom|brave|edge|vivaldi ]] && sleep 0.5
+case $app in
+  rembrowser*)  wtype -k Escape -s 30 -k y ;;
+  vimb)         wtype -k Escape -s 30 -k y -k y ;;
+  *helium*|*chrom*|*chrome*|*brave*|*edge*|*vivaldi*)
+                wtype -M ctrl -k l -m ctrl -s 80 -M ctrl -k c -m ctrl -s 40 -k Escape ;;
+esac
+sleep 0.15
+url=$(wl-paste -n 2>/dev/null | head -n1)
+[[ $url =~ ^https?:// ]] || url=
+pkill -f 'qs -p .*/quickshell/ytdl' 2>/dev/null
+YTDL_URL=$url YTDL_DIR=${YTDL_DIR:-$HOME/Videos} exec qs -p ~/.config/quickshell/ytdl

@@ -14,6 +14,7 @@ binds {
     // ── 🎬 Video ─────────────────────────────────────────────────────────────
     Mod+Y        hotkey-overlay-title="▶️ YouTube"       { spawn-sh "$NIRI_BROWSER --app=https://youtube.com"; }
     Mod+Alt+Y    hotkey-overlay-title="📺 remtube (YouTube in mpv)" { spawn "/home/rem/.local/bin/remtube"; }
+    Mod+Alt+D    hotkey-overlay-title="⬇️ Download picker (video/audio)" { spawn "/home/rem/.local/bin/ytdl-pick"; }
     Mod+Alt+N    hotkey-overlay-title="🎬 Netflix"      { spawn-sh "$NIRI_BROWSER --app=https://netflix.com"; }
     Mod+Alt+H    hotkey-overlay-title="🎬 Hotstar"      { spawn-sh "$NIRI_BROWSER --app=https://hotstar.com"; }
 }

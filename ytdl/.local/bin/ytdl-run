@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# ytdl-run URL TYPE(video|audio) QUALITY NAME DIR — download with yt-dlp, notify on start/finish.
+set -u
+url=$1 type=$2 q=$3 name=${4:-} dir=${5:-$HOME/Videos} from=${6:-} to=${7:-}
+dir=${dir/#\~/$HOME}
+mkdir -p "$dir" || exit 1
+tmpl=${name:-%(title)s}
+args=(--no-playlist --newline --embed-metadata -P "$dir" -o "$tmpl.%(ext)s" --quiet --progress --progress-template "download:PROG|%(progress._percent_str)s|%(progress._speed_str)s|%(progress._eta_str)s" --print after_move:filepath --print 'before_dl:META|%(title)s')
+if [[ -n $from || -n $to ]]; then  # section: "*FROM-TO", blank end = to the end
+  args+=(--download-sections "*${from:-0}-${to:-inf}" --force-keyframes-at-cuts)
+fi
+if [[ $type == audio ]]; then
+  args+=(-x --audio-format "$q" --embed-thumbnail)
+elif [[ $q == best ]]; then
+  args+=(-S "ext:mp4:m4a")
+else
+  args+=(-S "res:${q%p},ext:mp4:m4a")
+fi
+log=${YTDL_LOG:-/dev/stdout}
+[[ $log == /dev/stdout ]] || echo $$ >"$log.pid"
+exec 3>>"$log"
+[[ $log == /dev/stdout ]] || echo "META|${name:-$url}" >&3
+id=$(oq omarchy-notification-send --app-name ytdl -g 󰇚 -p -t 0 "Downloading" "$type · $q · click: progress" --exec omarchy-shell -q shell summon omarchy.notifications "{}")
+trap 'pkill -P $$; exit 130' TERM INT
+cookies=${YTDL_COOKIES:-$HOME/.config/mpvtube/cookies.txt}
+needs_login='Sign in to|cookies are no longer valid|HTTP Error 403'
+run_dl() { PYTHONUNBUFFERED=1 yt-dlp "$@" -- "$url" 2>&1 | tee >(rg --line-buffered -N '^(PROG|META)' >&3) | rg -v '^(PROG|META)'; }
+all=$(run_dl "${args[@]}"); out=$(tail -n1 <<<"$all")
+# bot check / 403 (YouTube wants a login): retry once with the logged-in cookies (a throwaway copy, yt-dlp rewrites its jar)
+if [[ ! -f $out && $all =~ $needs_login && -r $cookies ]]; then
+  ck=$(mktemp); cp "$cookies" "$ck"
+  all=$(run_dl --cookies "$ck" "${args[@]}"); out=$(tail -n1 <<<"$all"); rm -f "$ck"
+fi
+if [[ -f $out ]]; then
+  echo "FILE|$out" >&3; echo DONE >&3
+  oq omarchy-notification-send --app-name ytdl -g 󰄬 -r "$id" -t 10000 "Download complete" "${out##*/} · right-click: folder" --exec ytdl-open "$out"
+else
+  err=$(rg -N '^ERROR' <<<"$all" | tail -n1 | sed 's/^ERROR: *//; s/\[youtube\] [^:]*: //' | cut -c1-200)
+  if [[ $all =~ $needs_login ]]; then
+    # YouTube wants a login and ours is missing or no longer works: tell the user how to refresh it
+    [[ -r $cookies ]] && why="expired" || why="missing"
+    echo "COOKIES|$why" >&3
+    echo "ERR|YouTube cookies $why — export new ones (steps in the popup)" >&3; echo FAIL >&3
+    oq omarchy-notification-send --app-name ytdl -g 󰀪 -u critical -r "$id" "Update your YouTube cookies ($why)" "Private Helium window → log in to youtube.com → cookie exporter → save as ~/.config/mpvtube/cookies.txt, close the window. Then retry."
+  else
+    echo "ERR|${err:-unknown error}" >&3; echo FAIL >&3
+    oq omarchy-notification-send --app-name ytdl -g 󰅖 -u critical -r "$id" "Download failed" "${err:-unknown error}"
+  fi
+fi

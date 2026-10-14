@@ -21,3 +21,7 @@ gtk/.config/gtk-3.0/bookmarks
 # espanso matches hold passwords; never add ~/.config/espanso here
 # The DuckDNS token lives in /usr/local/bin/ddns-update.sh; only the template is tracked
 setup/system/files/usr/local/bin/ddns-update.sh
+
+# Browser cookie exports hold full account access: never commit
+*cookies*.txt
+cookies.txt

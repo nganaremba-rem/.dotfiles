@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# One line per running download: pct|speed|eta|label  (also drops stale logs)
+d=${XDG_RUNTIME_DIR:-/tmp}
+for log in "$d"/ytdl-*.log; do
+  [[ -f $log ]] || continue
+  pid=$(<"$log.pid") 2>/dev/null
+  if [[ -n ${pid:-} ]] && kill -0 "$pid" 2>/dev/null; then
+    label=$(rg -N '^META' "$log" | tail -n1 | cut -d'|' -f2-)
+    last=$(rg -N '^PROG' "$log" | tail -n1)
+    IFS='|' read -r _ p s e <<<"${last:-PROG|0|-|-}"
+    echo "${p//[^0-9.]/}|${s// /}|${e// /}|$label"
+  else
+    rm -f "$log" "$log.pid"
+  fi
+done

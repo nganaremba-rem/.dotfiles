@@ -61,5 +61,6 @@ xcompose
 xdg
 xdg-desktop-portal
 yazi
+ytdl
 zathura
 zsh

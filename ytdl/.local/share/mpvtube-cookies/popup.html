@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  body { margin: 0; width: 280px; padding: 16px; background: #0f0f0f; color: #f1f1f1; font: 14px/20px Roboto, Arial, sans-serif; }
+  button { width: 100%; height: 36px; border: 0; border-radius: 18px; background: #f1f1f1; color: #0f0f0f; font: 500 14px Roboto, Arial; cursor: pointer; }
+  button:disabled { opacity: .5; cursor: default; }
+  p { margin: 12px 0 0; color: #aaa; }
+  p.ok { color: #3ea6ff; }
+  p.err { color: #ff6b6b; }
+</style>
+</head>
+<body>
+<button id="export">Export youtube.com cookies</button>
+<p id="msg">Use a private window, then close it after exporting.</p>
+<script type="module" src="popup.js"></script>
+</body>
+</html>
