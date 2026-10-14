@@ -116,6 +116,8 @@ ShellRoot {
     property string title: ""
     property string filePath: ""
     property string errText: ""
+    property string cookieSite: ""
+    property string cookiePath: ""
     property string cookieWhy: ""   // "expired" | "missing" when YouTube wants a (new) login
     function clock(ms) { return Qt.formatTime(new Date(ms), "HH:mm:ss") }
     function fmt(t) { const h = Math.floor(t / 3600), m = Math.floor(t % 3600 / 60), x = t % 60
@@ -142,7 +144,7 @@ ShellRoot {
                 } else if (l.startsWith("META|")) root.title = l.slice(5)
                 else if (l.startsWith("FILE|")) root.filePath = l.slice(5)
                 else if (l.startsWith("ERR|")) root.errText = l.slice(4)
-                else if (l.startsWith("COOKIES|")) root.cookieWhy = l.slice(8)
+                else if (l.startsWith("COOKIES|")) { const c = l.split("|"); root.cookieWhy = c[1]; root.cookieSite = c[2] || ""; root.cookiePath = c[3] || "" }
                 else if (l === "DONE") { root.pct = 100; root.endMs = Date.now(); root.state = "done" }
                 else if (l === "FAIL") { root.endMs = Date.now(); root.state = "fail" }
             }
@@ -330,12 +332,12 @@ ShellRoot {
                             id: ck
                             anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter; margins: 14 }
                             spacing: 5
-                            Text { text: "󰀪  Update your YouTube cookies (" + root.cookieWhy + ")"; color: root.cYel; font.family: root.fSans; font.pixelSize: 13; font.bold: true }
+                            Text { text: "󰀪  Update your " + root.cookieSite + " cookies (" + root.cookieWhy + ")"; color: root.cYel; font.family: root.fSans; font.pixelSize: 13; font.bold: true }
                             Repeater {
                                 model: [
-                                    "Helium → private window (Ctrl+Shift+N) → log in to youtube.com",
-                                    "Click the cookie-export extension → Export",
-                                    "Save as ~/.config/mpvtube/cookies.txt, then chmod 600 it",
+                                    "Helium → private window (Ctrl+Shift+N) → log in to " + root.cookieSite,
+                                    "On that " + root.cookieSite + " tab, click the cookie-export extension → Export",
+                                    "Save as " + root.cookiePath + ", then chmod 600 it",
                                     "Close the private window (a closed session keeps working for weeks)",
                                     "Retry the download — no restart needed"
                                 ]
@@ -347,7 +349,7 @@ ShellRoot {
                                     Text { text: modelData; width: ck.width - 26; wrapMode: Text.Wrap; color: root.cText; font.family: root.fSans; font.pixelSize: 12 }
                                 }
                             }
-                            Text { text: "Extension missing? chrome://extensions → Load unpacked → ~/.local/share/mpvtube-cookies"; width: ck.width; wrapMode: Text.Wrap; color: root.cOver; font.family: root.fSans; font.pixelSize: 11; font.italic: true }
+                            Text { text: "Extension missing or old? chrome://extensions → Load unpacked → ~/.local/share/mpvtube-cookies (reload it once; it asks permission per site)"; width: ck.width; wrapMode: Text.Wrap; color: root.cOver; font.family: root.fSans; font.pixelSize: 11; font.italic: true }
                         }
                     }
                     Row {

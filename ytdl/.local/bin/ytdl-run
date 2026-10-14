@@ -22,11 +22,30 @@ exec 3>>"$log"
 [[ $log == /dev/stdout ]] || echo "META|${name:-$url}" >&3
 id=$(oq omarchy-notification-send --app-name ytdl -g 󰇚 -p -t 0 "Downloading" "$type · $q · click: progress" --exec omarchy-shell -q shell summon omarchy.notifications "{}")
 trap 'pkill -P $$; exit 130' TERM INT
-cookies=${YTDL_COOKIES:-$HOME/.config/mpvtube/cookies.txt}
-needs_login='Sign in to|cookies are no longer valid|HTTP Error 403'
+# site key from the URL -> its cookie file. YouTube shares remtube's file; every other site gets
+# ~/.config/ytdl/cookies/<site>.txt (yt-dlp only sends the cookies whose domain matches the URL).
+site_of() {
+  local h=${1#*://} p n
+  h=${h%%[/:?#]*}; h=${h,,}; h=${h#www.}
+  case $h in
+    youtu.be|youtube.com|*.youtube.com|youtube-nocookie.com) echo youtube; return ;;
+    fb.watch|fb.com|facebook.com|*.facebook.com) echo facebook; return ;;
+    x.com|*.x.com|twitter.com|*.twitter.com) echo x; return ;;
+  esac
+  IFS=. read -ra p <<<"$h"; n=${#p[@]}
+  if ((n >= 3)) && [[ ${p[n-2]} =~ ^(co|com|org|net|gov|ac)$ && ${#p[n-1]} -eq 2 ]]; then echo "${p[n-3]//[^a-z0-9-]/}"
+  elif ((n >= 2)); then echo "${p[n-2]//[^a-z0-9-]/}"; else echo "${h//[^a-z0-9-]/}"; fi
+}
+site=$(site_of "$url")
+mkdir -p -m 700 "$HOME/.config/ytdl/cookies"
+if [[ $site == youtube ]]; then default_ck=$HOME/.config/mpvtube/cookies.txt; else default_ck=$HOME/.config/ytdl/cookies/$site.txt; fi
+cookies=${YTDL_COOKIES:-$default_ck}
+# errors that mean "this needs a (new) login"; a bare 403 only counts on YouTube (elsewhere it is often geo/CDN)
+needs_login='Sign in|sign in|cookies are no longer valid|--cookies|[Ll]og ?in|[Aa]uthenticat|registered users|rate-limit'
+[[ $site == youtube ]] && needs_login+='|HTTP Error 403'
 run_dl() { PYTHONUNBUFFERED=1 yt-dlp "$@" -- "$url" 2>&1 | tee >(rg --line-buffered -N '^(PROG|META)' >&3) | rg -v '^(PROG|META)'; }
 all=$(run_dl "${args[@]}"); out=$(tail -n1 <<<"$all")
-# bot check / 403 (YouTube wants a login): retry once with the logged-in cookies (a throwaway copy, yt-dlp rewrites its jar)
+# the site wants a login: retry once with that site's cookies (a throwaway copy, yt-dlp rewrites its jar)
 if [[ ! -f $out && $all =~ $needs_login && -r $cookies ]]; then
   ck=$(mktemp); cp "$cookies" "$ck"
   all=$(run_dl --cookies "$ck" "${args[@]}"); out=$(tail -n1 <<<"$all"); rm -f "$ck"
@@ -35,13 +54,13 @@ if [[ -f $out ]]; then
   echo "FILE|$out" >&3; echo DONE >&3
   oq omarchy-notification-send --app-name ytdl -g 󰄬 -r "$id" -t 10000 "Download complete" "${out##*/} · right-click: folder" --exec ytdl-open "$out"
 else
-  err=$(rg -N '^ERROR' <<<"$all" | tail -n1 | sed 's/^ERROR: *//; s/\[youtube\] [^:]*: //' | cut -c1-200)
+  err=$(rg -N '^ERROR' <<<"$all" | tail -n1 | sed 's/^ERROR: *//; s/^\[[a-z:A-Z0-9]*\] [^:]*: //' | cut -c1-200)
   if [[ $all =~ $needs_login ]]; then
-    # YouTube wants a login and ours is missing or no longer works: tell the user how to refresh it
+    # the site wants a login and ours is missing or no longer works: tell the user how to refresh it
     [[ -r $cookies ]] && why="expired" || why="missing"
-    echo "COOKIES|$why" >&3
-    echo "ERR|YouTube cookies $why — export new ones (steps in the popup)" >&3; echo FAIL >&3
-    oq omarchy-notification-send --app-name ytdl -g 󰀪 -u critical -r "$id" "Update your YouTube cookies ($why)" "Private Helium window → log in to youtube.com → cookie exporter → save as ~/.config/mpvtube/cookies.txt, close the window. Then retry."
+    echo "COOKIES|$why|$site|${cookies/#$HOME/\~}" >&3
+    echo "ERR|$site cookies $why — export new ones (steps in the popup)" >&3; echo FAIL >&3
+    oq omarchy-notification-send --app-name ytdl -g 󰀪 -u critical -r "$id" "Update your $site cookies ($why)" "Private Helium window → log in to $site → cookie exporter (on that tab) → save as ${cookies/#$HOME/\~}, close the window. Then retry."
   else
     echo "ERR|${err:-unknown error}" >&3; echo FAIL >&3
     oq omarchy-notification-send --app-name ytdl -g 󰅖 -u critical -r "$id" "Download failed" "${err:-unknown error}"
