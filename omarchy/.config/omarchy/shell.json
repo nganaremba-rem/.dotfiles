@@ -2,80 +2,17 @@
   "bar": {
     "centerAnchor": "omarchy.clock",
     "layout": {
-      "left": [
-        {
-          "id": "omarchy.menu"
-        },
-        {
-          "id": "omarchy.workspaces"
-        },
-        {
-          "id": "omarchy.spacer",
-          "size": 12
-        },
-        {
-          "id": "cpu",
-          "type": "command",
-          "exec": "bar-stat cpu 3",
-          "onClick": "omarchy-launch-tui remtop",
-          "tooltip": "CPU usage",
-          "fontSize": 14,
-          "stream": true
-        },
-        {
-          "id": "memory",
-          "type": "command",
-          "exec": "bar-stat mem 5",
-          "onClick": "omarchy-launch-tui remtop",
-          "tooltip": "Memory in use",
-          "fontSize": 14,
-          "stream": true
-        },
-        {
-          "id": "color-picker",
-          "type": "command",
-          "text": "󰈊",
-          "fontSize": 15,
-          "onClick": "pkill hyprpicker || hyprpicker -a",
-          "tooltip": "Pick a colour"
-        },
-        {
-          "id": "screencast",
-          "type": "command",
-          "fontSize": 15,
-          "exec": "bar-stat screencast",
-          "stream": true
-        },
-        {
-          "id": "camera",
-          "type": "command",
-          "fontSize": 15,
-          "exec": "bar-stat camera 2",
-          "stream": true
-        },
-        {
-          "id": "omarchy.microphone"
-        }
-      ],
       "center": [
         {
-          "id": "net-speed",
-          "type": "command",
           "exec": "bar-stat net 2",
-          "tooltip": "Network speed",
           "fontSize": 14,
-          "stream": true
+          "id": "net-speed",
+          "stream": true,
+          "tooltip": "Network speed",
+          "type": "command"
         },
         {
           "id": "omarchy.indicators"
-        },
-        {
-          "id": "omarchy.clock",
-          "format": "ddd d MMM HH:mm",
-          "formatAlt": "d MMMM 'W'ww yyyy",
-          "verticalFormat": "HH\n—\nmm",
-          "birthYear": 0,
-          "lifeExpectancy": 100
         },
         {
           "id": "omarchy.elsewhen",
@@ -91,6 +28,69 @@
           "id": "omarchy.system-update"
         }
       ],
+      "left": [
+        {
+          "id": "omarchy.menu"
+        },
+        {
+          "id": "omarchy.workspaces"
+        },
+        {
+          "id": "omarchy.spacer",
+          "size": 12
+        },
+        {
+          "birthYear": 0,
+          "format": "ddd d MMM HH:mm",
+          "formatAlt": "d MMMM 'W'ww yyyy",
+          "id": "omarchy.clock",
+          "lifeExpectancy": 100,
+          "verticalFormat": "HH\n—\nmm"
+        },
+        {
+          "exec": "bar-stat cpu 3",
+          "fontSize": 14,
+          "id": "cpu",
+          "onClick": "omarchy-launch-tui remtop",
+          "stream": true,
+          "tooltip": "CPU usage",
+          "type": "command"
+        },
+        {
+          "exec": "bar-stat mem 5",
+          "fontSize": 14,
+          "id": "memory",
+          "onClick": "omarchy-launch-tui remtop",
+          "stream": true,
+          "tooltip": "Memory in use",
+          "type": "command"
+        },
+        {
+          "fontSize": 15,
+          "id": "color-picker",
+          "onClick": "pkill hyprpicker || hyprpicker -a",
+          "text": "󰈊",
+          "tooltip": "Pick a colour",
+          "type": "command"
+        },
+        {
+          "exec": "bar-stat screencast",
+          "fontSize": 15,
+          "id": "screencast",
+          "stream": true,
+          "type": "command"
+        },
+        {
+          "exec": "bar-stat camera 2",
+          "fontSize": 15,
+          "id": "camera",
+          "stream": true,
+          "type": "command"
+        },
+        {
+          "id": "omarchy.microphone"
+        }
+      ],
       "right": [
         {
           "id": "omarchy.keyboard-layout"
@@ -99,25 +99,25 @@
           "id": "omarchy.tray"
         },
         {
-          "id": "vpn",
-          "type": "command",
           "exec": "s=$(warp-cli status 2>/dev/null); case \"$s\" in *'Status update: Connected'*) i='' c=green t=Connected ;; *Connecting*) i='󰖂' c=yellow t=Connecting ;; *Disconnected*) i='' c=red t=Disconnected ;; *) i='󰅖' c=grey t=Unknown ;; esac; printf '{\"text\":\"%s\",\"color\":\"%s\",\"tooltip\":\"WARP: %s\"}' \"$i\" \"$c\" \"$t\"",
+          "fontSize": 25,
+          "id": "vpn",
           "interval": 5,
-          "tooltip": "WARP",
           "onClick": "warp-cli connect",
           "onRightClick": "warp-cli disconnect",
-          "fontSize": 25
+          "tooltip": "WARP",
+          "type": "command"
         },
         {
           "id": "omarchy.agents"
         },
         {
-          "id": "clipboard",
-          "type": "command",
-          "text": "󰅇",
           "fontSize": 15,
+          "id": "clipboard",
           "onClick": "omarchy-shell shell summon omarchy.clipboard",
-          "tooltip": "Clipboard history"
+          "text": "󰅇",
+          "tooltip": "Clipboard history",
+          "type": "command"
         },
         {
           "id": "omarchy.notifications"
