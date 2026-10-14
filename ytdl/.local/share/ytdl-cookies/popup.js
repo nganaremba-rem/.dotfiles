@@ -10,6 +10,7 @@ const KNOWN = [
   { site: 'facebook', domains: ['facebook.com'], hosts: ['facebook.com', 'fb.watch', 'fb.com'] },
   { site: 'instagram', domains: ['instagram.com'], hosts: ['instagram.com'] },
   { site: 'x', domains: ['x.com', 'twitter.com'], hosts: ['x.com', 'twitter.com'] },
+  { site: 'dailymotion', domains: ['dailymotion.com'], hosts: ['dailymotion.com', 'dai.ly'] },
   { site: 'tiktok', domains: ['tiktok.com'], hosts: ['tiktok.com'] },
 ];
 function siteOf(host) {

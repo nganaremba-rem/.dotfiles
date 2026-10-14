@@ -31,6 +31,7 @@ site_of() {
     youtu.be|youtube.com|*.youtube.com|youtube-nocookie.com) echo youtube; return ;;
     fb.watch|fb.com|facebook.com|*.facebook.com) echo facebook; return ;;
     x.com|*.x.com|twitter.com|*.twitter.com) echo x; return ;;
+    dai.ly|dailymotion.com|*.dailymotion.com) echo dailymotion; return ;;
   esac
   IFS=. read -ra p <<<"$h"; n=${#p[@]}
   if ((n >= 3)) && [[ ${p[n-2]} =~ ^(co|com|org|net|gov|ac)$ && ${#p[n-1]} -eq 2 ]]; then echo "${p[n-3]//[^a-z0-9-]/}"
