@@ -42,7 +42,7 @@ binds {
 
     // ── 🎨 DankMaterialShell ─────────────────────────────────────────────────
     Mod+S                hotkey-overlay-title="⚙️ DMS settings"               { spawn "dms" "ipc" "call" "settings" "focusOrToggle"; }
-    Mod+Ctrl+V           hotkey-overlay-title="📋 Clipboard history"          { spawn "dms" "ipc" "call" "clipboard" "toggle"; }  // was Mod+V, now universal paste
+    Mod+Ctrl+V           hotkey-overlay-title="📋 Clipboard history"          { spawn "oq" "omarchy-shell" "shell" "summon" "omarchy.clipboard"; }  // bar's clipboard history; was Mod+V, now universal paste
     Mod+Ctrl+Alt+N       hotkey-overlay-title="🔔 Notification center"        { spawn "dms" "ipc" "call" "notifications" "toggle"; }
     Mod+Ctrl+Alt+B       hotkey-overlay-title="🖼️ Wallpapers"                 { spawn "oq" "wallpaper-pick"; }
     Mod+Ctrl+W           hotkey-overlay-title="📊 Toggle bar"                 { spawn "dms" "ipc" "call" "bar" "toggle" "index" "0"; }

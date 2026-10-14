@@ -39,6 +39,14 @@ if [[ ${UCLIP_BACKEND:-} == "uinput" ]]; then
     exec ydotool key 29:1 "$code:1" "$code:0" 29:0
 fi
 
+# For compositor-triggered terminal shortcuts, wait until the physical Mod
+# key is released before injecting the terminal's Ctrl+Shift chord. Otherwise
+# the terminal can receive Super+Ctrl+Shift+C/V and ignore the binding.
+if [[ $terminal == true ]]; then
+    sleep 0.12
+    exec ydotool key 29:1 42:1 "$code:1" "$code:0" 42:0 29:0
+fi
+
 # X11 apps (through XWayland) ignore wtype's private keymap. xdotool reaches
 # them through the X server instead, and lifts the held Super for the chord.
 # niri reports the XWayland bridge as the owner of every X11 window.

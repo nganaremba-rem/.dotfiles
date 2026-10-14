@@ -97,6 +97,13 @@ window-rule {
     default-window-height { fixed 270; }
     default-floating-position x=24 y=24 relative-to="bottom-right"
 }
+// 🔑 rembrowser extension popouts (Bitwarden unlock, …) are small floating windows.
+window-rule {
+    match app-id=r#"^chrome-[a-p]{32}-Default$"#
+    open-floating true
+    default-column-width { fixed 400; }
+    default-window-height { fixed 620; }
+}
 window-rule {
     match app-id=r#"^rembrowser-devtools$"#
     default-column-width { proportion 0.4; }
