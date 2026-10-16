@@ -20,7 +20,13 @@ case "${1:-status}" in
   set)
     mode=${2:-}; [ -n "${name[$mode]:-}" ] || { echo "usage: battery-limit set health|auto|full" >&2; exit 2; }
     [ "$(status)" != unsupported ] || { echo "no hp-bioscfg battery setting here" >&2; exit 1; }
-    printf %s "${name[$mode]}" | pkexec tee "$attr" >/dev/null
+    if ! printf %s "${name[$mode]}" | pkexec tee "$attr" >/dev/null 2>&1; then
+      # hp_bioscfg: 'Invalid command type' -- this BIOS accepts reads but rejects writes from Linux.
+      notify-send -a Battery -u critical -t 12000 -i battery-caution "Could not change the charge limit" \
+        "This BIOS rejects the change from Linux. Set 'Battery Health Manager' to '${name[$mode]}' in BIOS setup (F10 at boot)." 2>/dev/null || true
+      echo "write rejected by BIOS (hp_bioscfg: Invalid command type)" >&2
+      exit 1
+    fi
     now=$(status)
     notify-send -a Battery -u low -t 3000 -i battery "Charge limit: ${label[$now]:-$now}" "BIOS setting saved. Takes effect on the next charge cycle." 2>/dev/null || true
     ;;
