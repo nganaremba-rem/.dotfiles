@@ -8,7 +8,7 @@ json() { # text color tooltip
 
 wg_status() {
   local now key ts up=0 total=0 lines="" ips hs
-  hs=$(sudo -n /usr/bin/wg show wg0 latest-handshakes 2>/dev/null) || { json "󱗼" grey $'WireGuard wg0: down or no access\n$ sudo wg show wg0'; return; }
+  hs=$(sudo -n /usr/bin/wg show wg0 latest-handshakes 2>/dev/null) || { json "" grey $'WireGuard wg0: down or no access\n$ sudo wg show wg0'; return; }
   ips=$(sudo -n /usr/bin/wg show wg0 allowed-ips 2>/dev/null)
   now=$(date +%s)
   while read -r key ts; do
@@ -23,16 +23,16 @@ wg_status() {
       lines+="○ ${ip:-${key:0:6}}  never connected"$'\n'
     fi
   done <<<"$hs"
-  json "󱗼" "$([ "$up" -gt 0 ] && echo green || echo grey)" "WireGuard: $up of $total peers connected"$'\n'"${lines}\$ sudo wg show wg0"
+  json "" "$([ "$up" -gt 0 ] && echo green || echo grey)" "WireGuard: $up of $total peers connected"$'\n'"${lines}\$ sudo wg show wg0"
 }
 
 ts_status() {
   local s state online total
-  s=$(tailscale status --json 2>/dev/null) || { json "󰖂" grey $'Tailscale: not running\n$ tailscale status'; return; }
+  s=$(tailscale status --json 2>/dev/null) || { json "󱗼" grey $'Tailscale: not running\n$ tailscale status'; return; }
   state=$(jq -r .BackendState <<<"$s")
   online=$(jq '[.Peer[]? | select(.Online)] | length' <<<"$s")
   total=$(jq '[.Peer[]?] | length' <<<"$s")
-  json "󰖂" "$([ "$state" = Running ] && [ "$online" -gt 0 ] && echo green || echo grey)" "Tailscale: $state, $online of $total peers online"$'\n$ tailscale status'
+  json "󱗼" "$([ "$state" = Running ] && [ "$online" -gt 0 ] && echo green || echo grey)" "Tailscale: $state, $online of $total peers online"$'\n$ tailscale status'
 }
 
 docker_status() {
