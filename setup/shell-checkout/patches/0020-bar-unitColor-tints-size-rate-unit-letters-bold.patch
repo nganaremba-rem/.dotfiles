@@ -1,7 +1,7 @@
-From c3ee830d064cb8ac9dfddf61e459c2a6c0d96cbc Mon Sep 17 00:00:00 2001
+From f641ae87b2bd1f56fd0eb04dd72ec6e0505fc0b5 Mon Sep 17 00:00:00 2001
 From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
-Date: Fri, 16 Oct 2026 19:39:15 +0530
-Subject: [PATCH 20/20] bar: unitColor setting tints size/rate unit letters
+Date: Fri, 16 Oct 2026 19:47:46 +0530
+Subject: [PATCH 20/20] bar: unitColor tints size/rate unit letters, bold
 
 Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
 ---
@@ -41,20 +41,20 @@ index 510bcd8..2041ca8 100644
      font.family: root.fontFamily
      font.pixelSize: root.fontSize
 diff --git a/shell/plugins/bar/Bar.qml b/shell/plugins/bar/Bar.qml
-index db74240..63ffb77 100644
+index db74240..857df77 100644
 --- a/shell/plugins/bar/Bar.qml
 +++ b/shell/plugins/bar/Bar.qml
-@@ -2248,6 +2248,13 @@ Item {
-     horizontalMargin: Number(setting("horizontalMargin", 7.5))
-     verticalPadding: Number(setting("verticalPadding", 6))
-     fontSize: Number(setting("fontSize", 12))
+@@ -2242,6 +2242,13 @@ Item {
+     bar: root
+     foreground: colorName !== "" ? Commons.Color.named(colorName) : root.barForeground
+     text: outputText || String(setting("text", ""))
 +    // "unitColor": tint size/rate unit letters (B K M G T) that follow a digit.
 +    richText: {
 +      var c = String(setting("unitColor", ""))
 +      if (c === "" || outputText === "") return ""
 +      var esc = outputText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/ /g, "&nbsp;")
-+      return esc.replace(/(\d)([BKMGT])/g, "$1<font color=\"" + Commons.Color.named(c) + "\">$2</font>")
++      return esc.replace(/(\d)([BKMGT])/g, "$1<b><font color=\"" + Commons.Color.named(c) + "\">$2</font></b>")
 +    }
- 
-     onPressed: function(button) {
-       var command = ""
+     tooltipText: outputTooltip || String(setting("tooltip", ""))
+     active: outputActive
+     keepSpace: setting("keepSpace", false) === true

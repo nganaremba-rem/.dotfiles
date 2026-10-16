@@ -1,52 +1,168 @@
 {
-  "version": 1,
-  "idle": {
-    "screensaver": 150,
-    "lock": 300
-  },
   "bar": {
-    "position": "top",
-    "transparent": false,
     "centerAnchor": "omarchy.clock",
     "layout": {
-      "left": [
-        {
-          "id": "omarchy.menu"
-        },
-        {
-          "id": "omarchy.workspaces"
-        }
-      ],
       "center": [
         {
-          "id": "omarchy.indicators"
+          "exec": "bar-stat net 2",
+          "fontSize": 14,
+          "hideBelow": 1500,
+          "id": "net-speed",
+          "stream": true,
+          "tooltip": "Network speed\n$ bar-stat net 2",
+          "type": "command",
+          "unitColor": "cyan"
         },
         {
-          "id": "omarchy.clock",
-          "format": "dddd HH:mm",
-          "formatAlt": "d MMMM 'W'ww yyyy",
-          "verticalFormat": "HH\n—\nmm"
+          "id": "omarchy.indicators"
         },
         {
           "id": "omarchy.elsewhen",
           "zones": "Kolkata|Asia/Kolkata, Tokyo|Asia/Tokyo, Los Angeles|America/Los_Angeles, New York|America/New_York, London|Europe/London"
         },
         {
+          "hideBelow": 1650,
           "id": "omarchy.weather"
         },
         {
+          "hideBelow": 1550,
+          "id": "omarchy.media"
+        },
+        {
+          "hideBelow": 1400,
           "id": "omarchy.system-update"
+        }
+      ],
+      "left": [
+        {
+          "id": "omarchy.menu"
+        },
+        {
+          "id": "omarchy.workspaces"
+        },
+        {
+          "id": "omarchy.spacer",
+          "size": 12
+        },
+        {
+          "birthYear": 0,
+          "format": "ddd d MMM HH:mm",
+          "formatAlt": "d MMMM 'W'ww yyyy",
+          "id": "omarchy.clock",
+          "lifeExpectancy": 100,
+          "verticalFormat": "HH\n—\nmm"
+        },
+        {
+          "exec": "bar-stat cpu 3",
+          "fontSize": 14,
+          "hideBelow": 1300,
+          "id": "cpu",
+          "onClick": "omarchy-launch-tui remtop",
+          "stream": true,
+          "tooltip": "CPU usage\n$ omarchy-launch-tui remtop",
+          "type": "command"
+        },
+        {
+          "exec": "bar-stat mem 5",
+          "fontSize": 14,
+          "hideBelow": 1300,
+          "id": "memory",
+          "onClick": "omarchy-launch-tui remtop",
+          "stream": true,
+          "tooltip": "Memory in use\n$ omarchy-launch-tui remtop",
+          "type": "command",
+          "unitColor": "cyan"
+        },
+        {
+          "fontSize": 15,
+          "hideBelow": 1450,
+          "id": "color-picker",
+          "onClick": "pkill hyprpicker || hyprpicker -a",
+          "text": "󰈊",
+          "tooltip": "Pick a colour\n$ pkill hyprpicker || hyprpicker -a",
+          "type": "command"
+        },
+        {
+          "exec": "bar-stat screencast",
+          "fontSize": 15,
+          "id": "screencast",
+          "stream": true,
+          "type": "command"
+        },
+        {
+          "exec": "bar-stat camera 2",
+          "fontSize": 15,
+          "id": "camera",
+          "stream": true,
+          "type": "command"
+        },
+        {
+          "id": "omarchy.microphone"
         }
       ],
       "right": [
         {
+          "hideBelow": 1200,
           "id": "omarchy.keyboard-layout"
         },
         {
           "id": "omarchy.tray"
         },
         {
+          "exec": "s=$(warp-cli status 2>/dev/null); case \"$s\" in *'Status update: Connected'*) i='' c=green t=Connected ;; *Connecting*) i='󰖂' c=yellow t=Connecting ;; *Disconnected*) i='' c=red t=Disconnected ;; *) i='󰅖' c=grey t=Unknown ;; esac; printf '{\"text\":\"%s\",\"color\":\"%s\",\"tooltip\":\"WARP: %s\\\\n$ warp-cli connect\"}' \"$i\" \"$c\" \"$t\"",
+          "fontSize": 25,
+          "hideBelow": 1350,
+          "id": "vpn",
+          "interval": 5,
+          "onClick": "warp-cli connect",
+          "onRightClick": "warp-cli disconnect",
+          "tooltip": "WARP\n$ warp-cli connect",
+          "type": "command"
+        },
+        {
+          "exec": "bar-status wg",
+          "fontSize": 18,
+          "hideBelow": 1100,
+          "id": "wg",
+          "interval": 3,
+          "onClick": "notify-send -a Network -t 8000 \"$(bar-status wg | jq -r .text)\" \"$(bar-status wg | jq -r .tooltip)\"",
+          "tooltip": "WireGuard\n$ sudo wg show wg0",
+          "type": "command"
+        },
+        {
+          "exec": "bar-status ts",
+          "fontSize": 18,
+          "hideBelow": 1450,
+          "id": "ts",
+          "interval": 5,
+          "onClick": "notify-send -a Network -t 8000 \"$(bar-status ts | jq -r .text)\" \"$(bar-status ts | jq -r .tooltip)\"",
+          "tooltip": "Tailscale\n$ tailscale status",
+          "type": "command"
+        },
+        {
+          "exec": "bar-status docker",
+          "fontSize": 18,
+          "hideBelow": 1500,
+          "id": "docker",
+          "interval": 3,
+          "onClick": "omarchy-launch-tui lazydocker",
+          "tooltip": "Docker\n$ docker ps",
+          "type": "command"
+        },
+        {
+          "hideBelow": 1250,
           "id": "omarchy.agents"
+        },
+        {
+          "fontSize": 15,
+          "id": "clipboard",
+          "onClick": "omarchy-shell shell summon omarchy.clipboard",
+          "text": "󰅇",
+          "tooltip": "Clipboard history\n$ omarchy-shell shell summon omarchy.clipboard",
+          "type": "command"
+        },
+        {
+          "id": "omarchy.notifications"
         },
         {
           "id": "omarchy.bluetooth"
@@ -61,10 +177,26 @@
           "id": "omarchy.monitor"
         },
         {
-          "id": "omarchy.power"
+          "id": "omarchy.power",
+          "showPercentage": true
         }
       ]
-    }
+    },
+    "position": "top",
+    "transparent": true
   },
-  "plugins": []
+  "disabledPlugins": [
+    "omarchy.polkit",
+    "omarchy.remote-session"
+  ],
+  "idle": {
+    "lock": 300,
+    "screensaver": 150
+  },
+  "plugins": [
+    {
+      "id": "rem.websearch"
+    }
+  ],
+  "version": 1
 }
