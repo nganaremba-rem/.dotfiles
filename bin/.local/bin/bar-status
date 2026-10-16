@@ -7,22 +7,34 @@ json() { # text color tooltip
 }
 
 wg_status() {
-  local now key ts up=0 total=0 lines="" ips hs
-  hs=$(sudo -n /usr/bin/wg show wg0 latest-handshakes 2>/dev/null) || { json "" grey $'WireGuard wg0: down or no access\n$ sudo wg show wg0'; return; }
+  # "Connected" = the peer sent traffic recently. The handshake time alone lags: it is only
+  # refreshed every ~2 min, so a dropped peer would look connected for up to 3 minutes.
+  # Phones send a keepalive every 25 s, so 75 s without new rx bytes means gone.
+  local now key rx hs ts ip up=0 total=0 lines="" ips tr state chg
+  local -A prev_rx prev_chg handshake
+  state=${XDG_RUNTIME_DIR:-/tmp}/bar-wg-rx
+  tr=$(sudo -n /usr/bin/wg show wg0 transfer 2>/dev/null) || { json "" grey $'WireGuard wg0: down or no access\n$ sudo wg show wg0'; return; }
+  while read -r key ts; do handshake[$key]=$ts; done < <(sudo -n /usr/bin/wg show wg0 latest-handshakes 2>/dev/null)
   ips=$(sudo -n /usr/bin/wg show wg0 allowed-ips 2>/dev/null)
-  now=$(date +%s)
-  while read -r key ts; do
+  [ -r "$state" ] && while read -r key rx chg; do prev_rx[$key]=$rx; prev_chg[$key]=$chg; done <"$state"
+  now=$(date +%s); : >"$state.new"
+  while read -r key rx _; do
     [ -n "$key" ] || continue
     total=$((total + 1))
+    hs=${handshake[$key]:-0}
+    if [ "${prev_rx[$key]:-}" != "$rx" ]; then chg=$now; [ -z "${prev_rx[$key]:-}" ] && chg=$hs   # first sight: trust handshake age
+    else chg=${prev_chg[$key]:-0}; fi
+    printf '%s %s %s\n' "$key" "$rx" "$chg" >>"$state.new"
     ip=$(awk -v k="$key" '$1==k{print $2}' <<<"$ips")
-    if [ "$ts" -gt 0 ] && [ $((now - ts)) -lt 180 ]; then
-      up=$((up + 1)); lines+="● ${ip:-${key:0:6}}  $((now - ts))s ago"$'\n'
-    elif [ "$ts" -gt 0 ]; then
-      lines+="○ ${ip:-${key:0:6}}  idle $(( (now - ts) / 60 ))m"$'\n'
+    if [ "$chg" -gt 0 ] && [ $((now - chg)) -lt 75 ]; then
+      up=$((up + 1)); lines+="● ${ip:-${key:0:6}}  traffic $((now - chg))s ago"$'\n'
+    elif [ "$hs" -gt 0 ]; then
+      lines+="○ ${ip:-${key:0:6}}  idle $(( (now - hs) / 60 ))m"$'\n'
     else
       lines+="○ ${ip:-${key:0:6}}  never connected"$'\n'
     fi
-  done <<<"$hs"
+  done <<<"$tr"
+  mv "$state.new" "$state"
   json "" "$([ "$up" -gt 0 ] && echo green || echo grey)" "WireGuard: $up of $total peers connected"$'\n'"${lines}\$ sudo wg show wg0"
 }
 

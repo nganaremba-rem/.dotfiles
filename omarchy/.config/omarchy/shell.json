@@ -123,7 +123,7 @@
           "fontSize": 18,
           "hideBelow": 1100,
           "id": "wg",
-          "interval": 5,
+          "interval": 3,
           "onClick": "notify-send -a Network -t 8000 \"$(bar-status wg | jq -r .text)\" \"$(bar-status wg | jq -r .tooltip)\"",
           "tooltip": "WireGuard\n$ sudo wg show wg0",
           "type": "command"
@@ -133,7 +133,7 @@
           "fontSize": 18,
           "hideBelow": 1450,
           "id": "ts",
-          "interval": 10,
+          "interval": 5,
           "onClick": "notify-send -a Network -t 8000 \"$(bar-status ts | jq -r .text)\" \"$(bar-status ts | jq -r .tooltip)\"",
           "tooltip": "Tailscale\n$ tailscale status",
           "type": "command"
@@ -143,7 +143,7 @@
           "fontSize": 18,
           "hideBelow": 1500,
           "id": "docker",
-          "interval": 10,
+          "interval": 3,
           "onClick": "omarchy-launch-tui lazydocker",
           "tooltip": "Docker\n$ docker ps",
           "type": "command"
