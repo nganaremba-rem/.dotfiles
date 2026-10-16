@@ -28,11 +28,11 @@ wg_status() {
 
 ts_status() {
   local s state online total
-  s=$(tailscale status --json 2>/dev/null) || { json "󰛳 off" grey $'Tailscale: not running\n$ tailscale status'; return; }
+  s=$(tailscale status --json 2>/dev/null) || { json "󱗼 off" grey $'Tailscale: not running\n$ tailscale status'; return; }
   state=$(jq -r .BackendState <<<"$s")
   online=$(jq '[.Peer[]? | select(.Online)] | length' <<<"$s")
   total=$(jq '[.Peer[]?] | length' <<<"$s")
-  json "󰛳 $online/$total" "$([ "$state" = Running ] && echo green || echo grey)" "Tailscale: $state, $online of $total peers online"$'\n$ tailscale status'
+  json "󱗼 $online/$total" "$([ "$state" = Running ] && echo green || echo grey)" "Tailscale: $state, $online of $total peers online"$'\n$ tailscale status'
 }
 
 docker_status() {
