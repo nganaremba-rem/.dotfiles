@@ -20,4 +20,5 @@ binds {
     Mod+Ctrl+Space       hotkey-overlay-title="🖼️ Background switcher"     { spawn "oq" "omarchy-menu" "toggle" "background"; }
     Mod+Ctrl+S           hotkey-overlay-title="📤 Share"                   { spawn "oq" "omarchy-menu" "toggle" "share"; }
     Mod+Ctrl+Alt+P       hotkey-overlay-title="🧱 Switch panel (DMS ↔ shell bar)" { spawn "oq" "panel-switch" "toggle"; }
+    Mod+Ctrl+Alt+R       hotkey-overlay-title="🔄 Restart bar (quickshell)"  { spawn "oq" "omarchy-restart-shell"; }
 }
