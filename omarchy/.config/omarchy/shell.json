@@ -120,7 +120,7 @@
         },
         {
           "exec": "bar-status wg",
-          "fontSize": 16,
+          "fontSize": 18,
           "hideBelow": 1100,
           "id": "wg",
           "interval": 5,
@@ -130,7 +130,7 @@
         },
         {
           "exec": "bar-status ts",
-          "fontSize": 16,
+          "fontSize": 18,
           "hideBelow": 1450,
           "id": "ts",
           "interval": 10,
@@ -140,7 +140,7 @@
         },
         {
           "exec": "bar-status docker",
-          "fontSize": 16,
+          "fontSize": 18,
           "hideBelow": 1500,
           "id": "docker",
           "interval": 10,
