@@ -126,14 +126,6 @@
           "id": "omarchy.bluetooth"
         },
         {
-          "exec": "net-switch status",
-          "id": "net-switch",
-          "interval": 3,
-          "onClick": "net-switch toggle",
-          "tooltip": "Switch ethernet ↔ wifi\n$ net-switch toggle",
-          "type": "command"
-        },
-        {
           "id": "omarchy.network"
         },
         {

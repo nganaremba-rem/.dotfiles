@@ -1,0 +1,61 @@
+diff --git a/shell/plugins/panels/network/Panel.qml b/shell/plugins/panels/network/Panel.qml
+index 213031c..950be94 100644
+--- a/shell/plugins/panels/network/Panel.qml
++++ b/shell/plugins/panels/network/Panel.qml
+@@ -133,8 +133,12 @@ Panel {
+   readonly property bool canToggleWifi: networkManagerAvailable && wifiStationAvailable
+   readonly property int qrHeaderIndex: canShareWifi ? 0 : -1
+   readonly property int speedHeaderIndex: canRunSpeedTest ? (canShareWifi ? 1 : 0) : -1
+-  readonly property int toggleHeaderIndex: canToggleWifi ? (canShareWifi ? 1 : 0) + (canRunSpeedTest ? 1 : 0) : -1
+-  readonly property int headerActionCount: (canShareWifi ? 1 : 0) + (canRunSpeedTest ? 1 : 0) + (canToggleWifi ? 1 : 0)
++  // Ethernet <-> Wi-Fi primary-link switch (~/.local/bin/net-switch), sits before the radio switch.
++  readonly property bool canSwitchLink: networkManagerAvailable
++  readonly property int switchHeaderIndex: canSwitchLink ? (canShareWifi ? 1 : 0) + (canRunSpeedTest ? 1 : 0) : -1
++  readonly property int toggleHeaderIndex: canToggleWifi ? (canShareWifi ? 1 : 0) + (canRunSpeedTest ? 1 : 0) + (canSwitchLink ? 1 : 0) : -1
++  readonly property int headerActionCount: (canShareWifi ? 1 : 0) + (canRunSpeedTest ? 1 : 0) + (canSwitchLink ? 1 : 0) + (canToggleWifi ? 1 : 0)
++  readonly property bool switchHeaderHasCursor: cursorActive && focusSection === "header" && headerIndex === switchHeaderIndex
+   readonly property bool qrHeaderHasCursor: cursorActive && focusSection === "header" && headerIndex === qrHeaderIndex
+   readonly property bool speedHeaderHasCursor: cursorActive && focusSection === "header" && headerIndex === speedHeaderIndex
+   readonly property bool toggleHeaderHasCursor: cursorActive && focusSection === "header" && headerIndex === toggleHeaderIndex
+@@ -228,9 +232,20 @@ Panel {
+   function activateHeader() {
+     if (headerIndex === qrHeaderIndex) summonWifiQr()
+     else if (headerIndex === speedHeaderIndex) summonSpeedTest()
++    else if (headerIndex === switchHeaderIndex) switchLink()
+     else if (headerIndex === toggleHeaderIndex) toggleNetwork()
+   }
+ 
++  function switchLink() {
++    if (!netSwitch.running) netSwitch.running = true
++  }
++
++  Process {
++    id: netSwitch
++    command: [Quickshell.env("HOME") + "/.local/bin/net-switch", "toggle"]
++    onExited: root.refresh(true)
++  }
++
+   function setHeaderCursor(index) {
+     cursorActive = true
+     focusSection = "header"
+@@ -1274,6 +1289,20 @@ Panel {
+             onClicked: root.summonSpeedTest()
+           }
+ 
++          PanelActionButton {
++            id: switchAction
++            visible: root.canSwitchLink
++            iconText: "\udb81\udce1"
++            tooltipText: "Switch ethernet \u2194 wifi\n$ net-switch toggle"
++            foreground: root.bar.foreground
++            fontFamily: root.bar.fontFamily
++            fontSize: Style.font.subtitle * 1.5
++            hasCursor: root.switchHeaderHasCursor
++            Layout.alignment: Qt.AlignVCenter
++            onHovered: function(on) { if (on) root.setHeaderCursor(root.switchHeaderIndex) }
++            onClicked: root.switchLink()
++          }
++
+           ToggleSwitch {
+             id: powerSwitch
+             visible: root.canToggleWifi
