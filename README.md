@@ -143,7 +143,7 @@ pacman -Qqem | grep -vx rembrowser > ~/.dotfiles/setup/aur.txt
 | `niri-curve-pick` | Tune niri's animation springs. |
 | `mic-toggle`, `camera-toggle`, `bt-callmode` | Hardware toggles bound to keys. |
 
-Scripts that only niri uses are in `niri/.config/niri/scripts/`: `scratchpad`, `uclip` (Mod+C / Mod+V everywhere), `toggle-split`.
+Scripts that only niri uses are in `niri/.config/niri/scripts/`: `scratchpad`, `uclip` (Mod+C / Mod+V everywhere; sends the keys with `vkchord.c`, which it compiles on first use), `toggle-split`.
 
 ## The desktop shell
 

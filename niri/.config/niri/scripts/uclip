@@ -1,94 +1,69 @@
 #!/bin/bash
-# Universal copy / paste / cut for Mod+C / Mod+V / Mod+X:
-# Ctrl+Shift+C/V in terminals, plain Ctrl+C/V/X everywhere else.
+# Universal copy / paste / cut for Mod+C / Mod+V: Ctrl+Shift+C/V in terminals,
+# plain Ctrl+C/V/X everywhere else (also launcher and menu text fields).
 #
-# Keys go out as real uinput events (ydotool). wtype's private virtual keymap
-# is ignored by GTK3, Chromium/CEF and XWayland clients, so it is not used.
-# Because uinput events join the physical modifier state, the chord waits
-# until the Super key of the bind is physically up (polled with EVIOCGKEY on
-# every keyboard) before injecting Ctrl[+Shift]+key.
+# vkchord (built from vkchord.c on first use) types the chord into the focused
+# window through a Wayland virtual keyboard with its own modifier state. So it
+# fires at once, while the window of the key press still has focus, and the
+# Super still held for the bind is never part of it. (ydotool's uinput keys
+# merged with that Super, so uclip had to wait for Super-up: by then focus
+# could have moved on, and after 1 s the chord went out anyway as
+# Mod+Ctrl+C/V, which are niri binds.) UCLIP_BACKEND from the emoji picker is
+# no longer needed and ignored.
 #
-# copy/cut hold a lock until the clipboard actually changed (or 0.6 s passed)
-# and paste takes the same lock first, so a quick Mod+C then Mod+V can no
-# longer paste the previous clipboard. In a terminal a copy that changed
-# nothing (no selection) falls back to the PRIMARY selection.
-#
-# UCLIP_BACKEND=uinput skips the Super wait for callers with no key held (the
-# emoji and icon pickers).
-case "${1:-}" in
-copy) code=46 ;;
-paste) code=47 ;;
-cut) code=45 ;;
+# Terminal paste with only an image on the clipboard sends plain Ctrl+V, so
+# TUIs that read the clipboard themselves (Claude Code, Codex) get the image;
+# the terminal's own paste only takes text. A terminal copy that changes
+# nothing (no selection in the terminal itself) takes the PRIMARY selection,
+# and paste waits for that copy, so a quick Mod+C then Mod+V pastes the new text.
+case ${1:-} in
+copy) key=46 ;;
+paste) key=47 ;;
+cut) key=45 ;;
 *)
     echo "usage: uclip copy|paste|cut" >&2
     exit 2
     ;;
 esac
 
-window=$(niri msg -j focused-window)
-app=$(jq -r '.app_id // ""' <<<"$window")
-case "$app" in
-foot | footclient | kitty | Alacritty | com.mitchellh.ghostty | org.wezfurlong.wezterm | scratchpad | btop | qsmenu-term | herdr.* | org.omarchy.* | TUI*)
-    terminal=true
-    ;;
-*)
-    terminal=false
-    ;;
+# Window owned by a terminal emulator process (footclient windows belong to
+# the foot server, whatever their app id). No focused window = a layer surface
+# (launcher, menu) has the keyboard.
+pid=$(niri msg -j focused-window | jq -r '.pid // empty')
+exe=$(readlink "/proc/$pid/exe")
+case ${exe##*/} in
+foot | kitty | alacritty | ghostty | wezterm-gui) mods=ctrl+shift ;;
+*) mods=ctrl ;;
 esac
-
-# Wait (max 1 s) until no Super key is held on any keyboard.
-wait_super_up() {
-    /usr/bin/python3 -I - <<'EOF'
-import evdev, re, time
-devs = []
-for blk in open("/proc/bus/input/devices").read().split("\n\n"):
-    m = re.search(r"Handlers=.*\bkbd\b.*\b(event\d+)", blk)
-    if m:
-        try:
-            devs.append(evdev.InputDevice("/dev/input/" + m.group(1)))
-        except OSError:
-            pass
-end = time.time() + 1
-while time.time() < end:
-    if not any({125, 126} & set(d.active_keys()) for d in devs):
-        break
-    time.sleep(0.01)
-EOF
-}
-
-send() {
-    if [[ $terminal == true ]]; then
-        ydotool key 29:1 42:1 "$code:1" "$code:0" 42:0 29:0 # Ctrl+Shift+key
-    else
-        ydotool key 29:1 "$code:1" "$code:0" 29:0 # Ctrl+key
-    fi
-}
-
-clip_sum() { wl-paste -n 2>/dev/null | md5sum; }
 
 exec 9>"${XDG_RUNTIME_DIR:-/tmp}/uclip.lock"
-flock -w 3 9
+flock -w 1 9
 
-[[ ${UCLIP_BACKEND:-} == uinput ]] || wait_super_up
+src=${BASH_SOURCE[0]%/*}/vkchord.c
+vkchord=${XDG_CACHE_HOME:-$HOME/.cache}/niri/vkchord
+if [[ ! $vkchord -nt $src ]]; then
+    mkdir -p "${vkchord%/*}" &&
+        cc -O2 -o "$vkchord.new" "$src" -lwayland-client &&
+        mv -f "$vkchord.new" "$vkchord" || exit 1
+fi
 
-case $1 in
-paste)
-    send
-    sleep 0.05 # let the app issue its paste request before the lock drops
-    ;;
-*)
-    before=$(clip_sum)
-    send
-    tries=30 # 0.6 s
-    [[ $terminal == true ]] && tries=12
-    for _ in $(seq "$tries"); do
-        sleep 0.02
-        [[ $(clip_sum) != "$before" ]] && exit 0
-    done
-    # Terminal with nothing selected-for-clipboard: use the PRIMARY selection.
-    if [[ $terminal == true && $1 == copy ]]; then
-        sel=$(wl-paste -p -n 2>/dev/null)
-        [[ -n $sel ]] && printf %s "$sel" | wl-copy
+text() { timeout 0.5 wl-paste -n -t text "$@" 2>/dev/null; }
+
+if [[ $1 == paste && $mods == ctrl+shift ]]; then
+    types=$(timeout 0.5 wl-paste -l 2>/dev/null)
+    if [[ $types == *image/* ]] && ! grep -qxE 'text/plain.*|UTF8_STRING|STRING|TEXT|text/uri-list' <<<"$types"; then
+        mods=ctrl
     fi
-    ;;
-esac
+fi
+
+if [[ $1 != copy || $mods == ctrl ]]; then
+    exec "$vkchord" "$mods" "$key"
+fi
+before=$(text | md5sum)
+"$vkchord" "$mods" "$key"
+for _ in {1..12}; do
+    sleep 0.02
+    [[ $(text | md5sum) != "$before" ]] && exit 0
+done
+sel=$(text -p)
+[[ -n $sel ]] && printf %s "$sel" | wl-copy

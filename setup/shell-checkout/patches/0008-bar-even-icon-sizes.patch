@@ -1,7 +1,7 @@
 From 81fb9a690c55789771a0a60643312be5ac67ad5c Mon Sep 17 00:00:00 2001
 From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
 Date: Sun, 11 Oct 2026 18:19:52 +0530
-Subject: [PATCH 08/23] bar: even icon sizes
+Subject: [PATCH 08/24] bar: even icon sizes
 
 Nerd Font icons differ a lot in ink size at one font size. A lone icon glyph
 is now scaled so its larger ink side matches the icon font size. The menu

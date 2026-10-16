@@ -1,7 +1,7 @@
 From 0a5a420767b043574cd94543246f5b83fc3d2cd9 Mon Sep 17 00:00:00 2001
 From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
 Date: Fri, 16 Oct 2026 19:57:44 +0530
-Subject: [PATCH 23/23] bar: hidden-modules popup closes on an outside click
+Subject: [PATCH 23/24] bar: hidden-modules popup closes on an outside click
 
 Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
 ---

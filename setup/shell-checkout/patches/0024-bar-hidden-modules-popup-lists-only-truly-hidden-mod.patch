@@ -1,0 +1,117 @@
+From 4f96abe74380a9cbb53ef4d1cfb0be6e772ce1f8 Mon Sep 17 00:00:00 2001
+From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
+Date: Fri, 16 Oct 2026 20:28:52 +0530
+Subject: [PATCH 24/24] bar: hidden-modules popup lists only truly hidden
+ modules and rows are clickable
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+---
+ shell/plugins/bar/Bar.qml | 82 +++++++++++++++++++++++++--------------
+ 1 file changed, 52 insertions(+), 30 deletions(-)
+
+diff --git a/shell/plugins/bar/Bar.qml b/shell/plugins/bar/Bar.qml
+index 810612b..468bd1e 100644
+--- a/shell/plugins/bar/Bar.qml
++++ b/shell/plugins/bar/Bar.qml
+@@ -1420,24 +1420,20 @@ Item {
+     // the left section opens a popup listing them with their live values.
+     property bool hiddenOpen: false
+     property Item hiddenToggleItem: null
++    // Read from the live slots, so only modules the bar is really hiding (and
++    // that have something to show) are listed.
+     readonly property var hiddenEntries: {
+       var out = []
+-      var regions = ["left", "center", "right"]
+-      for (var r = 0; r < regions.length; r++) {
+-        var list = root.layoutEntries(regions[r])
+-        for (var i = 0; i < list.length; i++) {
+-          var set = root.entrySettings(list[i]) || {}
+-          var h = Number(set.hideBelow || 0)
+-          if (h <= 0 || barWindow.width >= h) continue
+-          var id = root.entryId(list[i])
+-          var label = String(set.tooltip || "").split("\n")[0] || id.replace(/^omarchy\./, "")
+-          var text = ""
+-          if (root.customModuleType(list[i]) === "command") {
+-            var raw = root.commandOutput[id] || ""
+-            text = String(Util.parseModuleJson(raw).text || raw).trim()
+-          }
+-          out.push({ label: label, text: text })
+-        }
++      var slots = root.moduleSlots
++      for (var i = 0; i < slots.length; i++) {
++        var slot = slots[i]
++        if (!slot || !slot.narrowHidden || root.targetWindow(slot) !== barWindow) continue
++        var item = slot.activeItem
++        if (!item) continue
++        var shows = item.hasVisualContent !== undefined ? item.hasVisualContent : item.implicitWidth > 0
++        if (!shows || String(item.text || "").trim() === "") continue
++        var label = String(item.tooltipText || "").split("\n")[0] || String(slot.moduleName).replace(/^omarchy\./, "")
++        out.push({ label: label, text: String(item.text || "").trim(), item: item })
+       }
+       return out
+     }
+@@ -1545,24 +1541,50 @@ Item {
+           Repeater {
+             model: barWindow.hiddenEntries
+ 
+-            Row {
++            MouseArea {
++              id: hiddenRow
+               required property var modelData
+-              spacing: Style.space(10)
++              implicitWidth: rowContent.implicitWidth
++              implicitHeight: rowContent.implicitHeight + Style.space(4)
++              width: implicitWidth
++              height: implicitHeight
++              acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
++              hoverEnabled: true
++              cursorShape: Qt.PointingHandCursor
++              onClicked: function(mouse) {
++                var item = modelData.item
++                var button = mouse.button
++                barWindow.hiddenOpen = false
++                if (item && item.triggerPress) Qt.callLater(function() { item.triggerPress(button) })
++              }
+ 
+-              Text {
+-                textFormat: Text.PlainText
+-                text: parent.modelData.label
++              Rectangle {
++                anchors.fill: parent
++                radius: Style.cornerRadius / 2
+                 color: Commons.Color.tooltip.text
+-                opacity: 0.6
+-                font.family: root.fontFamily
+-                font.pixelSize: Style.font.body
++                opacity: hiddenRow.containsMouse ? 0.12 : 0
+               }
+-              Text {
+-                textFormat: Text.PlainText
+-                text: parent.modelData.text
+-                color: Commons.Color.tooltip.text
+-                font.family: root.fontFamily
+-                font.pixelSize: Style.font.body
++
++              Row {
++                id: rowContent
++                anchors.verticalCenter: parent.verticalCenter
++                spacing: Style.space(10)
++
++                Text {
++                  textFormat: Text.PlainText
++                  text: hiddenRow.modelData.label
++                  color: Commons.Color.tooltip.text
++                  opacity: 0.6
++                  font.family: root.fontFamily
++                  font.pixelSize: Style.font.body
++                }
++                Text {
++                  textFormat: Text.PlainText
++                  text: hiddenRow.modelData.text
++                  color: Commons.Color.tooltip.text
++                  font.family: root.fontFamily
++                  font.pixelSize: Style.font.body
++                }
+               }
+             }
+           }

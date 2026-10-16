@@ -1,7 +1,7 @@
 From b0e42f02ea8308b7002f7be9784cb82e7b117b55 Mon Sep 17 00:00:00 2001
 From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
 Date: Sun, 11 Oct 2026 22:09:46 +0530
-Subject: [PATCH 14/23] emoji insert: leave the glyph on the clipboard and
+Subject: [PATCH 14/24] emoji insert: leave the glyph on the clipboard and
  paste with real key codes
 
 Typing with wtype skipped the clipboard and did nothing in Chromium apps,

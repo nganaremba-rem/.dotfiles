@@ -1,7 +1,7 @@
 From c83b5dec8ade78c66197db8a775bc7dbe99bbb51 Mon Sep 17 00:00:00 2001
 From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
 Date: Sun, 11 Oct 2026 18:25:18 +0530
-Subject: [PATCH 09/23] niri: DNS switch that works with a hand-kept
+Subject: [PATCH 09/24] niri: DNS switch that works with a hand-kept
  systemd-resolved setup
 
 Upstream's omarchy-dns re-execs a root helper at /usr/bin/omarchy-dns, which

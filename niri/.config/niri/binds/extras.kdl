@@ -7,8 +7,9 @@ binds {
     Mod+Grave       hotkey-overlay-title="📥 Toggle scratchpad"          { spawn "~/.config/niri/scripts/scratchpad" "toggle"; }
 
     // ── 📋 Universal copy / paste (Ctrl+Shift+C/V in terminals, Ctrl+C/V elsewhere) ──
-    Mod+C           hotkey-overlay-title="📋 Copy"                       { spawn "~/.config/niri/scripts/uclip" "copy"; }
-    Mod+V           hotkey-overlay-title="📋 Paste"                      { spawn "~/.config/niri/scripts/uclip" "paste"; }
+    // repeat=false: binds repeat after repeat-delay (200 ms), so a slow press pasted many times.
+    Mod+C repeat=false hotkey-overlay-title="📋 Copy"                    { spawn "~/.config/niri/scripts/uclip" "copy"; }
+    Mod+V repeat=false hotkey-overlay-title="📋 Paste"                   { spawn "~/.config/niri/scripts/uclip" "paste"; }
 
     // ── ⌨️ Every keybind, searchable ─────────────────────────────────────────
     Mod+F1          hotkey-overlay-title="⌨️ Search keybinds"             { spawn "oq" "omarchy-menu-keybindings"; }
