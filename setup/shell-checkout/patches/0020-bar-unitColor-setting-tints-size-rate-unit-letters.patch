@@ -1,0 +1,60 @@
+From c3ee830d064cb8ac9dfddf61e459c2a6c0d96cbc Mon Sep 17 00:00:00 2001
+From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
+Date: Fri, 16 Oct 2026 19:39:15 +0530
+Subject: [PATCH 20/20] bar: unitColor setting tints size/rate unit letters
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+---
+ shell/Ui/WidgetButton.qml | 6 ++++--
+ shell/plugins/bar/Bar.qml | 7 +++++++
+ 2 files changed, 11 insertions(+), 2 deletions(-)
+
+diff --git a/shell/Ui/WidgetButton.qml b/shell/Ui/WidgetButton.qml
+index 510bcd8..2041ca8 100644
+--- a/shell/Ui/WidgetButton.qml
++++ b/shell/Ui/WidgetButton.qml
+@@ -7,6 +7,8 @@ Item {
+ 
+   property var bar: null
+   property string text: ""
++  // niri port: optional HTML for the label (text stays the plain form).
++  property string richText: ""
+   property string fontFamily: bar ? bar.fontFamily : Style.font.family
+   property real fontSize: Style.font.body
+   property color foreground: bar ? bar.barForeground : Commons.Color.foreground
+@@ -77,7 +79,7 @@ Item {
+ 
+   Text {
+     id: label
+-    textFormat: Text.PlainText
++    textFormat: root.richText !== "" ? Text.RichText : Text.PlainText
+     visible: root.labelVisible
+     anchors.centerIn: parent
+     // Centering the line box puts the figures above the bar's middle, since
+@@ -99,7 +101,7 @@ Item {
+         : !root.centerFigures
+           ? 0
+           : (labelMetrics.descent - labelMetrics.ascent + labelMetrics.tightBoundingRect("0").height) / 2
+-    text: root.text
++    text: root.richText !== "" ? root.richText : root.text
+     color: root.active && root.useActiveColor ? root.activeColor : root.foreground
+     font.family: root.fontFamily
+     font.pixelSize: root.fontSize
+diff --git a/shell/plugins/bar/Bar.qml b/shell/plugins/bar/Bar.qml
+index db74240..63ffb77 100644
+--- a/shell/plugins/bar/Bar.qml
++++ b/shell/plugins/bar/Bar.qml
+@@ -2248,6 +2248,13 @@ Item {
+     horizontalMargin: Number(setting("horizontalMargin", 7.5))
+     verticalPadding: Number(setting("verticalPadding", 6))
+     fontSize: Number(setting("fontSize", 12))
++    // "unitColor": tint size/rate unit letters (B K M G T) that follow a digit.
++    richText: {
++      var c = String(setting("unitColor", ""))
++      if (c === "" || outputText === "") return ""
++      var esc = outputText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/ /g, "&nbsp;")
++      return esc.replace(/(\d)([BKMGT])/g, "$1<font color=\"" + Commons.Color.named(c) + "\">$2</font>")
++    }
+ 
+     onPressed: function(button) {
+       var command = ""

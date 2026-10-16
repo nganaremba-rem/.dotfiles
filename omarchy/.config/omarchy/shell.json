@@ -10,13 +10,13 @@
           "id": "net-speed",
           "stream": true,
           "tooltip": "Network speed\n$ bar-stat net 2",
-          "type": "command"
+          "type": "command",
+          "unitColor": "magenta"
         },
         {
           "id": "omarchy.indicators"
         },
         {
-          "hideBelow": 1750,
           "id": "omarchy.elsewhen",
           "zones": "Kolkata|Asia/Kolkata, Tokyo|Asia/Tokyo, Los Angeles|America/Los_Angeles, New York|America/New_York, London|Europe/London"
         },

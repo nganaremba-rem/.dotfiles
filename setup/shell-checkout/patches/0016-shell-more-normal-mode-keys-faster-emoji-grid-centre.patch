@@ -1,7 +1,7 @@
 From 205e4f59fcdd80908c4095e9355cddaaade5d944 Mon Sep 17 00:00:00 2001
 From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
 Date: Sun, 11 Oct 2026 23:05:59 +0530
-Subject: [PATCH 16/18] shell: more normal-mode keys, faster emoji grid,
+Subject: [PATCH 16/20] shell: more normal-mode keys, faster emoji grid,
  centred lone icons
 
 Normal mode gains gg/G, Ctrl+d/u/f/b, x and dd (delete), cc and S (clear the

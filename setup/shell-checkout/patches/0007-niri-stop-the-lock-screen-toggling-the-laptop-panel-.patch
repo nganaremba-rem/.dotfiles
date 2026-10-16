@@ -1,7 +1,7 @@
 From d5d9bdd04e525dad4fd9233d6af96a773978cfbc Mon Sep 17 00:00:00 2001
 From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
 Date: Sun, 11 Oct 2026 18:10:20 +0530
-Subject: [PATCH 07/18] niri: stop the lock screen toggling the laptop panel on
+Subject: [PATCH 07/20] niri: stop the lock screen toggling the laptop panel on
  every wake
 
 The upstream clamshell script runs on each wake, including every key press

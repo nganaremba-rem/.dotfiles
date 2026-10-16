@@ -1,0 +1,26 @@
+From c56d835400d4da92e9c70b54ef2aa3b66c099cdb Mon Sep 17 00:00:00 2001
+From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
+Date: Fri, 16 Oct 2026 19:37:50 +0530
+Subject: [PATCH 19/20] bar-stat net: drop padding around down/up rates
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+---
+ niri/bin/bar-stat | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/niri/bin/bar-stat b/niri/bin/bar-stat
+index dbf9a92..98073bb 100755
+--- a/niri/bin/bar-stat
++++ b/niri/bin/bar-stat
+@@ -100,7 +100,10 @@ case "${1:-}" in
+         if [[ $REPLY == "$iface" ]]; then
+           human "$(( (new_rx - rx) / interval ))"; down=$REPLY
+           human "$(( (new_tx - tx) / interval ))"; up=$REPLY
+-          emit "↓$down ↑$up"
++          [[ $down == *[KM] ]] || down+=B
++          [[ $up == *[KM] ]] || up+=B
++          printf -v line '󰇚 %s  󰕒 %s' "$down" "$up"
++          emit "$line"
+         fi
+         iface=${stats#/sys/class/net/} iface=${iface%/statistics} rx=$new_rx tx=$new_tx
+       fi

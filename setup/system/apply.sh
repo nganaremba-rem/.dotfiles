@@ -20,6 +20,7 @@ while IFS= read -r -d '' src; do
   fi
   mode=644
   [[ -x $src ]] && mode=755
+  [[ $dest == /etc/sudoers.d/* ]] && mode=440
   sudo install -D -m "$mode" "$src" "$dest"
 done < <(find "$here/files" -type f -print0)
 
