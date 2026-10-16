@@ -70,7 +70,8 @@
           "onClick": "omarchy-launch-tui remtop",
           "stream": true,
           "tooltip": "Memory in use\n$ omarchy-launch-tui remtop",
-          "type": "command"
+          "type": "command",
+          "unitColor": "magenta"
         },
         {
           "fontSize": 15,
