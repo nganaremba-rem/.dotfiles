@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "remtube cookie export",
+  "version": "1.0.0",
+  "description": "Export youtube.com cookies to a Netscape cookies.txt file for remtube. Nothing leaves the browser.",
+  "permissions": ["cookies", "downloads"],
+  "host_permissions": ["*://*.youtube.com/*"],
+  "incognito": "spanning",
+  "action": { "default_popup": "popup.html", "default_title": "Export youtube.com cookies" }
+}
