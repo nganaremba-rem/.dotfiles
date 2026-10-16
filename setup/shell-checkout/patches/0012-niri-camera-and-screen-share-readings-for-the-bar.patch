@@ -1,7 +1,7 @@
 From 15c84bad14a332aa819c604543dbee458a0507b0 Mon Sep 17 00:00:00 2001
 From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
 Date: Sun, 11 Oct 2026 21:40:37 +0530
-Subject: [PATCH 12/21] niri: camera and screen share readings for the bar
+Subject: [PATCH 12/22] niri: camera and screen share readings for the bar
 
 bar-stat camera reports which process holds a camera device open, and
 bar-stat screencast reports the outputs niri is feeding to a screencast.

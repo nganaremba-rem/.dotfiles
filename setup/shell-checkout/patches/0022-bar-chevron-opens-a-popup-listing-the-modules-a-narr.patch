@@ -1,0 +1,170 @@
+From beb5c231c5be3ff2ed0d7c5b76351df39e0dbbc7 Mon Sep 17 00:00:00 2001
+From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
+Date: Fri, 16 Oct 2026 19:55:20 +0530
+Subject: [PATCH 22/22] bar: chevron opens a popup listing the modules a narrow
+ bar hides
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+---
+ shell/plugins/bar/Bar.qml | 121 +++++++++++++++++++++++++++++++-------
+ 1 file changed, 100 insertions(+), 21 deletions(-)
+
+diff --git a/shell/plugins/bar/Bar.qml b/shell/plugins/bar/Bar.qml
+index f3b62ee..9b7b72e 100644
+--- a/shell/plugins/bar/Bar.qml
++++ b/shell/plugins/bar/Bar.qml
+@@ -1416,9 +1416,32 @@ Item {
+ 
+     readonly property bool cutoutPending: BarModel.cutoutPending(root.displayCutouts, root.position, screen.name, screen.width, screen.height, screen.devicePixelRatio, panelMode)
+     property bool cutoutWaitOver: false
+-    // niri port: show the modules a narrow bar hid ("hideBelow"); toggled by the
+-    // chevron beside the left section.
+-    property bool showHidden: false
++    // niri port: a narrow bar hides modules with "hideBelow"; the chevron beside
++    // the left section opens a popup listing them with their live values.
++    property bool hiddenOpen: false
++    property Item hiddenToggleItem: null
++    readonly property var hiddenEntries: {
++      var out = []
++      var regions = ["left", "center", "right"]
++      for (var r = 0; r < regions.length; r++) {
++        var list = root.layoutEntries(regions[r])
++        for (var i = 0; i < list.length; i++) {
++          var set = root.entrySettings(list[i]) || {}
++          var h = Number(set.hideBelow || 0)
++          if (h <= 0 || barWindow.width >= h) continue
++          var id = root.entryId(list[i])
++          var label = String(set.tooltip || "").split("\n")[0] || id.replace(/^omarchy\./, "")
++          var text = ""
++          if (root.customModuleType(list[i]) === "command") {
++            var raw = root.commandOutput[id] || ""
++            text = String(Util.parseModuleJson(raw).text || raw).trim()
++          }
++          out.push({ label: label, text: text })
++        }
++      }
++      return out
++    }
++    onHiddenEntriesChanged: if (hiddenEntries.length === 0) hiddenOpen = false
+     onCutoutPendingChanged: if (!cutoutPending) cutoutWaitOver = true
+     Component.onCompleted: if (!cutoutPending) cutoutWaitOver = true
+ 
+@@ -1453,6 +1476,75 @@ Item {
+       }
+     }
+ 
++    // The chevron's popup: one row per module the narrow bar is hiding.
++    PopupWindow {
++      id: hiddenWindow
++
++      visible: barWindow.hiddenOpen && barWindow.hiddenToggleItem !== null
++      color: "transparent"
++      implicitWidth: Math.ceil(hiddenBubble.implicitWidth)
++      implicitHeight: Math.ceil(hiddenBubble.implicitHeight)
++
++      anchor {
++        id: hiddenAnchor
++        window: barWindow
++        adjustment: PopupAdjustment.Slide
++        edges: Edges.Top | Edges.Left
++        gravity: Edges.Bottom | Edges.Right
++        rect.width: 1
++        rect.height: 1
++
++        onAnchoring: {
++          var target = barWindow.hiddenToggleItem
++          if (!target) return
++          var point = barWindow.contentItem.mapFromItem(target, 0,
++            root.position === "bottom" ? -hiddenWindow.implicitHeight - 6 : target.height + 6)
++          hiddenAnchor.rect.x = Math.round(point.x)
++          hiddenAnchor.rect.y = Math.round(point.y)
++        }
++      }
++
++      BorderSurface {
++        id: hiddenBubble
++        implicitWidth: hiddenColumn.implicitWidth + 24
++        implicitHeight: hiddenColumn.implicitHeight + 18
++        color: Commons.Color.tooltip.background
++        borderSpec: Border.surfaceSpec("tooltip", "border", Commons.Color.tooltip.border, 1)
++        radius: Style.cornerRadius
++
++        Column {
++          id: hiddenColumn
++          anchors.centerIn: parent
++          spacing: Style.space(4)
++
++          Repeater {
++            model: barWindow.hiddenEntries
++
++            Row {
++              required property var modelData
++              spacing: Style.space(10)
++
++              Text {
++                textFormat: Text.PlainText
++                text: parent.modelData.label
++                color: Commons.Color.tooltip.text
++                opacity: 0.6
++                font.family: root.fontFamily
++                font.pixelSize: Style.font.body
++              }
++              Text {
++                textFormat: Text.PlainText
++                text: parent.modelData.text
++                color: Commons.Color.tooltip.text
++                font.family: root.fontFamily
++                font.pixelSize: Style.font.body
++              }
++            }
++          }
++        }
++      }
++    }
++
+     PopupWindow {
+       id: tooltipWindow
+ 
+@@ -1538,29 +1630,17 @@ Item {
+         // Chevron that appears only while a narrow bar is hiding modules.
+         WidgetButton {
+           id: hiddenToggle
+-          readonly property int hiddenCount: {
+-            var n = 0
+-            var regions = ["left", "center", "right"]
+-            for (var r = 0; r < regions.length; r++) {
+-              var list = root.layoutEntries(regions[r])
+-              for (var i = 0; i < list.length; i++) {
+-                var h = Number((root.entrySettings(list[i]) || {}).hideBelow || 0)
+-                if (h > 0 && barWindow.width < h) n++
+-              }
+-            }
+-            return n
+-          }
++          readonly property int hiddenCount: barWindow.hiddenEntries.length
+           visible: hiddenCount > 0
+           bar: root
+-          text: barWindow.showHidden ? "󰅁" : "󰅂"
+-          tooltipText: barWindow.showHidden
+-            ? "Hide the extra modules"
+-            : hiddenCount + " hidden module" + (hiddenCount === 1 ? "" : "s") + " (screen too narrow). Click to show."
++          text: barWindow.hiddenOpen ? "󰅀" : "󰅂"
++          tooltipText: hiddenCount + " module" + (hiddenCount === 1 ? "" : "s") + " hidden (screen too narrow)"
++          Component.onCompleted: barWindow.hiddenToggleItem = hiddenToggle
+           fontSize: 14
+           anchors.left: leftModules.right
+           anchors.leftMargin: Style.space(4)
+           anchors.verticalCenter: parent.verticalCenter
+-          onPressed: function(button) { barWindow.showHidden = !barWindow.showHidden }
++          onPressed: function(button) { barWindow.hiddenOpen = !barWindow.hiddenOpen }
+         }
+ 
+         RightModules {
+@@ -2031,7 +2111,6 @@ Item {
+     readonly property real barLength: Window.width > 0 ? Window.width : 100000
+     readonly property real hideBelow: Number(moduleSettings.hideBelow || 0)
+     readonly property bool narrowHidden: !root.vertical && hideBelow > 0 && barLength < hideBelow
+-      && !(Window.window && Window.window.showHidden === true)
+     readonly property bool dragSource: root.barDragSource === slot
+     readonly property bool panelOpen: root.activePopout === slot.activeItem
+     // Modules bigger than the mark they want (a text label in a padded slot,

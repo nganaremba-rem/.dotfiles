@@ -1,7 +1,7 @@
 From 78b0fa05359862aa62b42a86114a3ae2b42f97e2 Mon Sep 17 00:00:00 2001
 From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
 Date: Sun, 11 Oct 2026 22:27:46 +0530
-Subject: [PATCH 15/21] bar: command modules can set their colour
+Subject: [PATCH 15/22] bar: command modules can set their colour
 
 A module takes "color" next to its id for a fixed colour, or prints it in
 its JSON output to change per run. Theme colour names (red, green, yellow,

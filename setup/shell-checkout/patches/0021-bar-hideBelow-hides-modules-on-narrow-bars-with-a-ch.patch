@@ -1,7 +1,7 @@
 From d3cb0384ae3b903fe53613e29bce286d0837321e Mon Sep 17 00:00:00 2001
 From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
 Date: Fri, 16 Oct 2026 19:53:21 +0530
-Subject: [PATCH 21/21] bar: hideBelow hides modules on narrow bars with a
+Subject: [PATCH 21/22] bar: hideBelow hides modules on narrow bars with a
  chevron to show them; never overwrite an unreadable shell.json with defaults
 
 Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
