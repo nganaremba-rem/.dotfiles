@@ -1,0 +1,48 @@
+diff --git a/bin/omarchy-battery-status b/bin/omarchy-battery-status
+index 13de445..025ca65 100755
+--- a/bin/omarchy-battery-status
++++ b/bin/omarchy-battery-status
+@@ -132,6 +132,9 @@ if [[ $shell_output == "true" ]]; then
+ 
+   [[ -n $cycles ]] && printf 'cycles\t%s\n' "$cycles"
+ 
++  full=$(<"$battery_path/charge_full") design=$(<"$battery_path/charge_full_design")
++  [[ $full =~ ^[0-9]+$ && $design =~ ^[0-9]+$ ]] && (( design > 0 )) && printf 'health\t%s%%\n' $(( full * 100 / design ))
++
+   if [[ -n $threshold_end ]]; then
+     if [[ -n $threshold_start && $threshold_start != $threshold_end ]]; then
+       printf 'threshold\t%s-%s%%\n' "$threshold_start" "$threshold_end"
+diff --git a/shell/plugins/panels/network/Panel.qml b/shell/plugins/panels/network/Panel.qml
+index 213031c..ef1fb32 100644
+--- a/shell/plugins/panels/network/Panel.qml
++++ b/shell/plugins/panels/network/Panel.qml
+@@ -1410,12 +1410,12 @@ Panel {
+           InfoLabel { text: "Ping" }
+           DetailValue {
+             text: root.formatPingLatency(root.internetPingLatency)
+-            color: root.internetPingPacketLoss > 0 ? root.bar.urgent : root.bar.foreground
++            color: root.internetPingPacketLoss >= 10 ? root.bar.urgent : root.bar.foreground
+           }
+           InfoLabel { text: "Packet Loss" }
+           DetailValue {
+             text: root.formatPacketLoss(root.internetPingPacketLoss)
+-            color: root.internetPingPacketLoss > 0 ? root.bar.urgent : root.bar.foreground
++            color: root.internetPingPacketLoss >= 10 ? root.bar.urgent : root.bar.foreground
+           }
+ 
+           InfoLabel { text: "Receiving" }
+diff --git a/shell/plugins/panels/power/Panel.qml b/shell/plugins/panels/power/Panel.qml
+index 6a69fb2..dc871fb 100644
+--- a/shell/plugins/panels/power/Panel.qml
++++ b/shell/plugins/panels/power/Panel.qml
+@@ -436,6 +436,10 @@ Panel {
+             spacing: Style.spacing.labelGap
+             InfoPair { label: "Battery size"; value: root.batteryInfo.size || "" }
+             InfoPair { label: "Charge cycles"; value: root.batteryInfo.cycles || "—" }
++            InfoPair {
++              label: "Battery health"
++              value: root.batteryInfo.health || "—"
++            }
+           }
+ 
+           Column {

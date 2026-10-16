@@ -2,17 +2,23 @@
 # Universal copy / paste / cut for Mod+C / Mod+V / Mod+X:
 # Ctrl+Shift+C/V in terminals, plain Ctrl+C/V/X everywhere else.
 #
-# wtype is a virtual keyboard that reports its own modifiers to the focused
-# client, so the Super key still held for the bind is not part of the chord.
+# Keys go out as real uinput events (ydotool). wtype's private virtual keymap
+# is ignored by GTK3, Chromium/CEF and XWayland clients, so it is not used.
+# Because uinput events join the physical modifier state, the chord waits
+# until the Super key of the bind is physically up (polled with EVIOCGKEY on
+# every keyboard) before injecting Ctrl[+Shift]+key.
 #
-# UCLIP_BACKEND=uinput sends real key codes through ydotool instead. Those also
-# reach X11 and Chromium apps, which ignore wtype's private keymap, but a held
-# Super would join the chord, so it is only for callers with no key held (the
+# copy/cut hold a lock until the clipboard actually changed (or 0.6 s passed)
+# and paste takes the same lock first, so a quick Mod+C then Mod+V can no
+# longer paste the previous clipboard. In a terminal a copy that changed
+# nothing (no selection) falls back to the PRIMARY selection.
+#
+# UCLIP_BACKEND=uinput skips the Super wait for callers with no key held (the
 # emoji and icon pickers).
 case "${1:-}" in
-copy) key=c code=46 ;;
-paste) key=v code=47 ;;
-cut) key=x code=45 ;;
+copy) code=46 ;;
+paste) code=47 ;;
+cut) code=45 ;;
 *)
     echo "usage: uclip copy|paste|cut" >&2
     exit 2
@@ -21,7 +27,6 @@ esac
 
 window=$(niri msg -j focused-window)
 app=$(jq -r '.app_id // ""' <<<"$window")
-pid=$(jq -r '.pid // ""' <<<"$window")
 case "$app" in
 foot | footclient | kitty | Alacritty | com.mitchellh.ghostty | org.wezfurlong.wezterm | scratchpad | btop | qsmenu-term | herdr.* | org.omarchy.* | TUI*)
     terminal=true
@@ -31,30 +36,59 @@ foot | footclient | kitty | Alacritty | com.mitchellh.ghostty | org.wezfurlong.w
     ;;
 esac
 
-if [[ ${UCLIP_BACKEND:-} == "uinput" ]]; then
-    # Linux key codes: 29 = left Ctrl, 42 = left Shift.
+# Wait (max 1 s) until no Super key is held on any keyboard.
+wait_super_up() {
+    /usr/bin/python3 -I - <<'EOF'
+import evdev, re, time
+devs = []
+for blk in open("/proc/bus/input/devices").read().split("\n\n"):
+    m = re.search(r"Handlers=.*\bkbd\b.*\b(event\d+)", blk)
+    if m:
+        try:
+            devs.append(evdev.InputDevice("/dev/input/" + m.group(1)))
+        except OSError:
+            pass
+end = time.time() + 1
+while time.time() < end:
+    if not any({125, 126} & set(d.active_keys()) for d in devs):
+        break
+    time.sleep(0.01)
+EOF
+}
+
+send() {
     if [[ $terminal == true ]]; then
-        exec ydotool key 29:1 42:1 "$code:1" "$code:0" 42:0 29:0
+        ydotool key 29:1 42:1 "$code:1" "$code:0" 42:0 29:0 # Ctrl+Shift+key
+    else
+        ydotool key 29:1 "$code:1" "$code:0" 29:0 # Ctrl+key
     fi
-    exec ydotool key 29:1 "$code:1" "$code:0" 29:0
-fi
+}
 
-# For compositor-triggered terminal shortcuts, wait until the physical Mod
-# key is released before injecting the terminal's Ctrl+Shift chord. Otherwise
-# the terminal can receive Super+Ctrl+Shift+C/V and ignore the binding.
-if [[ $terminal == true ]]; then
-    sleep 0.12
-    exec ydotool key 29:1 42:1 "$code:1" "$code:0" 42:0 29:0
-fi
+clip_sum() { wl-paste -n 2>/dev/null | md5sum; }
 
-# X11 apps (through XWayland) ignore wtype's private keymap. xdotool reaches
-# them through the X server instead, and lifts the held Super for the chord.
-# niri reports the XWayland bridge as the owner of every X11 window.
-if [[ -n $pid && $(ps -o comm= -p "$pid") == xwayland-satell* ]]; then
-    exec xdotool key --clearmodifiers "ctrl+$key"
-fi
+exec 9>"${XDG_RUNTIME_DIR:-/tmp}/uclip.lock"
+flock -w 3 9
 
-if [[ $terminal == true ]]; then
-    exec wtype -M ctrl -M shift -k "$key"
-fi
-exec wtype -M ctrl -k "$key"
+[[ ${UCLIP_BACKEND:-} == uinput ]] || wait_super_up
+
+case $1 in
+paste)
+    send
+    sleep 0.05 # let the app issue its paste request before the lock drops
+    ;;
+*)
+    before=$(clip_sum)
+    send
+    tries=30 # 0.6 s
+    [[ $terminal == true ]] && tries=12
+    for _ in $(seq "$tries"); do
+        sleep 0.02
+        [[ $(clip_sum) != "$before" ]] && exit 0
+    done
+    # Terminal with nothing selected-for-clipboard: use the PRIMARY selection.
+    if [[ $terminal == true && $1 == copy ]]; then
+        sel=$(wl-paste -p -n 2>/dev/null)
+        [[ -n $sel ]] && printf %s "$sel" | wl-copy
+    fi
+    ;;
+esac

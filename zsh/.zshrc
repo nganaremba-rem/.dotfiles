@@ -351,3 +351,7 @@ _eval_cache zoxide zoxide init zsh --cmd cd
 
 fpath+=('/home/rem/.local/share/zsh/site-functions')
 autoload -Uz compinit && compinit
+
+# Starship's PROMPT is '$(starship prompt ...)'; without promptsubst zsh prints it literally.
+# Re-assert after every plugin/eval above in case one of them reset options.
+setopt promptsubst

@@ -24,8 +24,9 @@ binds {
     Mod+Alt+Space        hotkey-overlay-title="🪟 Open windows"               { spawn-sh "dms ipc call spotlight openQuery '!'"; }
     Alt+W                hotkey-overlay-title="🪟 Open windows"               { spawn-sh "rofi -show window"; }
     Mod+Ctrl+E           hotkey-overlay-title="😀 Emoji picker"               { spawn "oq" "omarchy-menu-emoji"; }
+    Mod+Alt+U            hotkey-overlay-title="🚀 Internet speed test"        { spawn "oq" "omarchy-shell" "shell" "summon" "omarchy.speedtest"; }
     Mod+Ctrl+G           hotkey-overlay-title="🔣 Icon picker (Nerd Font)"    { spawn "oq" "omarchy-shell" "shell" "summon" "omarchy.emojis" "{\"set\":\"icons\"}"; }
-    Mod+P                hotkey-overlay-title="🔍 Web search"                 { spawn-sh "~/.config/rofi/rofi/scripts/websearch"; }
+    Mod+P                hotkey-overlay-title="🔍 Web search"                 { spawn "oq" "omarchy-shell" "shell" "summon" "rem.websearch"; }
 
     // ── 🧰 Terminal tools ────────────────────────────────────────────────────
     // btop's --app-id is a foot flag: dms/windowrules.kdl opens app-id "btop" maximized.

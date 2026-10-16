@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id": "rem.websearch",
+  "name": "Web Search",
+  "version": "1.0.0",
+  "author": "rem",
+  "description": "Search overlay with engine prefixes and live suggestions",
+  "kinds": ["overlay"],
+  "entryPoints": { "overlay": "WebSearch.qml" }
+}

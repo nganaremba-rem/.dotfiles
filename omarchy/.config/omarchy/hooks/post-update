@@ -1,0 +1,18 @@
+#!/bin/bash
+# Re-apply local patches (~/.config/omarchy/patches/*.patch) that an Omarchy update may have overwritten.
+cd "$OMARCHY_PATH" || exit 0
+
+applied=() failed=()
+for patch in "$HOME"/.config/omarchy/patches/*.patch; do
+  [ -e "$patch" ] || continue
+  git apply --check --reverse "$patch" 2>/dev/null && continue   # already applied
+  if git apply "$patch"; then applied+=("$(basename "$patch")"); else failed+=("$(basename "$patch")"); fi
+done
+
+if [ "${#applied[@]}" -gt 0 ]; then
+  notify-send "Omarchy" "Local patches re-applied (${applied[*]}); restarting shell"
+  quickshell kill -p "$OMARCHY_PATH/shell" --any-display
+  (setsid omarchy-launch-shell >/dev/null 2>&1 &)
+fi
+[ "${#failed[@]}" -gt 0 ] && notify-send -u critical "Omarchy" "Local patch no longer applies: ${failed[*]}"
+exit 0

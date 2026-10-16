@@ -141,7 +141,7 @@
       ]
     },
     "position": "top",
-    "transparent": false
+    "transparent": true
   },
   "disabledPlugins": [
     "omarchy.polkit",
@@ -151,6 +151,10 @@
     "lock": 300,
     "screensaver": 150
   },
-  "plugins": [],
+  "plugins": [
+    {
+      "id": "rem.websearch"
+    }
+  ],
   "version": 1
 }
