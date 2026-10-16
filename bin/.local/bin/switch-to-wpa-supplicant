@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Switch NetworkManager's wifi backend iwd -> wpa_supplicant (NM's default).
+set -euo pipefail
+[ "$EUID" -eq 0 ] || exec sudo "$0" "$@"
+
+rm -f /etc/NetworkManager/conf.d/wifi_backend.conf
+
+systemctl disable --now iwd
+systemctl unmask wpa_supplicant
+systemctl start wpa_supplicant
+systemctl restart NetworkManager
+
+sleep 5
+dev=$(nmcli -t -f DEVICE,TYPE dev | sed -n 's/:wifi$//p' | head -1)
+nmcli radio wifi on
+nmcli device connect "$dev" || echo "wifi not connected yet; pick a network from the bar"
+echo "wifi backend: wpa_supplicant"

@@ -1,0 +1,48 @@
+diff --git a/shell/plugins/panels/network/Panel.qml b/shell/plugins/panels/network/Panel.qml
+index 213031c..5511031 100644
+--- a/shell/plugins/panels/network/Panel.qml
++++ b/shell/plugins/panels/network/Panel.qml
+@@ -2014,6 +2014,7 @@ Panel {
+       anchors.leftMargin: Style.space(10)
+       anchors.rightMargin: Style.space(10)
+       anchors.topMargin: Style.space(4)
++      onVisibleChanged: if (!visible) showPwBtn.revealed = false
+       implicitHeight: (idField.visible ? idField.implicitHeight + Style.space(4) : 0) + pwField.implicitHeight + Style.spacing.rowGap
+       height: implicitHeight
+ 
+@@ -2045,11 +2046,11 @@ Panel {
+         id: pwField
+         visible: !row.isBusy && !row.isFailed
+         anchors.left: parent.left
+-        anchors.right: connectPwBtn.left
++        anchors.right: showPwBtn.left
+         anchors.bottom: parent.bottom
+         anchors.bottomMargin: Style.spacing.rowGap / 2
+         anchors.rightMargin: Style.space(6)
+-        password: true
++        password: !showPwBtn.revealed
+         placeholderText: "Passphrase"
+         font.family: Style.font.family
+         font.pixelSize: Style.font.body
+@@ -2090,6 +2091,21 @@ Panel {
+         }
+       }
+ 
++      // Eye toggle: reveal/hide the passphrase. Re-hides whenever the prompt closes.
++      PanelActionButton {
++        id: showPwBtn
++        property bool revealed: false
++        visible: !row.isBusy && !row.isFailed
++        anchors.right: connectPwBtn.left
++        anchors.rightMargin: Style.space(4)
++        anchors.verticalCenter: parent.verticalCenter
++        iconText: revealed ? "\udb80\ude09" : "\udb80\ude08"
++        tooltipText: revealed ? "Hide passphrase" : "Show passphrase"
++        foreground: root.bar.foreground
++        fontFamily: root.bar.fontFamily
++        onClicked: { revealed = !revealed; pwField.forceActiveFocus() }
++      }
++
+       // 22×22 right-anchored to line up with lockIndicator above. Esc closes
+       // the prompt (handled by pwField.Keys.onEscapePressed)
+       // so there's no separate cancel button.

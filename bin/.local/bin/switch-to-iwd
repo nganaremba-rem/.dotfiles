@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# Switch NetworkManager's wifi backend wpa_supplicant -> iwd (NM stays the front end).
+set -euo pipefail
+[ "$EUID" -eq 0 ] || exec sudo "$0" "$@"
+
+mkdir -p /etc/NetworkManager/conf.d
+printf '[device]\nwifi.backend=iwd\n' > /etc/NetworkManager/conf.d/wifi_backend.conf
+
+# NM does DHCP; iwd must not compete.
+if [ -f /etc/iwd/main.conf ]; then
+  cp -n /etc/iwd/main.conf /etc/iwd/main.conf.bak
+  sed -i 's/^EnableNetworkConfiguration=true/EnableNetworkConfiguration=false/' /etc/iwd/main.conf
+fi
+
+# iwd can't read NM's saved secrets: copy each wifi PSK into /var/lib/iwd.
+umask 077
+mkdir -p /var/lib/iwd
+for f in /etc/NetworkManager/system-connections/*.nmconnection; do
+  [ -e "$f" ] || continue
+  [ "$(sed -n 's/^type=//p' "$f")" = wifi ] || continue
+  ssid=$(sed -n '/^\[wifi\]/,/^\[/s/^ssid=//p' "$f" | head -1)
+  psk=$(sed -n 's/^psk=//p' "$f")
+  [ -n "$ssid" ] && [ -n "$psk" ] || continue
+  if [[ $ssid =~ ^[A-Za-z0-9\ _-]+$ ]]; then name=$ssid; else name="=$(printf %s "$ssid" | xxd -p | tr -d '\n')"; fi
+  [ -e "/var/lib/iwd/$name.psk" ] || printf '[Security]\nPassphrase=%s\n' "$psk" > "/var/lib/iwd/$name.psk"
+done
+
+# Mask wpa_supplicant: D-Bus would otherwise restart it and fight iwd for the radio.
+systemctl mask --now wpa_supplicant
+systemctl enable --now iwd
+systemctl restart NetworkManager
+
+sleep 5
+dev=$(nmcli -t -f DEVICE,TYPE dev | sed -n 's/:wifi$//p' | head -1)
+nmcli radio wifi on
+nmcli device connect "$dev" || echo "wifi not connected yet; pick a network from the bar"
+echo "wifi backend: iwd"
