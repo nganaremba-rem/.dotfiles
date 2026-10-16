@@ -24,13 +24,26 @@ function siteOf(host) {
 }
 const savePath = (t) => `~/.config/ytdl/cookies/${t.site}.txt`;
 
+// The page being exported. A popup opened in its own window (rembrowser) has no "current
+// window" showing the site, so fall back: last focused window, any active tab, newest tab.
+const isPage = (t) => /^https?:/.test(t?.url ?? '');
+async function pageTab() {
+  const [focused] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+  if (isPage(focused)) return focused;
+  const all = await chrome.tabs.query({});
+  const pages = all.filter(isPage);
+  return pages.find((t) => t.active) ?? pages.sort((a, b) => (b.lastAccessed ?? 0) - (a.lastAccessed ?? 0))[0];
+}
+
 // Export from the cookie store of the window the popup was opened in (normal or private).
 async function current() {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  const tab = await pageTab();
   const stores = await chrome.cookies.getAllCookieStores();
   const storeId = stores.find((s) => s.tabIds.includes(tab?.id))?.id ?? stores[0]?.id;
   let host = '';
-  try { host = new URL(tab.url).hostname; } catch {}
+  try { host = new URL(tab?.url).hostname; } catch {}
+  // rembrowser's tabs are invisible to chrome.tabs; it passes the site in the popup URL.
+  host ||= new URLSearchParams(location.search).get('rembrowser_host')?.replace(/:\d+$/, '') ?? '';
   return { host, storeId };
 }
 

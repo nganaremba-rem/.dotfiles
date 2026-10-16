@@ -6,7 +6,8 @@
   "permissions": [
     "cookies",
     "downloads",
-    "activeTab"
+    "activeTab",
+    "tabs"
   ],
   "host_permissions": [
     "*://*.youtube.com/*"
