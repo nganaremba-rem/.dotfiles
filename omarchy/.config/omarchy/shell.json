@@ -6,6 +6,7 @@
         {
           "exec": "bar-stat net 2",
           "fontSize": 14,
+          "hideBelow": 1500,
           "id": "net-speed",
           "stream": true,
           "tooltip": "Network speed\n$ bar-stat net 2",
@@ -15,16 +16,20 @@
           "id": "omarchy.indicators"
         },
         {
+          "hideBelow": 1750,
           "id": "omarchy.elsewhen",
           "zones": "Kolkata|Asia/Kolkata, Tokyo|Asia/Tokyo, Los Angeles|America/Los_Angeles, New York|America/New_York, London|Europe/London"
         },
         {
+          "hideBelow": 1650,
           "id": "omarchy.weather"
         },
         {
+          "hideBelow": 1550,
           "id": "omarchy.media"
         },
         {
+          "hideBelow": 1400,
           "id": "omarchy.system-update"
         }
       ],
@@ -50,6 +55,7 @@
         {
           "exec": "bar-stat cpu 3",
           "fontSize": 14,
+          "hideBelow": 1300,
           "id": "cpu",
           "onClick": "omarchy-launch-tui remtop",
           "stream": true,
@@ -59,6 +65,7 @@
         {
           "exec": "bar-stat mem 5",
           "fontSize": 14,
+          "hideBelow": 1300,
           "id": "memory",
           "onClick": "omarchy-launch-tui remtop",
           "stream": true,
@@ -67,6 +74,7 @@
         },
         {
           "fontSize": 15,
+          "hideBelow": 1450,
           "id": "color-picker",
           "onClick": "pkill hyprpicker || hyprpicker -a",
           "text": "󰈊",
@@ -93,6 +101,7 @@
       ],
       "right": [
         {
+          "hideBelow": 1200,
           "id": "omarchy.keyboard-layout"
         },
         {
@@ -101,6 +110,7 @@
         {
           "exec": "s=$(warp-cli status 2>/dev/null); case \"$s\" in *'Status update: Connected'*) i='' c=green t=Connected ;; *Connecting*) i='󰖂' c=yellow t=Connecting ;; *Disconnected*) i='' c=red t=Disconnected ;; *) i='󰅖' c=grey t=Unknown ;; esac; printf '{\"text\":\"%s\",\"color\":\"%s\",\"tooltip\":\"WARP: %s\\\\n$ warp-cli connect\"}' \"$i\" \"$c\" \"$t\"",
           "fontSize": 25,
+          "hideBelow": 1350,
           "id": "vpn",
           "interval": 5,
           "onClick": "warp-cli connect",
@@ -109,6 +119,34 @@
           "type": "command"
         },
         {
+          "exec": "bar-status wg",
+          "hideBelow": 1100,
+          "id": "wg",
+          "interval": 5,
+          "onClick": "notify-send -a Network -t 8000 \"$(bar-status wg | jq -r .text)\" \"$(bar-status wg | jq -r .tooltip)\"",
+          "tooltip": "WireGuard\n$ sudo wg show wg0",
+          "type": "command"
+        },
+        {
+          "exec": "bar-status ts",
+          "hideBelow": 1450,
+          "id": "ts",
+          "interval": 10,
+          "onClick": "notify-send -a Network -t 8000 \"$(bar-status ts | jq -r .text)\" \"$(bar-status ts | jq -r .tooltip)\"",
+          "tooltip": "Tailscale\n$ tailscale status",
+          "type": "command"
+        },
+        {
+          "exec": "bar-status docker",
+          "hideBelow": 1500,
+          "id": "docker",
+          "interval": 10,
+          "onClick": "omarchy-launch-tui lazydocker",
+          "tooltip": "Docker\n$ docker ps",
+          "type": "command"
+        },
+        {
+          "hideBelow": 1250,
           "id": "omarchy.agents"
         },
         {

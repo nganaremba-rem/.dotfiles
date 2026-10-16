@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# Bar command-widget readings as waybar-style JSON.  bar-status wg|ts|docker
+set -uo pipefail
+
+json() { # text color tooltip
+  jq -nc --arg t "$1" --arg c "$2" --arg tt "$3" '{text:$t,color:$c,tooltip:$tt}'
+}
+
+wg_status() {
+  local now key ts up=0 total=0 lines="" ips hs
+  hs=$(sudo -n /usr/bin/wg show wg0 latest-handshakes 2>/dev/null) || { json "󰖂 off" grey $'WireGuard wg0: down or no access\n$ sudo wg show wg0'; return; }
+  ips=$(sudo -n /usr/bin/wg show wg0 allowed-ips 2>/dev/null)
+  now=$(date +%s)
+  while read -r key ts; do
+    [ -n "$key" ] || continue
+    total=$((total + 1))
+    ip=$(awk -v k="$key" '$1==k{print $2}' <<<"$ips")
+    if [ "$ts" -gt 0 ] && [ $((now - ts)) -lt 180 ]; then
+      up=$((up + 1)); lines+="● ${ip:-${key:0:6}}  $((now - ts))s ago"$'\n'
+    elif [ "$ts" -gt 0 ]; then
+      lines+="○ ${ip:-${key:0:6}}  idle $(( (now - ts) / 60 ))m"$'\n'
+    else
+      lines+="○ ${ip:-${key:0:6}}  never connected"$'\n'
+    fi
+  done <<<"$hs"
+  json "󰖂 $up/$total" "$([ "$up" -gt 0 ] && echo green || echo grey)" "${lines}\$ sudo wg show wg0"
+}
+
+ts_status() {
+  local s state online total
+  s=$(tailscale status --json 2>/dev/null) || { json "󰛳 off" grey $'Tailscale: not running\n$ tailscale status'; return; }
+  state=$(jq -r .BackendState <<<"$s")
+  online=$(jq '[.Peer[]? | select(.Online)] | length' <<<"$s")
+  total=$(jq '[.Peer[]?] | length' <<<"$s")
+  json "󰛳 $online/$total" "$([ "$state" = Running ] && echo green || echo grey)" "Tailscale: $state, $online of $total peers online"$'\n$ tailscale status'
+}
+
+docker_status() {
+  local names n
+  names=$(docker ps --format '{{.Names}}  {{.Status}}' 2>/dev/null) || { json "󰡨 off" grey $'Docker: daemon not reachable\n$ docker ps'; return; }
+  n=$(grep -c . <<<"$names" || true)
+  json "󰡨 $n" "$([ "$n" -gt 0 ] && echo green || echo grey)" "${names:-No running containers}"$'\n$ docker ps'
+}
+
+case "${1:-}" in
+  wg) wg_status ;; ts) ts_status ;; docker) docker_status ;;
+  *) echo "usage: bar-status wg|ts|docker" >&2; exit 2 ;;
+esac

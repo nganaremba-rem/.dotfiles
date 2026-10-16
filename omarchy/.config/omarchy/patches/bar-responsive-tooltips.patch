@@ -1,0 +1,119 @@
+diff --git a/niri/bin/bar-stat b/niri/bin/bar-stat
+index dbf9a92..0bc66e3 100755
+--- a/niri/bin/bar-stat
++++ b/niri/bin/bar-stat
+@@ -100,7 +100,10 @@ case "${1:-}" in
+         if [[ $REPLY == "$iface" ]]; then
+           human "$(( (new_rx - rx) / interval ))"; down=$REPLY
+           human "$(( (new_tx - tx) / interval ))"; up=$REPLY
+-          emit "↓$down ↑$up"
++          [[ $down == *[KM] ]] || down+=B
++          [[ $up == *[KM] ]] || up+=B
++          printf -v line '󰇚 %6s  󰕒 %6s' "$down" "$up"
++          emit "$line"
+         fi
+         iface=${stats#/sys/class/net/} iface=${iface%/statistics} rx=$new_rx tx=$new_tx
+       fi
+diff --git a/shell/plugins/bar/Bar.qml b/shell/plugins/bar/Bar.qml
+index db74240..00584e9 100644
+--- a/shell/plugins/bar/Bar.qml
++++ b/shell/plugins/bar/Bar.qml
+@@ -1994,6 +1994,11 @@ Item {
+       return componentLoader.item
+     }
+     readonly property bool hovered: moduleHover.hovered
++    // Responsive: an entry with "hideBelow": <px> collapses (no width, no overlap)
++    // while the bar window is narrower than that. Priority = a bigger number hides first.
++    readonly property real barLength: Window.width > 0 ? Window.width : 100000
++    readonly property real hideBelow: Number(moduleSettings.hideBelow || 0)
++    readonly property bool narrowHidden: !root.vertical && hideBelow > 0 && barLength < hideBelow
+     readonly property bool dragSource: root.barDragSource === slot
+     readonly property bool panelOpen: root.activePopout === slot.activeItem
+     // Modules bigger than the mark they want (a text label in a padded slot,
+@@ -2006,8 +2011,9 @@ Item {
+       if (hint !== undefined && hint !== null && hint > 0) return Math.round(hint)
+       return Math.max(Style.space(10), Math.round((root.vertical ? slot.height : slot.width) * 0.55))
+     }
+-    implicitWidth: activeItem && activeItem.visible ? (root.vertical ? root.barSize : activeItem.implicitWidth) : 0
+-    implicitHeight: activeItem && activeItem.visible ? activeItem.implicitHeight : 0
++    visible: !narrowHidden
++    implicitWidth: activeItem && activeItem.visible && !narrowHidden ? (root.vertical ? root.barSize : activeItem.implicitWidth) : 0
++    implicitHeight: activeItem && activeItem.visible && !narrowHidden ? activeItem.implicitHeight : 0
+     width: implicitWidth
+     height: implicitHeight
+     z: modulePointer.dragging ? 100 : 0
+diff --git a/shell/plugins/bar/indicators/Dnd.qml b/shell/plugins/bar/indicators/Dnd.qml
+index 052469b..3bda338 100644
+--- a/shell/plugins/bar/indicators/Dnd.qml
++++ b/shell/plugins/bar/indicators/Dnd.qml
+@@ -11,8 +11,8 @@ BarIndicator {
+   active: dnd
+   activeText: "󰂛"
+   inactiveText: "󰂛"
+-  activeTooltipText: "Allow Notifications"
+-  inactiveTooltipText: "Silence Notifications"
++  activeTooltipText: "Allow Notifications\n$ omarchy-toggle-notification-silencing"
++  inactiveTooltipText: "Silence Notifications\n$ omarchy-toggle-notification-silencing"
+ 
+   onPressed: function() {
+     if (root.notificationService) {
+diff --git a/shell/plugins/bar/indicators/NightLight.qml b/shell/plugins/bar/indicators/NightLight.qml
+index b15744c..4be37b5 100644
+--- a/shell/plugins/bar/indicators/NightLight.qml
++++ b/shell/plugins/bar/indicators/NightLight.qml
+@@ -9,8 +9,8 @@ BarIndicator {
+   active: nightlightService ? nightlightService.enabled : false
+   activeText: "󰔎"
+   inactiveText: "󰔎"
+-  activeTooltipText: "Day Light"
+-  inactiveTooltipText: "Night Light"
++  activeTooltipText: "Day Light\n$ omarchy-toggle-nightlight"
++  inactiveTooltipText: "Night Light\n$ omarchy-toggle-nightlight"
+ 
+   function toggle() {
+     if (root.nightlightService) root.nightlightService.setNightlight(!root.active)
+diff --git a/shell/plugins/bar/indicators/PasswordlessSudo.qml b/shell/plugins/bar/indicators/PasswordlessSudo.qml
+index bdc7543..5436a03 100644
+--- a/shell/plugins/bar/indicators/PasswordlessSudo.qml
++++ b/shell/plugins/bar/indicators/PasswordlessSudo.qml
+@@ -13,8 +13,8 @@ BarIndicator {
+   active: granted
+   activeText: "󰟵"
+   inactiveText: "󰟵"
+-  activeTooltipText: "Disable Passwordless Sudo"
+-  inactiveTooltipText: "Passwordless Sudo"
++  activeTooltipText: "Disable Passwordless Sudo\n$ omarchy-sudo-passwordless --disable"
++  inactiveTooltipText: "Passwordless Sudo\n$ omarchy-sudo-passwordless"
+   useActiveColor: true
+   activeColor: Commons.Color.urgent
+ 
+diff --git a/shell/plugins/bar/indicators/ScreenRecording.qml b/shell/plugins/bar/indicators/ScreenRecording.qml
+index 59b4cab..d3e5ef2 100644
+--- a/shell/plugins/bar/indicators/ScreenRecording.qml
++++ b/shell/plugins/bar/indicators/ScreenRecording.qml
+@@ -10,8 +10,8 @@ BarIndicator {
+   active: recording
+   activeText: "󰻂"
+   inactiveText: "󰻂"
+-  activeTooltipText: "Stop recording"
+-  inactiveTooltipText: "Screen Recording"
++  activeTooltipText: "Stop recording\n$ omarchy-capture-screenrecording --stop-recording"
++  inactiveTooltipText: "Screen Recording\n$ omarchy-menu toggle trigger.capture.screenrecord"
+ 
+   function refresh() {
+     if (!root.bar || statusProc.running) return
+diff --git a/shell/plugins/bar/indicators/StayAwake.qml b/shell/plugins/bar/indicators/StayAwake.qml
+index 70a7829..73e76b6 100644
+--- a/shell/plugins/bar/indicators/StayAwake.qml
++++ b/shell/plugins/bar/indicators/StayAwake.qml
+@@ -9,8 +9,8 @@ BarIndicator {
+   active: idleService ? idleService.stayAwake : false
+   activeText: "󰅶"
+   inactiveText: "󰅶"
+-  activeTooltipText: "Allow Idle Lock & Screensaver"
+-  inactiveTooltipText: "Stay Awake"
++  activeTooltipText: "Allow Idle Lock & Screensaver\n$ omarchy-toggle-idle"
++  inactiveTooltipText: "Stay Awake\n$ omarchy-toggle-idle"
+ 
+   function toggle() {
+     if (root.idleService) root.idleService.setIdleEnabled(root.active)
