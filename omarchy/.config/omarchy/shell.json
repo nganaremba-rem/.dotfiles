@@ -11,7 +11,7 @@
           "stream": true,
           "tooltip": "Network speed\n$ bar-stat net 2",
           "type": "command",
-          "unitColor": "magenta"
+          "unitColor": "yellow"
         },
         {
           "id": "omarchy.indicators"
@@ -71,7 +71,7 @@
           "stream": true,
           "tooltip": "Memory in use\n$ omarchy-launch-tui remtop",
           "type": "command",
-          "unitColor": "magenta"
+          "unitColor": "yellow"
         },
         {
           "fontSize": 15,
