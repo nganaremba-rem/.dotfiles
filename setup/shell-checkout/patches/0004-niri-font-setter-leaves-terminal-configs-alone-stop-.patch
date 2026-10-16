@@ -1,7 +1,7 @@
 From d4fb96cbfa4a1a54d4bdb6eab6b5832c6fdf219a Mon Sep 17 00:00:00 2001
 From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
 Date: Sun, 11 Oct 2026 17:06:50 +0530
-Subject: [PATCH 04/20] niri: font setter leaves terminal configs alone; stop
+Subject: [PATCH 04/21] niri: font setter leaves terminal configs alone; stop
  sudo polling from the bar
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

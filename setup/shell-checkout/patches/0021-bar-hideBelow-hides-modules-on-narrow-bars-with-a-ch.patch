@@ -1,0 +1,139 @@
+From d3cb0384ae3b903fe53613e29bce286d0837321e Mon Sep 17 00:00:00 2001
+From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
+Date: Fri, 16 Oct 2026 19:53:21 +0530
+Subject: [PATCH 21/21] bar: hideBelow hides modules on narrow bars with a
+ chevron to show them; never overwrite an unreadable shell.json with defaults
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+---
+ shell/plugins/bar/Bar.qml | 43 +++++++++++++++++++++++++++++++++++++--
+ shell/shell.qml           | 15 ++++++++++++--
+ 2 files changed, 54 insertions(+), 4 deletions(-)
+
+diff --git a/shell/plugins/bar/Bar.qml b/shell/plugins/bar/Bar.qml
+index 857df77..f3b62ee 100644
+--- a/shell/plugins/bar/Bar.qml
++++ b/shell/plugins/bar/Bar.qml
+@@ -1416,6 +1416,9 @@ Item {
+ 
+     readonly property bool cutoutPending: BarModel.cutoutPending(root.displayCutouts, root.position, screen.name, screen.width, screen.height, screen.devicePixelRatio, panelMode)
+     property bool cutoutWaitOver: false
++    // niri port: show the modules a narrow bar hid ("hideBelow"); toggled by the
++    // chevron beside the left section.
++    property bool showHidden: false
+     onCutoutPendingChanged: if (!cutoutPending) cutoutWaitOver = true
+     Component.onCompleted: if (!cutoutPending) cutoutWaitOver = true
+ 
+@@ -1526,11 +1529,40 @@ Item {
+         }
+ 
+         LeftModules {
++          id: leftModules
+           anchors.left: parent.left
+           anchors.leftMargin: Style.space(8)
+           anchors.verticalCenter: parent.verticalCenter
+         }
+ 
++        // Chevron that appears only while a narrow bar is hiding modules.
++        WidgetButton {
++          id: hiddenToggle
++          readonly property int hiddenCount: {
++            var n = 0
++            var regions = ["left", "center", "right"]
++            for (var r = 0; r < regions.length; r++) {
++              var list = root.layoutEntries(regions[r])
++              for (var i = 0; i < list.length; i++) {
++                var h = Number((root.entrySettings(list[i]) || {}).hideBelow || 0)
++                if (h > 0 && barWindow.width < h) n++
++              }
++            }
++            return n
++          }
++          visible: hiddenCount > 0
++          bar: root
++          text: barWindow.showHidden ? "󰅁" : "󰅂"
++          tooltipText: barWindow.showHidden
++            ? "Hide the extra modules"
++            : hiddenCount + " hidden module" + (hiddenCount === 1 ? "" : "s") + " (screen too narrow). Click to show."
++          fontSize: 14
++          anchors.left: leftModules.right
++          anchors.leftMargin: Style.space(4)
++          anchors.verticalCenter: parent.verticalCenter
++          onPressed: function(button) { barWindow.showHidden = !barWindow.showHidden }
++        }
++
+         RightModules {
+           id: rightModules
+           anchors.right: parent.right
+@@ -1994,6 +2026,12 @@ Item {
+       return componentLoader.item
+     }
+     readonly property bool hovered: moduleHover.hovered
++    // Responsive: an entry with "hideBelow": <px> collapses (no width, no overlap)
++    // while the bar window is narrower than that. Priority = a bigger number hides first.
++    readonly property real barLength: Window.width > 0 ? Window.width : 100000
++    readonly property real hideBelow: Number(moduleSettings.hideBelow || 0)
++    readonly property bool narrowHidden: !root.vertical && hideBelow > 0 && barLength < hideBelow
++      && !(Window.window && Window.window.showHidden === true)
+     readonly property bool dragSource: root.barDragSource === slot
+     readonly property bool panelOpen: root.activePopout === slot.activeItem
+     // Modules bigger than the mark they want (a text label in a padded slot,
+@@ -2006,8 +2044,9 @@ Item {
+       if (hint !== undefined && hint !== null && hint > 0) return Math.round(hint)
+       return Math.max(Style.space(10), Math.round((root.vertical ? slot.height : slot.width) * 0.55))
+     }
+-    implicitWidth: activeItem && activeItem.visible ? (root.vertical ? root.barSize : activeItem.implicitWidth) : 0
+-    implicitHeight: activeItem && activeItem.visible ? activeItem.implicitHeight : 0
++    visible: !narrowHidden
++    implicitWidth: activeItem && activeItem.visible && !narrowHidden ? (root.vertical ? root.barSize : activeItem.implicitWidth) : 0
++    implicitHeight: activeItem && activeItem.visible && !narrowHidden ? activeItem.implicitHeight : 0
+     width: implicitWidth
+     height: implicitHeight
+     z: modulePointer.dragging ? 100 : 0
+diff --git a/shell/shell.qml b/shell/shell.qml
+index 19ad7fc..84ece6d 100644
+--- a/shell/shell.qml
++++ b/shell/shell.qml
+@@ -75,6 +75,12 @@ ShellRoot {
+     pluginRegistry.pluginsChanged()
+   }
+ 
++  // niri port: shell.json existed but read back empty or invalid (a writer that
++  // truncates in place, a half-saved edit). shellConfig is then only the
++  // defaults, so persisting it would overwrite the user's real file with them.
++  property bool userConfigUnreadable: false
++  property bool userConfigMissing: false
++
+   function applyShellConfig() {
+     // Decide which source is canonical: a valid user shell.json overrides
+     // defaults entirely; otherwise fall back to defaults. We do not deep-merge.
+@@ -90,6 +96,7 @@ ShellRoot {
+         console.warn("shell.json parse failed, using defaults:", e)
+       }
+     }
++    userConfigUnreadable = !userConfigMissing && user === null
+     shellConfig = user || defaults
+   }
+ 
+@@ -112,6 +119,10 @@ ShellRoot {
+   }
+ 
+   function persistShellConfig(nextConfig) {
++    if (userConfigUnreadable) {
++      console.warn("shell.json unreadable; not overwriting it with defaults")
++      return
++    }
+     var payload = JSON.parse(JSON.stringify(nextConfig))
+     payload.version = 1
+     shellConfig = payload
+@@ -142,8 +153,8 @@ ShellRoot {
+     watchChanges: true
+     atomicWrites: true
+     printErrors: false
+-    onLoaded: shell.applyShellConfig()
+-    onLoadFailed: function(error) { shell.applyShellConfig() }
++    onLoaded: { shell.userConfigMissing = false; shell.applyShellConfig() }
++    onLoadFailed: function(error) { shell.userConfigMissing = true; shell.applyShellConfig() }
+     onFileChanged: reload()
+   }
+ 

@@ -1,7 +1,7 @@
 From 118a9efc5ae51e73e98e3ae0666c80e312ef0df5 Mon Sep 17 00:00:00 2001
 From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
 Date: Sun, 11 Oct 2026 17:59:50 +0530
-Subject: [PATCH 06/20] niri: text size slider leaves terminal font sizes alone
+Subject: [PATCH 06/21] niri: text size slider leaves terminal font sizes alone
 
 The Display panel's text size control rewrote the font size in foot, kitty,
 alacritty and ghostty. Terminal configs are hand-kept on this machine, so on

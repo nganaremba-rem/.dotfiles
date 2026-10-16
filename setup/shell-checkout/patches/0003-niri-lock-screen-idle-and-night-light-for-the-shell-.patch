@@ -1,7 +1,7 @@
 From 95d2d54b617f54269837fcf84274ffbbbbebcdba Mon Sep 17 00:00:00 2001
 From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
 Date: Sun, 11 Oct 2026 16:44:38 +0530
-Subject: [PATCH 03/20] niri: lock screen, idle and night light for the shell
+Subject: [PATCH 03/21] niri: lock screen, idle and night light for the shell
  panel; one idle locker per panel; visible name is Arch
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

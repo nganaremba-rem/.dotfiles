@@ -1,7 +1,7 @@
 From a518e91e7b5d2bb19d205759e1666e133887a583 Mon Sep 17 00:00:00 2001
 From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
 Date: Sun, 11 Oct 2026 16:11:54 +0530
-Subject: [PATCH 01/20] Run the shell on niri: hyprctl stand-in, Niri data
+Subject: [PATCH 01/21] Run the shell on niri: hyprctl stand-in, Niri data
  source, overlays follow niri's focused output
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
