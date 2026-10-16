@@ -1,0 +1,105 @@
+diff --git a/shell/plugins/panels/power/Panel.qml b/shell/plugins/panels/power/Panel.qml
+index 6a69fb2..f39298c 100644
+--- a/shell/plugins/panels/power/Panel.qml
++++ b/shell/plugins/panels/power/Panel.qml
+@@ -139,6 +139,23 @@ Panel {
+     if (!batteryProc.running) batteryProc.running = true
+     if (!profilesProc.running) profilesProc.running = true
+     if (!systemProc.running) systemProc.running = true
++    if (!limitProc.running) limitProc.running = true
++  }
++
++  // Charge limit (HP BIOS Battery Health Manager) via ~/.local/bin/battery-limit.
++  property string chargeMode: ""   // health | auto | full | unsupported | "" (unknown yet)
++  readonly property var chargeModes: [
++    { key: "health", icon: "\udb80\udc79", text: "Max health", tip: "Stop at ~80%" },
++    { key: "auto",   icon: "\udb80\udc7a", text: "Adaptive",   tip: "HP decides" },
++    { key: "full",   icon: "\udb80\udc78", text: "Full",       tip: "Charge to 100%" }
++  ]
++  readonly property int batteryPercent: parseInt(String(batteryInfo.percentage || "0"))
++  readonly property bool aboveLimit: chargeMode === "health" && !discharging && batteryPercent > 80
++
++  function setChargeMode(key) {
++    if (!key || key === chargeMode || limitSetProc.running) return
++    limitSetProc.command = [Quickshell.env("HOME") + "/.local/bin/battery-limit", "set", key]
++    limitSetProc.running = true
+   }
+ 
+   function updateKeyValue(raw, targetName) {
+@@ -229,6 +246,17 @@ Panel {
+     onExited: root.refresh()
+   }
+ 
++  Process {
++    id: limitProc
++    command: [Quickshell.env("HOME") + "/.local/bin/battery-limit", "status"]
++    stdout: StdioCollector { waitForEnd: true; onStreamFinished: root.chargeMode = text.trim() }
++  }
++
++  Process {
++    id: limitSetProc
++    onExited: root.refresh()
++  }
++
+   Timer { interval: 5000; running: root.opened; repeat: true; onTriggered: root.refresh() }
+ 
+   // Rotate the status phrase while the panel is open and we're in a
+@@ -452,6 +484,58 @@ Panel {
+           }
+         }
+ 
++        // ---------- Charge limit ----------
++        PanelSeparator {
++          visible: root.chargeMode !== "" && root.chargeMode !== "unsupported"
++          foreground: root.bar.foreground
++        }
++
++        Column {
++          visible: root.chargeMode !== "" && root.chargeMode !== "unsupported"
++          width: parent.width
++          spacing: Style.space(10)
++
++          PanelSectionHeader {
++            text: "CHARGE LIMIT"
++            foreground: root.bar.foreground
++            fontFamily: root.bar.fontFamily
++          }
++
++          Row {
++            id: limitRow
++            width: parent.width
++            spacing: Style.space(6)
++            readonly property real cellWidth: (width - spacing * (root.chargeModes.length - 1)) / root.chargeModes.length
++
++            Repeater {
++              model: root.chargeModes
++              Button {
++                required property var modelData
++                width: limitRow.cellWidth
++                iconText: modelData.icon
++                iconSize: Style.font.title
++                text: modelData.text
++                tooltipText: modelData.tip + "\n$ battery-limit set " + modelData.key
++                fontSize: Style.font.bodySmall
++                foreground: root.bar.foreground
++                fontFamily: root.bar.fontFamily
++                horizontalPadding: Style.spacing.controlPaddingX
++                verticalPadding: Style.spacing.controlPaddingY + Style.space(2)
++                bordered: true
++                active: root.chargeMode === modelData.key
++                onClicked: root.setChargeMode(modelData.key)
++              }
++            }
++          }
++
++          InfoLabel {
++            width: parent.width
++            wrapMode: Text.WordWrap
++            visible: root.aboveLimit
++            text: "Above the 80% limit: unplug and it will drain down. HP cannot discharge while plugged in."
++          }
++        }
++
+         // ---------- Power profile picker ----------
+         PanelSeparator {
+           foreground: root.bar.foreground

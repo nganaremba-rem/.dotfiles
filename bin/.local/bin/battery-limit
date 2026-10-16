@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# HP BIOS "Battery Health Manager" (hp-bioscfg). No arbitrary % on this laptop: three BIOS modes.
+#   battery-limit status            -> health | auto | full | unsupported
+#   battery-limit set health|auto|full   (asks for admin auth via polkit)
+set -euo pipefail
+
+attr="/sys/class/firmware-attributes/hp-bioscfg/attributes/Battery Health Manager/current_value"
+declare -A name=( [health]="Maximize my battery health" [auto]="Let HP manage my battery charging" [full]="Maximize my battery duration" )
+declare -A label=( [health]="Max health (stops at ~80%)" [auto]="Adaptive (HP decides)" [full]="Full charge (100%)" )
+
+status() {
+  [ -r "$attr" ] || { echo unsupported; return; }
+  cur=$(<"$attr")
+  for k in "${!name[@]}"; do [ "${name[$k]}" = "$cur" ] && { echo "$k"; return; }; done
+  echo unsupported
+}
+
+case "${1:-status}" in
+  status) status ;;
+  set)
+    mode=${2:-}; [ -n "${name[$mode]:-}" ] || { echo "usage: battery-limit set health|auto|full" >&2; exit 2; }
+    [ "$(status)" != unsupported ] || { echo "no hp-bioscfg battery setting here" >&2; exit 1; }
+    printf %s "${name[$mode]}" | pkexec tee "$attr" >/dev/null
+    now=$(status)
+    notify-send -a Battery -u low -t 3000 -i battery "Charge limit: ${label[$now]:-$now}" "BIOS setting saved. Takes effect on the next charge cycle." 2>/dev/null || true
+    ;;
+  *) echo "usage: battery-limit [status|set health|auto|full]" >&2; exit 2 ;;
+esac
