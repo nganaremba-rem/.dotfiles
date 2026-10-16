@@ -1,0 +1,90 @@
+From 0a5a420767b043574cd94543246f5b83fc3d2cd9 Mon Sep 17 00:00:00 2001
+From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
+Date: Fri, 16 Oct 2026 19:57:44 +0530
+Subject: [PATCH 23/23] bar: hidden-modules popup closes on an outside click
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+---
+ shell/plugins/bar/Bar.qml | 63 +++++++++++++++++++++++++++------------
+ 1 file changed, 44 insertions(+), 19 deletions(-)
+
+diff --git a/shell/plugins/bar/Bar.qml b/shell/plugins/bar/Bar.qml
+index 9b7b72e..810612b 100644
+--- a/shell/plugins/bar/Bar.qml
++++ b/shell/plugins/bar/Bar.qml
+@@ -1476,31 +1476,56 @@ Item {
+       }
+     }
+ 
+-    // The chevron's popup: one row per module the narrow bar is hiding.
+-    PopupWindow {
++    // The chevron's popup: one row per module the narrow bar is hiding. A
++    // layer-shell card (above the click catchers) rather than an xdg popup,
++    // so a transparent window per output can sit under it and close it on any
++    // outside click.
++    Variants {
++      model: barWindow.hiddenOpen && barWindow.hiddenEntries.length > 0 ? Quickshell.screens : []
++
++      PanelWindow {
++        required property var modelData
++        screen: modelData
++        color: "transparent"
++        exclusionMode: ExclusionMode.Ignore
++        WlrLayershell.namespace: "omarchy-bar-hidden-catcher"
++        WlrLayershell.layer: WlrLayer.Top
++        WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
++        anchors { top: true; bottom: true; left: true; right: true }
++
++        MouseArea {
++          anchors.fill: parent
++          acceptedButtons: Qt.AllButtons
++          onPressed: barWindow.hiddenOpen = false
++        }
++      }
++    }
++
++    PanelWindow {
+       id: hiddenWindow
+ 
+-      visible: barWindow.hiddenOpen && barWindow.hiddenToggleItem !== null
++      visible: barWindow.hiddenOpen && barWindow.hiddenToggleItem !== null && barWindow.hiddenEntries.length > 0
++      screen: barWindow.screen
+       color: "transparent"
++      exclusionMode: ExclusionMode.Ignore
++      WlrLayershell.namespace: "omarchy-bar-hidden"
++      WlrLayershell.layer: WlrLayer.Overlay
++      WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+       implicitWidth: Math.ceil(hiddenBubble.implicitWidth)
+       implicitHeight: Math.ceil(hiddenBubble.implicitHeight)
+-
+-      anchor {
+-        id: hiddenAnchor
+-        window: barWindow
+-        adjustment: PopupAdjustment.Slide
+-        edges: Edges.Top | Edges.Left
+-        gravity: Edges.Bottom | Edges.Right
+-        rect.width: 1
+-        rect.height: 1
+-
+-        onAnchoring: {
++      anchors {
++        top: root.position !== "bottom"
++        bottom: root.position === "bottom"
++        left: true
++      }
++      margins {
++        top: barWindow.thickness + 6
++        bottom: barWindow.thickness + 6
++        left: {
+           var target = barWindow.hiddenToggleItem
+-          if (!target) return
+-          var point = barWindow.contentItem.mapFromItem(target, 0,
+-            root.position === "bottom" ? -hiddenWindow.implicitHeight - 6 : target.height + 6)
+-          hiddenAnchor.rect.x = Math.round(point.x)
+-          hiddenAnchor.rect.y = Math.round(point.y)
++          if (!target || !barWindow.hiddenOpen) return 0
++          var x = barWindow.contentItem.mapFromItem(target, 0, 0).x
++          return Math.max(0, Math.min(Math.round(x), barWindow.width - hiddenWindow.implicitWidth - 8))
+         }
+       }
+ 

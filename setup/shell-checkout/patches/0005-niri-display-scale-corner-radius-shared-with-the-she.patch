@@ -1,7 +1,7 @@
 From 2b4aa3bc76c4ceb6c96fc617787cac442101d24e Mon Sep 17 00:00:00 2001
 From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
 Date: Sun, 11 Oct 2026 17:15:56 +0530
-Subject: [PATCH 05/22] niri: display scale, corner radius shared with the
+Subject: [PATCH 05/23] niri: display scale, corner radius shared with the
  shell, HDMI outputs in the audio panel, night light handover, bar icon tokens
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

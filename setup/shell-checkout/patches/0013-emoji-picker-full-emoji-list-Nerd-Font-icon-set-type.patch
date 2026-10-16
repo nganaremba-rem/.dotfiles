@@ -1,7 +1,7 @@
 From 3f363acf2caf99df5dd3cd9064e529da159e0abf Mon Sep 17 00:00:00 2001
 From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
 Date: Sun, 11 Oct 2026 22:01:20 +0530
-Subject: [PATCH 13/22] emoji picker: full emoji list, Nerd Font icon set, type
+Subject: [PATCH 13/23] emoji picker: full emoji list, Nerd Font icon set, type
  the glyph directly
 
 The picker showed at most 1000 of a 1870-emoji subset. niri/gen-pickers now

@@ -1,7 +1,7 @@
 From 93a9d46865fa5e42d2d8c56cdcb6b7d3e57c2373 Mon Sep 17 00:00:00 2001
 From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
 Date: Sun, 11 Oct 2026 21:14:53 +0530
-Subject: [PATCH 11/22] shell: modal vim keys on the type-to-filter surfaces
+Subject: [PATCH 11/23] shell: modal vim keys on the type-to-filter surfaces
 
 Menu, image picker, emoji, clipboard and reminder open in insert mode, where
 typing filters as before. Esc switches to normal mode: h j k l move, d/u page,

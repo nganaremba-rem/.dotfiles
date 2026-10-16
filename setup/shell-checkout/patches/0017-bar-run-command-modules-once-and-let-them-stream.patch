@@ -1,7 +1,7 @@
 From 72f97bdfb207bdc4b039a061bfceba69e97aa52a Mon Sep 17 00:00:00 2001
 From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
 Date: Sun, 11 Oct 2026 23:41:54 +0530
-Subject: [PATCH 17/22] bar: run command modules once and let them stream
+Subject: [PATCH 17/23] bar: run command modules once and let them stream
 
 Each command module ran its command once per monitor, on a timer, through a
 fresh login shell. With five readings on three monitors that was about 16

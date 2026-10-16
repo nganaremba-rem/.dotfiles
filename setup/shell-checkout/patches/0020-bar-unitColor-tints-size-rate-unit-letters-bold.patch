@@ -1,7 +1,7 @@
 From f641ae87b2bd1f56fd0eb04dd72ec6e0505fc0b5 Mon Sep 17 00:00:00 2001
 From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
 Date: Fri, 16 Oct 2026 19:47:46 +0530
-Subject: [PATCH 20/22] bar: unitColor tints size/rate unit letters, bold
+Subject: [PATCH 20/23] bar: unitColor tints size/rate unit letters, bold
 
 Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
 ---

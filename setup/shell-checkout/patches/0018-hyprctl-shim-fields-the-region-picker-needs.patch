@@ -1,7 +1,7 @@
 From e531ec907b0696f6e91907a106c50c87f7e2f02f Mon Sep 17 00:00:00 2001
 From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
 Date: Mon, 12 Oct 2026 00:31:28 +0530
-Subject: [PATCH 18/22] hyprctl shim: fields the region picker needs
+Subject: [PATCH 18/23] hyprctl shim: fields the region picker needs
 
 The screen recording rows in the menu pick their target with
 omarchy-capture-region, which reads each monitor's active workspace and each

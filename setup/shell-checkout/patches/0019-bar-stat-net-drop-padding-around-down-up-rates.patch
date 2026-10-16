@@ -1,7 +1,7 @@
 From c56d835400d4da92e9c70b54ef2aa3b66c099cdb Mon Sep 17 00:00:00 2001
 From: nganaremba-rem <ngancloverr+remkugithub@gmail.com>
 Date: Fri, 16 Oct 2026 19:37:50 +0530
-Subject: [PATCH 19/22] bar-stat net: drop padding around down/up rates
+Subject: [PATCH 19/23] bar-stat net: drop padding around down/up rates
 
 Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
 ---
