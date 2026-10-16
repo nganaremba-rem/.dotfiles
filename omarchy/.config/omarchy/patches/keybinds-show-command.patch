@@ -1,0 +1,13 @@
+diff --git a/niri/bin/omarchy-menu-keybindings b/niri/bin/omarchy-menu-keybindings
+index 89e05b8..1a74396 100755
+--- a/niri/bin/omarchy-menu-keybindings
++++ b/niri/bin/omarchy-menu-keybindings
+@@ -6,5 +6,7 @@
+ if [[ ${1:-} == "--print" || ${1:-} == "-p" ]]; then
+   niri-keybinds | cut -f1
+ else
+-  niri-keybinds | cut -f1 | omarchy-menu-select 'Keybindings' -- --width 800 --height 500 >/dev/null || true
++  # key + title, then the bound command dimmed behind a separator.
++  niri-keybinds | awk -F'\t' '{ printf "%-58s  │  $ %s\n", $1, $2 }' |
++    omarchy-menu-select 'Keybindings' -- --width 1100 --height 500 >/dev/null || true
+ fi
