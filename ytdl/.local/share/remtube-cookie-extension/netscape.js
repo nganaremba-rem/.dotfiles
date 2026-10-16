@@ -1,7 +1,7 @@
-// Turn chrome.cookies.Cookie objects into a Netscape cookies.txt (the format yt-dlp and remtube read).
+// Turn chrome.cookies.Cookie objects into a Netscape cookies.txt (the format yt-dlp reads).
 // Columns: domain, include-subdomains, path, secure, expiry (0 = session), name, value.
 export function toNetscape(cookies) {
-  const lines = ['# Netscape HTTP Cookie File', '# Exported by remtube cookie export. Keep this file private (chmod 600).', ''];
+  const lines = ['# Netscape HTTP Cookie File', '# Exported by ytdl cookie export. Keep this file private (chmod 600).', ''];
   for (const c of cookies) {
     const domain = (c.httpOnly ? '#HttpOnly_' : '') + c.domain;
     const sub = c.domain.startsWith('.') ? 'TRUE' : 'FALSE';

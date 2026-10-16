@@ -4,7 +4,7 @@ const msg = document.getElementById('msg');
 const btn = document.getElementById('export');
 const say = (text, cls = '') => { msg.textContent = text; msg.className = cls; };
 
-// Same rules as `ytdl-run` (site key -> ~/.config/ytdl/cookies/<site>.txt). domains = what to export.
+// Site key as in `ytdl-run`; the saved file is named after the main domain (file: youtube.com -> youtube.com.txt). domains = what to export.
 const KNOWN = [
   { site: 'youtube', domains: ['youtube.com'], hosts: ['youtube.com', 'youtu.be', 'youtube-nocookie.com'] },
   { site: 'facebook', domains: ['facebook.com'], hosts: ['facebook.com', 'fb.watch', 'fb.com'] },
@@ -16,13 +16,13 @@ const KNOWN = [
 function siteOf(host) {
   host = host.replace(/^www\./, '');
   const hit = KNOWN.find((k) => k.hosts.some((h) => host === h || host.endsWith('.' + h)));
-  if (hit) return hit;
+  if (hit) return { ...hit, file: hit.domains[0] };
   const p = host.split('.');
   const n = p.length;
   const reg = n >= 3 && /^(co|com|org|net|gov|ac)$/.test(p[n - 2]) && p[n - 1].length === 2 ? p.slice(-3).join('.') : p.slice(-2).join('.');
-  return { site: reg.split('.')[0].replace(/[^a-z0-9-]/g, ''), domains: [reg] };
+  return { site: reg.split('.')[0].replace(/[^a-z0-9-]/g, ''), domains: [reg], file: reg };
 }
-const savePath = (site) => `~/.config/ytdl/cookies/${site}.txt`;
+const savePath = (t) => `~/.config/ytdl/cookies/${t.file}.txt`;
 
 // Export from the cookie store of the window the popup was opened in (normal or private).
 async function current() {
@@ -40,7 +40,7 @@ let target;
   if (!host || !host.includes('.')) { btn.disabled = true; say('Open the site you want (and log in) in this window first.', 'err'); return; }
   target = siteOf(host);
   btn.textContent = `Export ${target.domains.join(' + ')} cookies`;
-  say(`Saves to ${savePath(target.site)}. Use a private window, then close it.`);
+  say(`Saves to ${savePath(target)}. Use a private window, then close it.`);
 })();
 
 btn.addEventListener('click', async () => {
@@ -57,9 +57,16 @@ btn.addEventListener('click', async () => {
       return;
     }
     const url = 'data:text/plain;charset=utf-8,' + encodeURIComponent(toNetscape(cookies));
-    const filename = `ytdl-${target.site}.txt`;
-    await chrome.downloads.download({ url, filename, saveAs: true });
-    say(`Exported ${cookies.length} cookies. Save as ${savePath(target.site)}, then close this private window.`, 'ok');
+    const filename = `${target.file}.txt`;
+    const id = await chrome.downloads.download({ url, filename, saveAs: true });
+    // once saved, show the file in the file manager (= the cookies folder when saved there)
+    const shown = (d) => {
+      if (d.id !== id || d.state?.current !== 'complete') return;
+      chrome.downloads.onChanged.removeListener(shown);
+      chrome.downloads.show(id);
+    };
+    chrome.downloads.onChanged.addListener(shown);
+    say(`Exported ${cookies.length} cookies. Save as ${savePath(target)}, then close this private window.`, 'ok');
   } catch (e) {
     say(`Export failed: ${e.message}`, 'err');
   } finally {
