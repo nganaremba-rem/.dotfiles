@@ -9,7 +9,7 @@ json() { # text color tooltip
 wg_status() {
   # "Connected" = the peer sent traffic recently. The handshake time alone lags: it is only
   # refreshed every ~2 min, so a dropped peer would look connected for up to 3 minutes.
-  # Phones send a keepalive every 25 s, so 75 s without new rx bytes means gone.
+  # Phones send a keepalive every 25 s, so 45 s without new rx bytes (one missed keepalive + slack) means gone.
   local now key rx hs ts ip up=0 total=0 lines="" ips tr state chg
   local -A prev_rx prev_chg handshake
   state=${XDG_RUNTIME_DIR:-/tmp}/bar-wg-rx
@@ -26,7 +26,7 @@ wg_status() {
     else chg=${prev_chg[$key]:-0}; fi
     printf '%s %s %s\n' "$key" "$rx" "$chg" >>"$state.new"
     ip=$(awk -v k="$key" '$1==k{print $2}' <<<"$ips")
-    if [ "$chg" -gt 0 ] && [ $((now - chg)) -lt 75 ]; then
+    if [ "$chg" -gt 0 ] && [ $((now - chg)) -lt 45 ]; then
       up=$((up + 1)); lines+="● ${ip:-${key:0:6}}  traffic $((now - chg))s ago"$'\n'
     elif [ "$hs" -gt 0 ]; then
       lines+="○ ${ip:-${key:0:6}}  idle $(( (now - hs) / 60 ))m"$'\n'
