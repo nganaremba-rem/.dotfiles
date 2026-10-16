@@ -8,7 +8,7 @@
           "fontSize": 14,
           "id": "net-speed",
           "stream": true,
-          "tooltip": "Network speed",
+          "tooltip": "Network speed\n$ bar-stat net 2",
           "type": "command"
         },
         {
@@ -53,7 +53,7 @@
           "id": "cpu",
           "onClick": "omarchy-launch-tui remtop",
           "stream": true,
-          "tooltip": "CPU usage",
+          "tooltip": "CPU usage\n$ omarchy-launch-tui remtop",
           "type": "command"
         },
         {
@@ -62,7 +62,7 @@
           "id": "memory",
           "onClick": "omarchy-launch-tui remtop",
           "stream": true,
-          "tooltip": "Memory in use",
+          "tooltip": "Memory in use\n$ omarchy-launch-tui remtop",
           "type": "command"
         },
         {
@@ -70,7 +70,7 @@
           "id": "color-picker",
           "onClick": "pkill hyprpicker || hyprpicker -a",
           "text": "󰈊",
-          "tooltip": "Pick a colour",
+          "tooltip": "Pick a colour\n$ pkill hyprpicker || hyprpicker -a",
           "type": "command"
         },
         {
@@ -99,13 +99,13 @@
           "id": "omarchy.tray"
         },
         {
-          "exec": "s=$(warp-cli status 2>/dev/null); case \"$s\" in *'Status update: Connected'*) i='' c=green t=Connected ;; *Connecting*) i='󰖂' c=yellow t=Connecting ;; *Disconnected*) i='' c=red t=Disconnected ;; *) i='󰅖' c=grey t=Unknown ;; esac; printf '{\"text\":\"%s\",\"color\":\"%s\",\"tooltip\":\"WARP: %s\"}' \"$i\" \"$c\" \"$t\"",
+          "exec": "s=$(warp-cli status 2>/dev/null); case \"$s\" in *'Status update: Connected'*) i='' c=green t=Connected ;; *Connecting*) i='󰖂' c=yellow t=Connecting ;; *Disconnected*) i='' c=red t=Disconnected ;; *) i='󰅖' c=grey t=Unknown ;; esac; printf '{\"text\":\"%s\",\"color\":\"%s\",\"tooltip\":\"WARP: %s\\\\n$ warp-cli connect\"}' \"$i\" \"$c\" \"$t\"",
           "fontSize": 25,
           "id": "vpn",
           "interval": 5,
           "onClick": "warp-cli connect",
           "onRightClick": "warp-cli disconnect",
-          "tooltip": "WARP",
+          "tooltip": "WARP\n$ warp-cli connect",
           "type": "command"
         },
         {
@@ -116,7 +116,7 @@
           "id": "clipboard",
           "onClick": "omarchy-shell shell summon omarchy.clipboard",
           "text": "󰅇",
-          "tooltip": "Clipboard history",
+          "tooltip": "Clipboard history\n$ omarchy-shell shell summon omarchy.clipboard",
           "type": "command"
         },
         {
@@ -124,6 +124,14 @@
         },
         {
           "id": "omarchy.bluetooth"
+        },
+        {
+          "exec": "net-switch status",
+          "id": "net-switch",
+          "interval": 3,
+          "onClick": "net-switch toggle",
+          "tooltip": "Switch ethernet ↔ wifi\n$ net-switch toggle",
+          "type": "command"
         },
         {
           "id": "omarchy.network"

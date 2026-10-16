@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# Toggle the primary link between ethernet and wifi (metrics: ethernet 100, wifi 600).
+#   net-switch [toggle|wifi|eth|status]
+set -euo pipefail
+
+eth_devs() { nmcli -t -f DEVICE,TYPE,STATE dev | awk -F: '$2=="ethernet" && $3!="unmanaged" && $1!~/^veth/{print $1}'; }
+eth_up()   { nmcli -t -f DEVICE,TYPE,STATE dev | rg -q ':ethernet:connected$'; }
+
+to_wifi() { nmcli radio wifi on; for d in $(eth_devs); do timeout 10 nmcli dev disconnect "$d" >/dev/null 2>&1 || true; done; }
+to_eth()  { for d in $(eth_devs); do timeout 10 nmcli dev connect "$d" >/dev/null 2>&1 || true; done; }
+
+# Sets: dev, label, glyph (bar), icon (freedesktop name for notifications)
+link_info() {
+  dev=$(ip route show default | head -1 | sed -n 's/.* dev \([^ ]*\).*/\1/p')
+  case "$dev" in
+    wl*) label=Wi-Fi;    glyph='󰖩'; icon=network-wireless ;;
+    '')  label=Offline;  glyph='󰖪'; icon=network-offline; dev=none ;;
+    *)   label=Ethernet; glyph='󰈀'; icon=network-wired ;;
+  esac
+}
+
+status() {
+  link_info
+  printf '{"text":"%s","tooltip":"Using %s (%s)\\n$ net-switch toggle"}\n' "$glyph" "$label" "$dev"
+}
+
+notify() {
+  link_info
+  # Fixed sync hint: repeated toggles replace the previous popup instead of stacking.
+  notify-send -a Network -u low -t 2500 -i "$icon" \
+    -h string:x-canonical-private-synchronous:net-switch \
+    "Switched to $label" "Primary link: $dev" 2>/dev/null || true
+}
+
+case "${1:-toggle}" in
+  wifi)   to_wifi ;;
+  eth)    to_eth ;;
+  status) status; exit ;;
+  toggle) if eth_up; then to_wifi; else to_eth; fi ;;
+  *) echo "usage: net-switch [toggle|wifi|eth|status]" >&2; exit 2 ;;
+esac
+sleep 1   # let the default route settle before reporting it
+notify

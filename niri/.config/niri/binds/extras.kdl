@@ -21,4 +21,5 @@ binds {
     Mod+Ctrl+S           hotkey-overlay-title="📤 Share"                   { spawn "oq" "omarchy-menu" "toggle" "share"; }
     Mod+Ctrl+Alt+P       hotkey-overlay-title="🧱 Switch panel (DMS ↔ shell bar)" { spawn "oq" "panel-switch" "toggle"; }
     Mod+Ctrl+Alt+R       hotkey-overlay-title="🔄 Restart bar (quickshell)"  { spawn "oq" "omarchy-restart-shell"; }
+    Mod+Ctrl+Alt+E       hotkey-overlay-title="🌐 Switch ethernet ↔ wifi"     { spawn "net-switch" "toggle"; }
 }
