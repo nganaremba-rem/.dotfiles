@@ -49,6 +49,8 @@ binds {
     Mod+Ctrl+W           hotkey-overlay-title="📊 Toggle bar"                 { spawn "dms" "ipc" "call" "bar" "toggle" "index" "0"; }
 
     // ── ✨ Utilities ──────────────────────────────────────────────────────────
+    Mod+Alt+M            hotkey-overlay-title="🔍 Zoom + draw (shmooz)"    { spawn "~/.config/niri/scripts/zoom-toggle"; }
+    Mod+Alt+K            hotkey-overlay-title="⌨️ Show keys (wshowkeys)"   { spawn "~/.config/niri/scripts/showkeys"; }
     Mod+Alt+T            hotkey-overlay-title="🈂️ Screen translate (OCR)"     { spawn "screen-translate"; }
     Mod+Ctrl+X           hotkey-overlay-title="🎙️ Voxtype dictation"          { spawn-sh "voxtype record toggle"; }
     Mod+Ctrl+N           hotkey-overlay-title="🌙 Night light"                { spawn "~/bin/arch/toggle-gammastep"; }

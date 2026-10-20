@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# ⌨️ Mod+Alt+K: toggle wshowkeys (key bubbles bottom-right, fade on their own, click-through).
+if pgrep -x wshowkeys >/dev/null; then
+    pkill -x wshowkeys
+else
+    exec wshowkeys -a bottom -a right -m 24 -t 1500 -F 'JetBrainsMono Nerd Font 22' \
+        -b '#1e1e2eE6' -f '#cdd6f4' -s '#89b4fa'
+fi

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# 🔍 Mod+Alt+M: toggle shmooz (scroll = zoom, drag = pan, d = draw, 1-0 colours, u = undo, Esc = quit).
+if pgrep -x shmooz >/dev/null; then
+    pkill -x shmooz
+else
+    exec shmooz --no-indicator
+fi
