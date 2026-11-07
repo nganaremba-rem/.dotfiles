@@ -300,6 +300,13 @@ def gen_autostart():
         "  systemctl --user start \"$(basename \"$u\")\" &\n"
         "done) >/dev/null 2>&1 &\n"
     )
+    # Login managers hand mango different PATHs (greetd: bare, ly: zsh login, no ~/.local/bin) and mango applies
+    # env.conf only to later spawns, so load it here: `oq` and the shim must resolve for the first line.
+    out.append(
+        "while IFS= read -r l; do\n"
+        "  [[ $l == env=* ]] || continue\n"
+        "  l=${l#env=}; export \"${l%%,*}=${l#*,}\"\n"
+        "done < \"$HOME/.config/mango/env.conf\"\n")
     first, normal, late = [], [], []
     text = strip_comments((NIRI / "settings/startup.kdl").read_text())
     for m in re.finditer(r'(?m)^\s*(spawn-at-startup|spawn-sh-at-startup)\s+(.*?)\s*$', text):
