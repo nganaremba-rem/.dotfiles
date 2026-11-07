@@ -5,7 +5,6 @@
 #
 # Make an alias for invoking commands you use constantly
 # alias p='python'
-. "$HOME/.cargo/env"
 
 # simutil
 export PATH="/home/rem/.local/lib/simutil:$PATH"
@@ -14,3 +13,4 @@ export PATH="/home/rem/.local/lib/simutil:$PATH"
 export PATH="$PATH:/home/rem/.lmstudio/bin"
 # End of LM Studio CLI section
 
+. "$HOME/.cargo/env"

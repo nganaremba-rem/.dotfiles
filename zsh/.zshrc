@@ -355,3 +355,15 @@ autoload -Uz compinit && compinit
 # Starship's PROMPT is '$(starship prompt ...)'; without promptsubst zsh prints it literally.
 # Re-assert after every plugin/eval above in case one of them reset options.
 setopt promptsubst
+
+omni-setup() {
+  set -a
+  source "$HOME/.config/omniroute/secrets.env"
+  set +a
+
+  omniroute setup-claude "$@"
+  local exit_code=$?
+
+  unset OMNIROUTE_API_KEY
+  return "$exit_code"
+}
