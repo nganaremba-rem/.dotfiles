@@ -29,7 +29,11 @@ esac
 # Window owned by a terminal emulator process (footclient windows belong to
 # the foot server, whatever their app id). No focused window = a layer surface
 # (launcher, menu) has the keyboard.
-pid=$(niri msg -j focused-window | jq -r '.pid // empty')
+if [[ -n ${NIRI_SOCKET:-} ]]; then
+    pid=$(niri msg -j focused-window | jq -r '.pid // empty')
+else  # mango (same key, same script)
+    pid=$(mmsg get focusing-client 2>/dev/null | jq -r '.pid // empty')
+fi
 exe=$(readlink "/proc/$pid/exe")
 case ${exe##*/} in
 foot | kitty | alacritty | ghostty | wezterm-gui) mods=ctrl+shift ;;

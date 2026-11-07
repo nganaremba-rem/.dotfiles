@@ -1,0 +1,10 @@
+#!/bin/bash
+# Mango's binds as "KEY  title<TAB>command" lines, the same shape niri-keybinds prints.
+# keybinds.tsv is written by niri2mango, so it always matches the running config.
+f="$HOME/.config/mango/keybinds.tsv"
+if [[ -r $f ]]; then
+  cat "$f"
+else
+  echo "no keybinds.tsv: run niri2mango --write" >&2
+  exit 1
+fi

@@ -1,0 +1,188 @@
+Super+Alt+S                       📥 Send window to scratchpad	minimized
+Super+Alt+Shift+S                 📤 Take window out of scratchpad	restore_minimized
+Super+grave                       📥 Show or hide scratchpad	toggle_scratchpad
+Super+Shift+Alt+R                 🔄 Reload mango config	reload_config
+Super+Apostrophe                  📌 Scratchpad terminal (reused window, not a new one each time)	toggle_named_scratchpad,scratchpad,none,footclient --app-id=scratchpad
+Super+Tab                         🏷️ Jump to a window by its letter label	togglejump
+Super+Backslash                   🧩 Cycle layout: scroller, tile, grid, monocle, deck, center	switch_layout
+Super+Ctrl+grave                  🗂️ Special tag overlay: show or hide	toggle_special_tag
+Super+Ctrl+Shift+grave            🗂️ Send window to or from the special tag	tag_special_tag
+Super+Shift+G                     📍 Pin window to every tag	toggleglobal
+Super+Shift+Y                     ⬆️ Keep window always on top	toggleoverlay
+Super+Ctrl+apostrophe             📁 Yazi scratchpad (reused window)	toggle_named_scratchpad,scratchpad-yazi,none,footclient --app-id=scratchpad-yazi -e yazi
+Super+F2                          🎈 Float or tile every window on this tag	toggle_all_floating
+Super+Return                      💻 Terminal	$NIRI_TERMINAL
+Super+Alt+Return                  💻 Terminal + tmux	$NIRI_TERMINAL_RUN tmux
+Super+Ctrl+Return                 💻 Terminal + herdr session	~/.config/herdr/session-picker.sh open default
+Super+Slash                       👻 Ghostty	ghostty
+Super+N                           📝 Neovim	$NIRI_TERMINAL_RUN $NIRI_EDITOR
+Super+B                           🌐 Browser	$NIRI_BROWSER --new-window
+Super+E                           📁 File manager	$NIRI_FILE_MANAGER
+Super+Alt+B                       ⌨️ Vim browser (vimb)	$NIRI_VIM_BROWSER
+Super+Alt+F                         Yazi	$NIRI_TERMINAL_RUN yazi
+Super+Space                       🔎 Menu (apps, setup, system…)	$NIRI_LAUNCHER
+Alt+Space                         🚀 App launcher (rofi)	rofi -show drun
+Super+Shift+Return                🚀 App launcher (rofi)	rofi -show drun
+Alt+W                             🪟 Open windows	rofi -show window
+Super+Ctrl+E                      😀 Emoji picker	oq omarchy-menu-emoji
+Super+Alt+U                       🚀 Internet speed test	oq omarchy-shell shell summon omarchy.speedtest
+Super+P                           🔍 Web search	oq omarchy-shell shell summon rem.websearch
+Super+Shift+T                     📊 btop	$NIRI_TERMINAL --app-id=btop -- btop
+Super+Ctrl+T                      📈 RemTop	$NIRI_TERMINAL remtop
+Super+D                           ✅ Todo (taskwarrior-tui)	$NIRI_TERMINAL_RUN taskwarrior-tui
+Super+Ctrl+Alt+V                  🔊 Sound mixer (wiremix)	$NIRI_TERMINAL_RUN wiremix
+Super+Ctrl+Alt+W                  📶 Wi-Fi (wlctl)	rfkill unblock wifi && $NIRI_TERMINAL_RUN wlctl
+Super+Ctrl+Alt+Return             🤖 Claude Code	$NIRI_TERMINAL_RUN claude
+Super+Ctrl+Alt+Shift+Return       ⚠️ Claude Code (bypass permissions)	$NIRI_TERMINAL_RUN claude --dangerously-skip-permissions
+Super+Ctrl+Alt+I                  🤖 Codex	~/.config/mango/cmds/809cd6076d.sh
+Super+Ctrl+Alt+Shift+I            ⚠️ Codex (bypass approvals + sandbox)	~/.config/mango/cmds/3f8ac4c728.sh
+Super+Alt+I                       🧰 REMTUI	~/.local/bin/remtui
+Super+Ctrl+V                      📋 Clipboard history	oq omarchy-shell shell summon omarchy.clipboard
+Super+Ctrl+Alt+B                  🖼️ Wallpapers	oq wallpaper-pick
+Super+Alt+T                       🈂️ Screen translate (OCR)	screen-translate
+Super+Ctrl+X                      🎙️ Voxtype dictation	voxtype record toggle
+Super+Ctrl+N                      🌙 Night light	~/bin/arch/toggle-gammastep
+Super+Ctrl+Alt+A                  🎞️ Animation curve picker	niri-curve-pick
+Super+Alt+C                       🤖 Claude	$NIRI_BROWSER --app=https://claude.ai/chat
+Super+A                           🤖 ChatGPT	$NIRI_BROWSER --app=https://chatgpt.com
+Super+Alt+P                       🔍 Perplexity	$NIRI_BROWSER --app=https://perplexity.ai/
+Super+Shift+E                     📧 Gmail	$NIRI_BROWSER --app=https://mail.google.com/mail/?authuser=nganaremba@gmail.com
+Super+Ctrl+Shift+E                📧 Gmail	$NIRI_BROWSER --app=https://mail.google.com/mail/?authuser=rem_s@indiasolarwarehousing.jp
+Super+X                           🐦 X	$NIRI_BROWSER --app=https://x.com
+Super+Ctrl+Shift+C                  Chat	$NIRI_BROWSER --app=https://chat.google.com/?authuser=rem_s@indiasolarwarehousing.jp
+Super+Y                           ▶️ YouTube	$NIRI_BROWSER --app=https://youtube.com
+Super+Alt+Y                       📺 remtube (YouTube in mpv)	/home/rem/.local/bin/remtube
+Super+Alt+D                       ⬇️ Download picker (video/audio)	/home/rem/.local/bin/ytdl-pick
+Super+Alt+N                       🎬 Netflix	$NIRI_BROWSER --app=https://netflix.com
+Super+Alt+H                       🎬 Hotstar	$NIRI_BROWSER --app=https://hotstar.com
+Super+O                           Toggle overview;	toggleoverview
+Super+W                           Close window;	killclient
+Super+Left                        Focus column left;	focusdir,left
+Super+Down                        Focus window down;	focusdir,down
+Super+Up                          Focus window up;	focusdir,up
+Super+Right                       Focus column right;	focusdir,right
+Super+H                           Focus column left;	focusdir,left
+Super+J                           Focus window down;	focusdir,down
+Super+K                           Focus window up;	focusdir,up
+Super+L                           Focus column right;	focusdir,right
+Super+Ctrl+Left                   Move column left;	exchange_client,left
+Super+Ctrl+Down                   Move window down;	exchange_client,down
+Super+Ctrl+Up                     Move window up;	exchange_client,up
+Super+Ctrl+Right                  Move column right;	exchange_client,right
+Super+Ctrl+H                      Move column left;	exchange_client,left
+Super+Ctrl+J                      Move window down;	exchange_client,down
+Super+Ctrl+K                      Move window up;	exchange_client,up
+Super+Ctrl+L                      Move column right;	exchange_client,right
+Super+BracketLeft                 Consume or expel window left;	scroller_stack,left
+Super+BracketRight                Consume or expel window right;	scroller_stack,right
+Super+Comma                       Consume window into column;	scroller_stack,right
+Super+Period                      Expel window from column;	scroller_stack,down
+Super+R                           Switch preset column width;	switch_proportion_preset
+Super+F                           Maximize column;	togglemaximizescreen
+Super+Shift+F                     Fullscreen window;	togglefullscreen
+Super+Ctrl+F                      Expand column to available width;	set_proportion,1.0
+Super+Minus                       Set column width	resizewin,-100,0
+Super+Equal                       Set column width	resizewin,100,0
+Super+Shift+Minus                 Set window height	resizewin,0,-100
+Super+Shift+Equal                 Set window height	resizewin,0,100
+Super+Ctrl+Alt+C                  Center column;	centerwin
+Super+T                           Toggle window floating;	togglefloating
+Super+WheelScrollRight            Focus column right;	focusdir,right
+Super+WheelScrollLeft             Focus column left;	focusdir,left
+Super+Ctrl+WheelScrollRight       Move column right;	exchange_client,right
+Super+Ctrl+WheelScrollLeft        Move column left;	exchange_client,left
+Super+Shift+WheelScrollDown       Focus column right;	focusdir,right
+Super+Shift+WheelScrollUp         Focus column left;	focusdir,left
+Super+Ctrl+Shift+WheelScrollDown  Move column right;	exchange_client,right
+Super+Ctrl+Shift+WheelScrollUp    Move column left;	exchange_client,left
+Super+Page_Down                   Focus workspace down;	viewtoright
+Super+Page_Up                     Focus workspace up;	viewtoleft
+Super+U                           Focus workspace down;	viewtoright
+Super+I                           Focus workspace up;	viewtoleft
+Super+Ctrl+Page_Down              Move column to workspace down;	tagtoright
+Super+Ctrl+Page_Up                Move column to workspace up;	tagtoleft
+Super+Ctrl+U                      Move column to workspace down;	tagtoright
+Super+Ctrl+I                      Move column to workspace up;	tagtoleft
+Super+Alt+1                       Focus workspace	view,1
+Super+Alt+2                       Focus workspace	view,2
+Super+Alt+3                       Focus workspace	view,3
+Super+Alt+4                       Focus workspace	view,4
+Super+Alt+5                       Focus workspace	view,5
+Super+Alt+6                       Focus workspace	view,6
+Super+Alt+7                       Focus workspace	view,7
+Super+Alt+8                       Focus workspace	view,8
+Super+Alt+9                       Focus workspace	view,9
+Super+Alt+Shift+1                 Move column to workspace	tag,1
+Super+Alt+Shift+2                 Move column to workspace	tag,2
+Super+Alt+Shift+3                 Move column to workspace	tag,3
+Super+Alt+Shift+4                 Move column to workspace	tag,4
+Super+Alt+Shift+5                 Move column to workspace	tag,5
+Super+Alt+Shift+6                 Move column to workspace	tag,6
+Super+Alt+Shift+7                 Move column to workspace	tag,7
+Super+Alt+Shift+8                 Move column to workspace	tag,8
+Super+Alt+Shift+9                 Move column to workspace	tag,9
+Super+WheelScrollDown             Focus workspace down;	viewtoright
+Super+WheelScrollUp               Focus workspace up;	viewtoleft
+Super+Ctrl+WheelScrollDown        Move column to workspace down;	tagtoright
+Super+Ctrl+WheelScrollUp          Move column to workspace up;	tagtoleft
+Super+Shift+Left                  Focus monitor left;	focusmon,left
+Super+Shift+Down                  Focus monitor down;	focusmon,down
+Super+Shift+Up                    Focus monitor up;	focusmon,up
+Super+Shift+Right                 Focus monitor right;	focusmon,right
+Super+Shift+H                     Focus monitor left;	focusmon,left
+Super+Shift+J                     Focus monitor down;	focusmon,down
+Super+Shift+K                     Focus monitor up;	focusmon,up
+Super+Shift+L                     Focus monitor right;	focusmon,right
+Super+Shift+Ctrl+Left             Move column to monitor left;	tagmon,left
+Super+Shift+Ctrl+Down             Move column to monitor down;	tagmon,down
+Super+Shift+Ctrl+Up               Move column to monitor up;	tagmon,up
+Super+Shift+Ctrl+Right            Move column to monitor right;	tagmon,right
+Super+Shift+Ctrl+H                Move column to monitor left;	tagmon,left
+Super+Shift+Ctrl+J                Move column to monitor down;	tagmon,down
+Super+Shift+Ctrl+K                Move column to monitor up;	tagmon,up
+Super+Shift+Ctrl+L                Move column to monitor right;	tagmon,right
+XF86AudioRaiseVolume              swayosd-client --output-volume raise --max-volume 100	swayosd-client --output-volume raise --max-volume 100
+XF86AudioLowerVolume              swayosd-client --output-volume lower	swayosd-client --output-volume lower
+XF86AudioMute                     swayosd-client --output-volume mute-toggle	swayosd-client --output-volume mute-toggle
+XF86AudioMicMute                  /home/rem/.local/bin/mic-toggle	/home/rem/.local/bin/mic-toggle
+XF86WebCam                        /home/rem/.local/bin/camera-toggle	/home/rem/.local/bin/camera-toggle
+Super+Shift+C                     🎧 Headset: music ↔ call mode	/home/rem/.local/bin/bt-callmode
+XF86AudioPlay                     playerctl play-pause	playerctl play-pause
+XF86AudioStop                     playerctl stop	playerctl stop
+XF86AudioPrev                     playerctl previous	playerctl previous
+XF86AudioNext                     playerctl next	playerctl next
+XF86MonBrightnessUp               swayosd-client --brightness raise	swayosd-client --brightness raise
+XF86MonBrightnessDown             swayosd-client --brightness lower	swayosd-client --brightness lower
+Print                             Screenshot;	grim -g "$(slurp)" - | tee ~/Pictures/Screenshots/Screenshot\ from\ $(date +'%Y-%m-%d\ %H-%M-%S').png | wl-copy
+Ctrl+Print                        Screenshot screen;	grim - | tee ~/Pictures/Screenshots/Screenshot\ from\ $(date +'%Y-%m-%d\ %H-%M-%S').png | wl-copy
+Alt+Print                         Screenshot window;	grim -g "$(mmsg get focusing-client | jq -r '"\(.x),\(.y) \(.width)x\(.height)"')" - | tee ~/Pictures/Screenshots/Screenshot\ from\ $(date +'%Y-%m-%d\ %H-%M-%S').png | wl-copy
+Super+Shift+S                     ✏️ Screenshot (full) → annotate → clipboard	grim - | satty --filename - --copy-command wl-copy --early-exit
+Super+Shift+A                     ✏️ Screenshot (area) → annotate → clipboard	grim -g "$(slurp)" - | satty --filename - --copy-command wl-copy --early-exit
+Super+Shift+O                     🔤 OCR region → clipboard	ocr
+Super+Alt+O                       🔤 OCR region (Claude vision)	ocr --engine ai
+Super+Ctrl+O                      🔤 OCR focused window	ocr --window
+Super+Ctrl+Shift+O                🔤 OCR clipboard image	ocr --clip
+Super+Shift+Alt+O                 🔤 OCR region → pick action	ocr --menu
+Super+Shift+Slash                 Show hotkey overlay;	oq omarchy-menu-keybindings
+Alt+L                             🔒 Lock screen	oq omarchy-system-lock
+Super+Ctrl+Alt+L                  💤 Suspend	systemctl suspend
+Super+Delete                      ⏻ Power menu	wlogout
+Super+Shift+P                     Power off monitors;	niri msg action power-off-monitors
+Ctrl+Alt+Delete                   Quit;	quit
+Super+Shift+N                     foot -e $NIRI_EDITOR ~/.config/niri	foot -e $NIRI_EDITOR ~/.config/niri
+Super+Ctrl+Alt+F                  🔄 Restart foot server (closes footclient windows)	systemctl --user restart foot-server.service
+Alt+Tab                           Next window	switcher,all_tag_next
+Alt+Shift+Tab                     Previous window	switcher,all_tag_prev
+Alt+grave                         Next window	switcher,next
+Alt+Shift+grave                   Previous window	switcher,prev
+Super+C                           📋 Copy	~/.config/niri/scripts/uclip copy
+Super+V                           📋 Paste	~/.config/niri/scripts/uclip paste
+Super+F1                          ⌨️ Search keybinds	oq omarchy-menu-keybindings
+Super+Alt+R                       ⏰ Set reminder	oq omarchy-menu toggle reminder-set
+Super+Ctrl+Period                 🎞️ Transcode a file	oq omarchy-transcode
+Super+Ctrl+Shift+Space            🎨 Theme switcher	oq omarchy-menu toggle theme
+Super+Ctrl+Space                  🖼️ Background switcher	oq omarchy-menu toggle background
+Super+Ctrl+S                      📤 Share	oq omarchy-menu toggle share
+Super+Ctrl+Alt+P                  🧱 Switch panel (DMS ↔ shell bar)	oq panel-switch toggle
+Super+Ctrl+Alt+R                  🔄 Restart bar (quickshell)	oq omarchy-restart-shell
+Super+Ctrl+Alt+E                  🌐 Switch ethernet ↔ wifi	net-switch toggle

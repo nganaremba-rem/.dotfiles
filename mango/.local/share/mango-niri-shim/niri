@@ -1,0 +1,116 @@
+#!/bin/bash
+# niri shim for mango. The Omarchy shell and its helper scripts speak `niri msg`;
+# under mango this answers the subset they use, from mmsg (mango's IPC).
+#   workspaces = mango tags (a tag is listed when it has windows or is shown)
+#   id         = monitor-index*100 + tag, idx = tag number
+# Anything that is not `niri msg ...` goes to the real niri.
+set -uo pipefail
+
+[[ ${1:-} == msg ]] || exec /usr/bin/niri "$@"
+shift
+while [[ ${1:-} == -* ]]; do shift; done   # -j / --json: output is always JSON
+
+# ── snapshots ────────────────────────────────────────────────────────────────
+focused_output() {
+  local m
+  m=$(mmsg get focusing-client 2>/dev/null | jq -r '.monitor // empty' 2>/dev/null)
+  [[ -z $m ]] && m=$(mmsg get all-monitors | jq -r '([.monitors[] | select(.active)][0] // .monitors[0]).name')
+  echo "$m"
+}
+
+workspaces() {
+  local focus; focus=$(focused_output)
+  jq --arg focus "$focus" -c '
+    [.monitors | to_entries[] | .key as $mi | .value as $m
+     | $m.tags[] | select(.is_active or .client_count > 0)
+     | {id: (($mi + 1) * 100 + .index), idx: .index, name: null, output: $m.name,
+        is_active: .is_active, is_focused: (.is_active and $m.name == $focus),
+        is_urgent: .is_urgent, active_window_id: null}]' < <(mmsg get all-monitors)
+}
+
+windows() {
+  local mons clients
+  mons=$(mmsg get all-monitors); clients=$(mmsg get all-clients)
+  jq -c --argjson mons "$mons" '
+    ($mons.monitors | to_entries | map({key: .value.name, value: {i: .key, x: .value.x, y: .value.y}}) | from_entries) as $mi
+    | [.clients[] | ($mi[.monitor] // {i: 0, x: 0, y: 0}) as $o
+       | {id, title, app_id: .appid, pid, is_focused, is_floating, is_urgent,
+          workspace_id: (($o.i + 1) * 100 + ((.tags[0]) // 1)),
+          layout: {tile_pos_in_workspace_view: [(.x - $o.x), (.y - $o.y)],
+                   window_size: [.width, .height], window_offset_in_tile: [0, 0]}}]' <<<"$clients"
+}
+
+outputs() {
+  local mons rr; mons=$(mmsg get all-monitors); rr=$(wlr-randr --json 2>/dev/null || echo '[]')
+  jq -c --argjson rr "$rr" '
+    ($rr | map({key: .name, value: .}) | from_entries) as $r
+    | .monitors | map(. as $m | ($r[.name] // {}) as $o
+        | ([($o.modes // [])[] | select(.current)][0] // {width: $m.width, height: $m.height, refresh: 60}) as $c
+        | {key: .name, value: {name: .name, make: ($o.make // ""), model: ($o.model // ""), serial: ($o.serial // null),
+            physical_size: null,
+            modes: [{width: $c.width, height: $c.height, refresh_rate: (($c.refresh * 1000) | round), is_preferred: true}],
+            current_mode: 0, vrr_supported: false, vrr_enabled: false,
+            logical: {x: $m.x, y: $m.y, width: $m.width, height: $m.height, scale: $m.scale, transform: "Normal"}}})
+    | from_entries' <<<"$mons"
+}
+
+emit() { # one full snapshot, in niri's event shapes
+  jq -nc --argjson w "$(workspaces)" '{WorkspacesChanged: {workspaces: $w}}'
+  jq -nc --argjson w "$(windows)" '{WindowsChanged: {windows: $w}}'
+}
+
+# ── commands ─────────────────────────────────────────────────────────────────
+case "${1:-}" in
+  outputs) outputs ;;
+  workspaces) workspaces ;;
+  windows) windows ;;
+  focused-window) windows | jq -c '[.[] | select(.is_focused)][0]' ;;
+  focused-output) outputs | jq -c --arg n "$(focused_output)" '.[$n] // null' ;;
+  casts) echo '[]' ;;
+  version) echo "niri (mango shim)" ;;
+  event-stream)
+    emit
+    # Any change in tags or clients: re-send the whole state (the shell accepts full lists).
+    # Watchers write into a fifo; the trap stops them when the shell closes the stream.
+    fifo=$(mktemp -u); mkfifo "$fifo"
+    trap 'kill $(jobs -p) 2>/dev/null; rm -f "$fifo"' EXIT
+    trap 'exit 0' TERM INT HUP PIPE
+    exec 3<>"$fifo"
+    mmsg watch all-tags >&3 2>/dev/null &
+    mmsg watch all-clients >&3 2>/dev/null &
+    while read -r -u 3 _; do
+      while read -r -u 3 -t 0.05 _; do :; done   # merge a burst of changes
+      emit
+    done
+    ;;
+  output)
+    name=${2:-}; shift 2 || true
+    case "${1:-}" in
+      on) mmsg dispatch "enable_monitor,$name" ;;
+      off) mmsg dispatch "disable_monitor,$name" ;;
+      scale) wlr-randr --output "$name" --scale "${2:-1}" ;;
+      *) echo "niri shim: output $name ${*:-} not supported" >&2; exit 1 ;;
+    esac
+    ;;
+  action)
+    shift
+    act=${1:-}; shift || true
+    id=""; [[ ${1:-} == --id ]] && id=${2:-}
+    case "$act" in
+      focus-window) mmsg dispatch focusid "client,$id" ;;
+      close-window) if [[ -n $id ]]; then mmsg dispatch killclient "client,$id"; else mmsg dispatch killclient; fi ;;
+      focus-workspace) mmsg dispatch "view,${1:-1}" ;;
+      focus-monitor) mmsg dispatch "focusmon,${1:-}" ;;
+      consume-or-expel-window-left) mmsg dispatch scroller_stack,left ;;
+      consume-or-expel-window-right) mmsg dispatch scroller_stack,right ;;
+      spawn-sh) [[ ${1:-} == -- ]] && shift; setsid -f sh -c "$*" >/dev/null 2>&1 ;;
+      spawn) [[ ${1:-} == -- ]] && shift; setsid -f "$@" >/dev/null 2>&1 ;;
+      load-config-file) mmsg dispatch reload_config ;;
+      quit) mmsg dispatch quit ;;
+      power-off-monitors) for o in $(wlr-randr --json | jq -r '.[].name'); do wlr-randr --output "$o" --off; done ;;
+      power-on-monitors) for o in $(wlr-randr --json | jq -r '.[].name'); do wlr-randr --output "$o" --on; done ;;
+      *) echo "niri shim: action '$act' not supported under mango" >&2; exit 1 ;;
+    esac
+    ;;
+  *) echo "niri shim: 'msg ${*:-}' not supported under mango" >&2; exit 1 ;;
+esac

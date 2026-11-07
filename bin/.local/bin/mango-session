@@ -1,0 +1,37 @@
+#!/bin/sh
+# mango-session: start mango the way niri-session starts niri (systemd user service),
+# so graphical-session.target and every service bound to it come up.
+#   mango-session            login entry (greeter/TTY)
+#   mango-session --service  used by mango.service
+#   mango-session --ready    run by mango itself once its display exists
+
+case "$1" in
+--service)
+    exec mango -s "$HOME/.local/bin/mango-session --ready"
+    ;;
+--ready)
+    export XDG_CURRENT_DESKTOP="${XDG_CURRENT_DESKTOP:-mango}" XDG_SESSION_TYPE=wayland
+    systemctl --user import-environment WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE
+    dbus-update-activation-environment --systemd WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE
+    exec systemd-notify --ready
+    ;;
+esac
+
+# Login shell first, so ~/.profile / zsh env is loaded (same trick as niri-session).
+if [ -n "$SHELL" ] && grep -q "$SHELL" /etc/shells && [ "$1" != '-l' ]; then
+    exec "$SHELL" -l -c "'$0' -l"
+fi
+
+if systemctl --user -q is-active mango.service; then
+    echo 'A mango session is already running.'
+    exit 1
+fi
+
+systemctl --user reset-failed
+systemctl --user import-environment
+dbus-update-activation-environment --all
+
+systemctl --user --wait start mango.service
+
+systemctl --user start --job-mode=replace-irreversibly mango-shutdown.target
+systemctl --user unset-environment WAYLAND_DISPLAY DISPLAY XDG_SESSION_TYPE XDG_CURRENT_DESKTOP

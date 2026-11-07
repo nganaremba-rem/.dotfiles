@@ -9,3 +9,4 @@ spawn-sh-at-startup "wl-paste --watch cliphist store"                        // 
 spawn-at-startup "~/.config/session/init.sh"                                 // 🧩 session extras (session package)
 spawn-at-startup "~/.config/niri/scripts/scratchpad" "watch"                  // 📥 keep stashed scratchpad windows off screen
 spawn-at-startup "oq" "omarchy-launch-shell"                                 // 🔎 shell: Mod+Space menu, pickers, optional bar (~/.local/share/omarchy-quattro)
+spawn-at-startup "rembrowser" "--background"                                 // 🌐 warm browser engine, no window: next launch ~0.15 s (needs keep-running: true)
