@@ -4,12 +4,12 @@ Super+grave                       📥 Show or hide scratchpad	toggle_scratchpad
 Super+Shift+Alt+R                 🔄 Reload mango config	reload_config
 Super+Apostrophe                  📌 Scratchpad terminal (reused window, not a new one each time)	toggle_named_scratchpad,scratchpad,none,footclient --app-id=scratchpad
 Super+Tab                         🏷️ Jump to a window by its letter label	togglejump
-Super+Backslash                   🧩 Cycle layout: scroller, tile, grid, monocle, deck, center	switch_layout
+Super+Alt+Backslash               🧩 Cycle layout: scroller, tile, grid, monocle, deck, center	switch_layout
 Super+Ctrl+grave                  🗂️ Special tag overlay: show or hide	toggle_special_tag
 Super+Ctrl+Shift+grave            🗂️ Send window to or from the special tag	tag_special_tag
-Super+Shift+G                     📍 Pin window to every tag	toggleglobal
+Super+Alt+G                       📍 Pin window to every tag	toggleglobal
 Super+Shift+Y                     ⬆️ Keep window always on top	toggleoverlay
-Super+Ctrl+apostrophe             📁 Yazi scratchpad (reused window)	toggle_named_scratchpad,scratchpad-yazi,none,footclient --app-id=scratchpad-yazi -e yazi
+Super+Alt+apostrophe              📁 Yazi scratchpad (reused window)	toggle_named_scratchpad,scratchpad-yazi,none,footclient --app-id=scratchpad-yazi -e yazi
 Super+F2                          🎈 Float or tile every window on this tag	toggle_all_floating
 Super+Return                      💻 Terminal	$NIRI_TERMINAL
 Super+Alt+Return                  💻 Terminal + tmux	$NIRI_TERMINAL_RUN tmux
@@ -48,6 +48,7 @@ Super+A                           🤖 ChatGPT	$NIRI_BROWSER --app=https://chatg
 Super+Alt+P                       🔍 Perplexity	$NIRI_BROWSER --app=https://perplexity.ai/
 Super+Shift+E                     📧 Gmail	$NIRI_BROWSER --app=https://mail.google.com/mail/?authuser=nganaremba@gmail.com
 Super+Ctrl+Shift+E                📧 Gmail	$NIRI_BROWSER --app=https://mail.google.com/mail/?authuser=rem_s@indiasolarwarehousing.jp
+Super+Shift+G                     💬 WhatsApp	$NIRI_BROWSER --app=https://web.whatsapp.com
 Super+X                           🐦 X	$NIRI_BROWSER --app=https://x.com
 Super+Ctrl+Shift+C                  Chat	$NIRI_BROWSER --app=https://chat.google.com/?authuser=rem_s@indiasolarwarehousing.jp
 Super+Y                           ▶️ YouTube	$NIRI_BROWSER --app=https://youtube.com
@@ -56,7 +57,7 @@ Super+Alt+D                       ⬇️ Download picker (video/audio)	/home/rem
 Super+Alt+N                       🎬 Netflix	$NIRI_BROWSER --app=https://netflix.com
 Super+Alt+H                       🎬 Hotstar	$NIRI_BROWSER --app=https://hotstar.com
 Super+O                           Toggle overview;	toggleoverview
-Super+W                           Close window;	killclient
+Super+W                           Close window;	smartkillclient
 Super+Left                        Focus column left;	focusdir,left
 Super+Down                        Focus window down;	focusdir,down
 Super+Up                          Focus window up;	focusdir,up

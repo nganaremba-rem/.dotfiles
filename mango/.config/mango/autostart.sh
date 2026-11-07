@@ -6,7 +6,7 @@ while IFS= read -r l; do
   l=${l#env=}; export "${l%%,*}=${l#*,}"
 done < "$HOME/.config/mango/env.conf"
 # skipped (niri-only): "~/.config/niri/scripts/scratchpad" "watch"
-(oq omarchy-launch-shell) >/dev/null 2>&1 &
+(oq omarchy-launch-shell) >"${XDG_RUNTIME_DIR:-/tmp}/mango-shell.log" 2>&1 &
 systemctl --user import-environment WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE
 dbus-update-activation-environment --systemd WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE
 (/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1) >/dev/null 2>&1 &

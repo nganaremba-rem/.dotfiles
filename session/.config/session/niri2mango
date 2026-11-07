@@ -26,7 +26,7 @@ FIXED = {
     "focus-window-up": "focusdir,up", "focus-window-down": "focusdir,down",
     "move-column-left": "exchange_client,left", "move-column-right": "exchange_client,right",
     "move-window-up": "exchange_client,up", "move-window-down": "exchange_client,down",
-    "close-window": "killclient", "toggle-overview": "toggleoverview",
+    "close-window": "smartkillclient", "toggle-overview": "toggleoverview",
     "fullscreen-window": "togglefullscreen", "maximize-column": "togglemaximizescreen",
     "expand-column-to-available-width": "set_proportion,1.0",
     "toggle-window-floating": "togglefloating", "center-column": "centerwin",
@@ -316,7 +316,8 @@ def gen_autostart():
             out.append(f"# skipped (niri-only): {rest}\n"); continue
         cmd = t[0] if kind == "spawn-sh-at-startup" else tilde_join(t)
         if "launch-shell" in cmd:  # the bar, wallpaper and menu: what the eye waits for
-            first.append(f"({cmd}) >/dev/null 2>&1 &\n")
+            # Log in RAM (cleared on reboot): a shell that fails at login must leave a trace.
+            first.append(f'({cmd}) >"${{XDG_RUNTIME_DIR:-/tmp}}/mango-shell.log" 2>&1 &\n')
         elif "rembrowser" in cmd:  # browser engine warm-up is CPU heavy and invisible
             late.append(f"(sleep 3; {cmd}) >/dev/null 2>&1 &\n")
         else:
