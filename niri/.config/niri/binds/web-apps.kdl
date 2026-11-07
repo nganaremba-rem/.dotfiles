@@ -7,9 +7,11 @@ binds {
     Mod+Alt+P    hotkey-overlay-title="🔍 Perplexity"   { spawn-sh "$NIRI_BROWSER --app=https://perplexity.ai/"; }
 
     // ── 💬 Communication ─────────────────────────────────────────────────────
-    Mod+Shift+E  hotkey-overlay-title="📧 Gmail"        { spawn-sh "$NIRI_BROWSER --app=https://mail.google.com/mail/u/nganaremba@gmail.com"; }
+    Mod+Shift+E  hotkey-overlay-title="📧 Gmail"        { spawn-sh "$NIRI_BROWSER --app=https://mail.google.com/mail/?authuser=nganaremba@gmail.com"; }
+    Mod+Ctrl+Shift+E  hotkey-overlay-title="📧 Gmail"        { spawn-sh "$NIRI_BROWSER --app=https://mail.google.com/mail/?authuser=rem_s@indiasolarwarehousing.jp"; }
     Mod+Shift+G  hotkey-overlay-title="💬 WhatsApp"     { spawn-sh "$NIRI_BROWSER --app=https://web.whatsapp.com"; }
     Mod+X        hotkey-overlay-title="🐦 X"            { spawn-sh "$NIRI_BROWSER --app=https://x.com"; }
+    Mod+Ctrl+Shift+C    hotkey-overlay-title="  Chat"        { spawn-sh "$NIRI_BROWSER --app=https://chat.google.com/?authuser=rem_s@indiasolarwarehousing.jp"; }
 
     // ── 🎬 Video ─────────────────────────────────────────────────────────────
     Mod+Y        hotkey-overlay-title="▶️ YouTube"       { spawn-sh "$NIRI_BROWSER --app=https://youtube.com"; }

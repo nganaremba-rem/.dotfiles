@@ -3,6 +3,6 @@
 if pgrep -x wshowkeys >/dev/null; then
     pkill -x wshowkeys
 else
-    exec wshowkeys -a bottom -a right -m 24 -t 1500 -F 'JetBrainsMono Nerd Font 22' \
-        -b '#1e1e2eE6' -f '#cdd6f4' -s '#89b4fa'
+    exec wshowkeys -a bottom -a right -m 40 -t 1800 -F 'JetBrainsMono Nerd Font 24' \
+        -b '#11111bF2' -f '#cdd6f4' -s '#89b4fa'
 fi

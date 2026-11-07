@@ -17,3 +17,17 @@ layer-rule {
         blur true
     }
 }
+
+// ⌨️ wshowkeys (Mod+Alt+K): soft shadow lifts the key bubbles off busy backgrounds.
+// Namespaces are showkeys-keys / showkeys-mods. wshowkeys can't draw a border itself.
+layer-rule {
+    match namespace="^showkeys"
+    geometry-corner-radius 14
+    shadow {
+        on
+        softness 40
+        spread 6
+        offset x=0 y=8
+        color "#000000cc"
+    }
+}
