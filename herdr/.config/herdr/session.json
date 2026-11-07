@@ -6,8 +6,8 @@
       "custom_name": null,
       "identity_cwd": "/home/rem/work/DPS/KRT_DPS",
       "public_pane_numbers": {
-        "3": 3,
         "1": 1,
+        "3": 3,
         "2": 2
       },
       "next_public_pane_number": 33,
@@ -69,17 +69,19 @@
       "custom_name": null,
       "identity_cwd": "/home/rem/work/facial-recognition/may21/face-authentication-v2",
       "public_pane_numbers": {
+        "5": 3,
+        "7": 41,
         "4": 32,
-        "6": 34,
-        "5": 3
+        "6": 34
       },
-      "next_public_pane_number": 41,
+      "next_public_pane_number": 48,
       "public_tab_numbers": [
         1,
         2,
-        8
+        8,
+        12
       ],
-      "next_public_tab_number": 12,
+      "next_public_tab_number": 13,
       "tabs": [
         {
           "custom_name": "neovim",
@@ -107,7 +109,7 @@
                 "source": "herdr:claude",
                 "agent": "claude",
                 "kind": "id",
-                "value": "9cdfa7fe-229b-4e94-8aa5-a76bc106db31"
+                "value": "a9ea44cc-9569-44a5-b421-b35d3b2da65f"
               }
             }
           },
@@ -128,19 +130,33 @@
           "zoomed": false,
           "focused": 6,
           "root_pane": 6
+        },
+        {
+          "custom_name": "claude rc",
+          "layout": {
+            "Pane": 7
+          },
+          "panes": {
+            "7": {
+              "cwd": "/home/rem/work/facial-recognition/may21/face-authentication-v2"
+            }
+          },
+          "zoomed": false,
+          "focused": 7,
+          "root_pane": 7
         }
       ],
-      "active_tab": 0
+      "active_tab": 2
     },
     {
       "id": "w1A",
       "custom_name": "CDN",
       "identity_cwd": "/home/rem/coding/cdn-lab",
       "public_pane_numbers": {
-        "10": 4,
-        "8": 5,
-        "7": 1,
-        "9": 3
+        "11": 4,
+        "8": 1,
+        "10": 3,
+        "9": 5
       },
       "next_public_pane_number": 7,
       "public_tab_numbers": [
@@ -159,10 +175,10 @@
                   "direction": "Vertical",
                   "ratio": 0.5,
                   "first": {
-                    "Pane": 7
+                    "Pane": 8
                   },
                   "second": {
-                    "Pane": 8
+                    "Pane": 9
                   }
                 }
               },
@@ -171,19 +187,16 @@
                   "direction": "Vertical",
                   "ratio": 0.5,
                   "first": {
-                    "Pane": 9
+                    "Pane": 10
                   },
                   "second": {
-                    "Pane": 10
+                    "Pane": 11
                   }
                 }
               }
             }
           },
           "panes": {
-            "7": {
-              "cwd": "/home/rem/coding/cdn-lab"
-            },
             "8": {
               "cwd": "/home/rem/coding/cdn-lab"
             },
@@ -192,11 +205,14 @@
             },
             "10": {
               "cwd": "/home/rem/coding/cdn-lab"
+            },
+            "11": {
+              "cwd": "/home/rem/coding/cdn-lab"
             }
           },
           "zoomed": false,
-          "focused": 8,
-          "root_pane": 7
+          "focused": 9,
+          "root_pane": 8
         }
       ],
       "active_tab": 0
@@ -206,11 +222,11 @@
       "custom_name": "MCP Learning",
       "identity_cwd": "/home/rem/coding/mcp-learning",
       "public_pane_numbers": {
-        "15": 12,
-        "14": 9,
-        "12": 2,
-        "11": 1,
-        "13": 3
+        "15": 9,
+        "16": 12,
+        "12": 1,
+        "14": 3,
+        "13": 2
       },
       "next_public_pane_number": 14,
       "public_tab_numbers": [
@@ -227,50 +243,36 @@
               "direction": "Horizontal",
               "ratio": 0.29999995,
               "first": {
-                "Pane": 11
+                "Pane": 12
               },
               "second": {
                 "Split": {
                   "direction": "Horizontal",
                   "ratio": 0.29999995,
                   "first": {
-                    "Pane": 12
+                    "Pane": 13
                   },
                   "second": {
-                    "Pane": 13
+                    "Pane": 14
                   }
                 }
               }
             }
           },
           "panes": {
-            "13": {
-              "cwd": "/home/rem/coding/mcp-learning"
-            },
             "12": {
               "cwd": "/home/rem/coding/mcp-learning"
             },
-            "11": {
+            "14": {
+              "cwd": "/home/rem/coding/mcp-learning"
+            },
+            "13": {
               "cwd": "/home/rem/coding/mcp-learning"
             }
           },
           "zoomed": true,
-          "focused": 11,
-          "root_pane": 11
-        },
-        {
-          "custom_name": null,
-          "layout": {
-            "Pane": 14
-          },
-          "panes": {
-            "14": {
-              "cwd": "/home/rem/coding/mcp-learning"
-            }
-          },
-          "zoomed": false,
-          "focused": 14,
-          "root_pane": 14
+          "focused": 12,
+          "root_pane": 12
         },
         {
           "custom_name": null,
@@ -285,23 +287,7 @@
           "zoomed": false,
           "focused": 15,
           "root_pane": 15
-        }
-      ],
-      "active_tab": 0
-    },
-    {
-      "id": "w1M",
-      "custom_name": "git",
-      "identity_cwd": "/home/rem",
-      "public_pane_numbers": {
-        "16": 1
-      },
-      "next_public_pane_number": 2,
-      "public_tab_numbers": [
-        1
-      ],
-      "next_public_tab_number": 2,
-      "tabs": [
+        },
         {
           "custom_name": null,
           "layout": {
@@ -309,7 +295,7 @@
           },
           "panes": {
             "16": {
-              "cwd": "/home/rem"
+              "cwd": "/home/rem/coding/mcp-learning"
             }
           },
           "zoomed": false,
@@ -320,12 +306,42 @@
       "active_tab": 0
     },
     {
+      "id": "w1M",
+      "custom_name": "git",
+      "identity_cwd": "/home/rem",
+      "public_pane_numbers": {
+        "17": 1
+      },
+      "next_public_pane_number": 2,
+      "public_tab_numbers": [
+        1
+      ],
+      "next_public_tab_number": 2,
+      "tabs": [
+        {
+          "custom_name": null,
+          "layout": {
+            "Pane": 17
+          },
+          "panes": {
+            "17": {
+              "cwd": "/home/rem"
+            }
+          },
+          "zoomed": false,
+          "focused": 17,
+          "root_pane": 17
+        }
+      ],
+      "active_tab": 0
+    },
+    {
       "id": "w1R",
       "custom_name": "RemTop",
       "identity_cwd": "/home/rem/coding/rust/remtop",
       "public_pane_numbers": {
-        "17": 7,
-        "18": 8
+        "19": 8,
+        "18": 7
       },
       "next_public_pane_number": 9,
       "public_tab_numbers": [
@@ -337,10 +353,10 @@
         {
           "custom_name": "claude-remtop",
           "layout": {
-            "Pane": 17
+            "Pane": 18
           },
           "panes": {
-            "17": {
+            "18": {
               "cwd": "/home/rem/coding/rust/remtop",
               "agent_session": {
                 "source": "herdr:claude",
@@ -351,39 +367,9 @@
             }
           },
           "zoomed": false,
-          "focused": 17,
-          "root_pane": 17
-        },
-        {
-          "custom_name": null,
-          "layout": {
-            "Pane": 18
-          },
-          "panes": {
-            "18": {
-              "cwd": "/home/rem"
-            }
-          },
-          "zoomed": false,
           "focused": 18,
           "root_pane": 18
-        }
-      ],
-      "active_tab": 0
-    },
-    {
-      "id": "w1V",
-      "custom_name": "ollama",
-      "identity_cwd": "/home/rem",
-      "public_pane_numbers": {
-        "19": 1
-      },
-      "next_public_pane_number": 2,
-      "public_tab_numbers": [
-        1
-      ],
-      "next_public_tab_number": 2,
-      "tabs": [
+        },
         {
           "custom_name": null,
           "layout": {
@@ -402,12 +388,42 @@
       "active_tab": 0
     },
     {
+      "id": "w1V",
+      "custom_name": "ollama",
+      "identity_cwd": "/home/rem",
+      "public_pane_numbers": {
+        "20": 1
+      },
+      "next_public_pane_number": 2,
+      "public_tab_numbers": [
+        1
+      ],
+      "next_public_tab_number": 2,
+      "tabs": [
+        {
+          "custom_name": null,
+          "layout": {
+            "Pane": 20
+          },
+          "panes": {
+            "20": {
+              "cwd": "/home/rem"
+            }
+          },
+          "zoomed": false,
+          "focused": 20,
+          "root_pane": 20
+        }
+      ],
+      "active_tab": 0
+    },
+    {
       "id": "w1W",
       "custom_name": "AI Learning",
       "identity_cwd": "/home/rem/coding/learning-ai",
       "public_pane_numbers": {
-        "20": 1,
-        "21": 5
+        "22": 5,
+        "21": 1
       },
       "next_public_pane_number": 6,
       "public_tab_numbers": [
@@ -419,20 +435,6 @@
         {
           "custom_name": null,
           "layout": {
-            "Pane": 20
-          },
-          "panes": {
-            "20": {
-              "cwd": "/home/rem/coding/learning-ai"
-            }
-          },
-          "zoomed": false,
-          "focused": 20,
-          "root_pane": 20
-        },
-        {
-          "custom_name": "terminal",
-          "layout": {
             "Pane": 21
           },
           "panes": {
@@ -443,31 +445,15 @@
           "zoomed": false,
           "focused": 21,
           "root_pane": 21
-        }
-      ],
-      "active_tab": 0
-    },
-    {
-      "id": "w23",
-      "custom_name": null,
-      "identity_cwd": "/home/rem/work/collaboration_and_dev_architecture",
-      "public_pane_numbers": {
-        "22": 1
-      },
-      "next_public_pane_number": 3,
-      "public_tab_numbers": [
-        1
-      ],
-      "next_public_tab_number": 3,
-      "tabs": [
+        },
         {
-          "custom_name": null,
+          "custom_name": "terminal",
           "layout": {
             "Pane": 22
           },
           "panes": {
             "22": {
-              "cwd": "/home/rem/work/collaboration_and_dev_architecture"
+              "cwd": "/home/rem/coding/learning-ai"
             }
           },
           "zoomed": false,
@@ -478,13 +464,43 @@
       "active_tab": 0
     },
     {
+      "id": "w23",
+      "custom_name": null,
+      "identity_cwd": "/home/rem/work/collaboration_and_dev_architecture",
+      "public_pane_numbers": {
+        "23": 1
+      },
+      "next_public_pane_number": 3,
+      "public_tab_numbers": [
+        1
+      ],
+      "next_public_tab_number": 3,
+      "tabs": [
+        {
+          "custom_name": null,
+          "layout": {
+            "Pane": 23
+          },
+          "panes": {
+            "23": {
+              "cwd": "/home/rem/work/collaboration_and_dev_architecture"
+            }
+          },
+          "zoomed": false,
+          "focused": 23,
+          "root_pane": 23
+        }
+      ],
+      "active_tab": 0
+    },
+    {
       "id": "w24",
       "custom_name": "gold-calc",
       "identity_cwd": "/home/rem/coding/JS/gold-bill",
       "public_pane_numbers": {
-        "25": 3,
-        "24": 2,
-        "23": 1
+        "25": 2,
+        "24": 1,
+        "26": 3
       },
       "next_public_pane_number": 4,
       "public_tab_numbers": [
@@ -497,24 +513,24 @@
         {
           "custom_name": "neovim",
           "layout": {
-            "Pane": 23
-          },
-          "panes": {
-            "23": {
-              "cwd": "/home/rem/coding/JS/gold-bill"
-            }
-          },
-          "zoomed": false,
-          "focused": 23,
-          "root_pane": 23
-        },
-        {
-          "custom_name": "claude",
-          "layout": {
             "Pane": 24
           },
           "panes": {
             "24": {
+              "cwd": "/home/rem/coding/JS/gold-bill"
+            }
+          },
+          "zoomed": false,
+          "focused": 24,
+          "root_pane": 24
+        },
+        {
+          "custom_name": "claude",
+          "layout": {
+            "Pane": 25
+          },
+          "panes": {
+            "25": {
               "cwd": "/home/rem/coding/JS/gold-bill",
               "agent_session": {
                 "source": "herdr:claude",
@@ -525,22 +541,22 @@
             }
           },
           "zoomed": false,
-          "focused": 24,
-          "root_pane": 24
+          "focused": 25,
+          "root_pane": 25
         },
         {
           "custom_name": "docker",
           "layout": {
-            "Pane": 25
+            "Pane": 26
           },
           "panes": {
-            "25": {
+            "26": {
               "cwd": "/home/rem/coding/JS/gold-bill"
             }
           },
           "zoomed": false,
-          "focused": 25,
-          "root_pane": 25
+          "focused": 26,
+          "root_pane": 26
         }
       ],
       "active_tab": 1
@@ -548,35 +564,105 @@
     {
       "id": "w25",
       "custom_name": null,
-      "identity_cwd": "/home/rem",
+      "identity_cwd": "/home/rem/projects/CabSure-Ride-Booking-Application",
       "public_pane_numbers": {
-        "26": 1
+        "30": 4,
+        "29": 3,
+        "28": 2,
+        "31": 5,
+        "27": 1
       },
-      "next_public_pane_number": 2,
+      "next_public_pane_number": 6,
       "public_tab_numbers": [
-        1
+        1,
+        2,
+        3,
+        4,
+        5
       ],
-      "next_public_tab_number": 2,
+      "next_public_tab_number": 6,
       "tabs": [
         {
           "custom_name": null,
           "layout": {
-            "Pane": 26
+            "Pane": 27
           },
           "panes": {
-            "26": {
-              "cwd": "/home/rem",
+            "27": {
+              "cwd": "/home/rem/projects/CabSure-Ride-Booking-Application",
               "agent_session": {
                 "source": "herdr:claude",
                 "agent": "claude",
                 "kind": "id",
-                "value": "c53e8d50-99b7-4824-993e-386bc856775b"
+                "value": "358fc72b-60c2-483e-a2c2-6e95fb3f2a64"
               }
             }
           },
           "zoomed": false,
-          "focused": 26,
-          "root_pane": 26
+          "focused": 27,
+          "root_pane": 27
+        },
+        {
+          "custom_name": "neovim",
+          "layout": {
+            "Pane": 28
+          },
+          "panes": {
+            "28": {
+              "cwd": "/home/rem/projects/CabSure-Ride-Booking-Application"
+            }
+          },
+          "zoomed": false,
+          "focused": 28,
+          "root_pane": 28
+        },
+        {
+          "custom_name": "claude",
+          "layout": {
+            "Pane": 29
+          },
+          "panes": {
+            "29": {
+              "cwd": "/home/rem/projects/CabSure-Ride-Booking-Application",
+              "agent_session": {
+                "source": "herdr:claude",
+                "agent": "claude",
+                "kind": "id",
+                "value": "ade13b39-940a-40a0-87ac-0306da14b1af"
+              }
+            }
+          },
+          "zoomed": false,
+          "focused": 29,
+          "root_pane": 29
+        },
+        {
+          "custom_name": "terminal stuff",
+          "layout": {
+            "Pane": 30
+          },
+          "panes": {
+            "30": {
+              "cwd": "/home/rem/projects/CabSure-Ride-Booking-Application/backend"
+            }
+          },
+          "zoomed": false,
+          "focused": 30,
+          "root_pane": 30
+        },
+        {
+          "custom_name": "backend",
+          "layout": {
+            "Pane": 31
+          },
+          "panes": {
+            "31": {
+              "cwd": "/home/rem/projects/CabSure-Ride-Booking-Application"
+            }
+          },
+          "zoomed": false,
+          "focused": 31,
+          "root_pane": 31
         }
       ],
       "active_tab": 0

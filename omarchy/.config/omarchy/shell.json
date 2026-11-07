@@ -183,7 +183,7 @@
       ]
     },
     "position": "top",
-    "transparent": true
+    "transparent": false
   },
   "disabledPlugins": [
     "omarchy.polkit",

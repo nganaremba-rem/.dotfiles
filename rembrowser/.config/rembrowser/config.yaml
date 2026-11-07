@@ -4,8 +4,9 @@
 settings:
   home-page: home # the homescreen
   status-bar: false # pops up when needed; true = always visible
-  tab-bar: false # pops up when switching tabs; true = always visible
+  tab-bar: true # pops up when switching tabs; true = always visible
   extensions: true
+  keep-running: true # closing the last window keeps the engine alive: next launch ~0.15 s
   dark-mode: true # sites see prefers-color-scheme: dark (restart)
   hint-keys: asdfghjkl
   hint-follow-last: true
@@ -48,7 +49,10 @@ keys:
     "<Space>ma": { run: ":pin add<CR>", desc: "harpoon: add page" }
     "<Space>mm": { run: ":pins<CR>", desc: "harpoon: menu" }
     "<Space>me":
-      { run: ":sh! foot nvim ~/.local/share/rembrowser/harpoon<CR>", desc: "harpoon: edit list in nvim" }
+      {
+        run: ":sh! foot nvim ~/.local/share/rembrowser/harpoon<CR>",
+        desc: "harpoon: edit list in nvim",
+      }
     "<Space>m1": { run: ":pin 1<CR>", desc: "harpoon: set slot 1" }
     "<Space>m2": { run: ":pin 2<CR>", desc: "harpoon: set slot 2" }
     "<Space>m3": { run: ":pin 3<CR>", desc: "harpoon: set slot 3" }
@@ -63,14 +67,22 @@ keys:
     "<Space>ul":
       { run: ":set status-bar!<CR>", desc: pin / unpin the status line }
     "<Space>uz":
-      { run: ":set status-bar!|set fullscreen!<CR>", desc: zen mode (status bar + fullscreen) }
+      {
+        run: ":set status-bar!|set fullscreen!<CR>",
+        desc: zen mode (status bar + fullscreen),
+      }
     "<Space>uc": { run: ":config<CR>", desc: edit this config }
 
     # Misc
-    "<Space>Q": { run: ":quitall!<CR>", desc: "quit all, even with downloads running" }
+    "<Space>Q":
+      { run: ":quitall!<CR>", desc: "quit all, even with downloads running" }
     "<Space>tt": { run: ":sh! foot<CR>", desc: terminal (foot) }
     M: { run: ":sh! mpv '<C-R>%'<CR>", desc: play page in mpv }
-    "<M-S-d>": { run: ":sh! video-dl<CR>", desc: "download this page's video (yt-dlp → ~/Videos)" }
+    "<M-S-d>":
+      {
+        run: ":sh! video-dl<CR>",
+        desc: "download this page's video (yt-dlp → ~/Videos)",
+      }
     ";m": { run: ";x", desc: "hint: play link in mpv" }
     ",d":
       run: ":eval! (()=>{const s=document.getElementById('rem-dark');if(s){s.remove();return}const e=document.createElement('style');e.id='rem-dark';e.textContent='html{filter:invert(.92) hue-rotate(180deg);background:#fff}img,video,picture,canvas,iframe,svg image{filter:invert(1) hue-rotate(180deg)}';document.documentElement.append(e)})()<CR>"
